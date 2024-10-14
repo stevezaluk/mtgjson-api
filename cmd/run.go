@@ -28,5 +28,5 @@ func init() {
 	rootCmd.AddCommand(runCmd)
 	runCmd.Flags().StringP("config", "c", defaultConfig, "The path to your MTGJSON config file")
 	runCmd.Flags().BoolP("env", "e", false, "Ignore the default config path and attempt to use Environmental Variables")
-
+	runCmd.Flags().Int64P("port", "p", 2100, "Set the default port that the API is listening on")
 }
