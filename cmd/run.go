@@ -6,6 +6,8 @@ import (
 	"github.com/spf13/cobra"
 )
 
+var defaultConfig string = "~/.config/mtgjson/config.json"
+
 var runCmd = &cobra.Command{
 	Use:   "run",
 	Short: "Run the API in the foreground and use STDOUT for logging",
@@ -24,4 +26,5 @@ mtgjson run --env`,
 
 func init() {
 	rootCmd.AddCommand(runCmd)
+	runCmd.Flags().StringP("config", "c", defaultConfig, "The path to your MTGJSON config file")
 }
