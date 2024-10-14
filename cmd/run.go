@@ -8,15 +8,17 @@ import (
 
 var runCmd = &cobra.Command{
 	Use:   "run",
-	Short: "A brief description of your command",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
+	Short: "Run the API in the foreground and use STDOUT for logging",
+	Long: `To start the API using the default config path:
+mtgjson run
 
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
+To start the API using a custom config file:
+mtgjson run -c /path/to/config/.json
+
+To start the API using environmental variables
+mtgjson run --env`,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("run called")
+		fmt.Println("[error] run not implemented yet")
 	},
 }
 
