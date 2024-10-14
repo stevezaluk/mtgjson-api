@@ -2,8 +2,9 @@ package api
 
 import (
 	"github.com/gin-gonic/gin"
+	"net/http"
 )
 
-func HealthGET(ctx *gin.Context) {
-	ctx.HTML(200, "https", gin.H{"status": "Healthy"})
+func HealthGET(c *gin.Context) {
+	c.JSON(http.StatusOK, gin.H{"status": "healthy"})
 }
