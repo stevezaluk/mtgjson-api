@@ -28,6 +28,7 @@ $ mtgjson run --env`,
 	Run: func(cmd *cobra.Command, args []string) {
 		router := gin.Default()
 		router.GET("/health", api.HealthGET)
+		router.GET("/card", api.CardGET)
 		router.Run()
 	},
 	PostRun: func(cmd *cobra.Command, args []string) {
