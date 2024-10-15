@@ -40,3 +40,8 @@ func InitDatabase() {
 	ctx := context.WithValue(ServerContext, "database", database)
 	ServerContext = ctx
 }
+
+func DestroyDatabase() {
+	var database = ServerContext.Value("database").(server.Database)
+	database.Disconnect()
+}
