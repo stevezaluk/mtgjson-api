@@ -10,14 +10,14 @@ type CardSet struct {
 	ArtistIds           []string              `json:"artistIds"`
 	Availability        []string              `json:"availability"`
 	BoosterTypes        []string              `json:"boosterTypes"`
-	BorderColor         []string              `json:"borderColor"`
+	BorderColor         string                `json:"borderColor"`
 	CardParts           []string              `json:"cardParts"`
 	DuelDeck            string                `json:"duelDeck"`
 	FaceFlavorName      string                `json:"faceFlavorName"`
 	Finishes            []string              `json:"finishes"`
 	FlavorName          string                `json:"flavorName"`
 	FrameEffects        []string              `json:"FrameEffects"`
-	FrameVersion        []string              `json:"frameVersion"`
+	FrameVersion        string                `json:"frameVersion"`
 	HasContentWarning   bool                  `json:"hasContentWarning"`
 	HasFoil             bool                  `json:"hasFoil"`
 	HasNonFoil          bool                  `json:"hasNonFoil"`
