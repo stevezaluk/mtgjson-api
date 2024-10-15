@@ -25,7 +25,7 @@ func CardGET(c *gin.Context) {
 
 	var database = ServerContext.Value("database").(server.Database)
 
-	query := bson.D{{"identifiers.mtgjsonV4Id", cardId}}
+	query := bson.M{"identifiers.mtgjsonV4Id": cardId}
 	results := database.Find("card", query, &models.CardSet{})
 	if results == nil {
 		c.JSON(http.StatusNotFound, gin.H{"message": "Failed to find card with the requested ID", "cardId": cardId})

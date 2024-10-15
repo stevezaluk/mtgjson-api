@@ -50,7 +50,7 @@ func (d Database) Health() {
 	}
 }
 
-func (d Database) Find(collection string, query bson.D, model interface{}) any {
+func (d Database) Find(collection string, query bson.M, model interface{}) any {
 	coll := d.Database.Collection(collection)
 
 	var results interface{}
@@ -61,7 +61,7 @@ func (d Database) Find(collection string, query bson.D, model interface{}) any {
 		}
 	}
 
-	bytes, err := bson.Marshal(results)
+	bytes, err := bson.Marshal(&results)
 	if err != nil {
 		fmt.Println("[error] Failed to marshal results:", err)
 	}
