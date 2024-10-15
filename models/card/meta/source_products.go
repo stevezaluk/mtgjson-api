@@ -1,7 +1,7 @@
-package meta
+package models
 
 type SourceProducts struct {
-	Etched []string `json:"etched"`
-	Foil []string `json:"foil"`
+	Etched  []string `json:"etched"`
+	Foil    []string `json:"foil"`
 	NonFoil []string `json:"nonFoil"`
 }

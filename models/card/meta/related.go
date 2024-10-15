@@ -1,6 +1,6 @@
-package meta
+package models
 
 type RelatedCards struct {
 	ReverseRelated []string `json:"reverseRelated"`
-	Spellbook []string `json:"spellbook"`
+	Spellbook      []string `json:"spellbook"`
 }

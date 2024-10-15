@@ -1,4 +1,4 @@
-package meta
+package models
 
 type CardRulings struct {
 	Date string `json:"date"`
