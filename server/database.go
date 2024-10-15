@@ -9,17 +9,18 @@ import (
 )
 
 type Database struct {
-	Config Config
-	Client *mongo.Client
+	Config   Config
+	Client   *mongo.Client
 	Database *mongo.Database
 }
 
-func (d* Database) Connect() {
+func (d *Database) Connect() {
 	opts := options.Client()
 	uri := d.Config.BuildUri()
 
 	opts.ApplyURI(uri)
 
+	fmt.Println("[info] Connecting to MongoDB")
 	client, err := mongo.Connect(context.TODO(), opts)
 	if err != nil {
 		fmt.Printf("[error] Failed to connect to MongoDB Database: %s", uri)
@@ -30,6 +31,17 @@ func (d* Database) Connect() {
 	d.Client = client
 }
 
+func (d Database) Disconnect() {
+	d.Health() // this will throw an fatal error when
+
+	fmt.Println("[info] Disconnecting from MongoDB")
+	err := d.Client.Disconnect(context.Background())
+	if err != nil {
+		fmt.Println("[error] Failed to disconnect from MongoDB: ", err)
+		panic(1)
+	}
+}
+
 func (d Database) Health() {
 	err := d.Client.Ping(context.TODO(), nil)
 	if err != nil {
@@ -38,7 +50,7 @@ func (d Database) Health() {
 	}
 }
 
-func (d Database) Find(collection string, query bson.D, model interface{}) (any) {
+func (d Database) Find(collection string, query bson.D, model interface{}) any {
 	coll := d.Database.Collection(collection)
 
 	var results interface{}
