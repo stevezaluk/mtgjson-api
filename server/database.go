@@ -34,7 +34,7 @@ func (d *Database) Connect() {
 func (d Database) Disconnect() {
 	d.Health() // this will throw an fatal error when
 
-	fmt.Println("[info] Disconnecting from MongoDB")
+	fmt.Println("[info] Disconnecting from MongoDB") // these will be replaced with proper logging in a future PR
 	err := d.Client.Disconnect(context.Background())
 	if err != nil {
 		fmt.Println("[error] Failed to disconnect from MongoDB: ", err)
@@ -57,7 +57,7 @@ func (d Database) Find(collection string, query bson.D, model interface{}) any {
 	err := coll.FindOne(context.TODO(), query).Decode(&results)
 	if err != nil {
 		if err == mongo.ErrNoDocuments {
-			fmt.Println("[warn] No documents found")
+			return nil
 		}
 	}
 
