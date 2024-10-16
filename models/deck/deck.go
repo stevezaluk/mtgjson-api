@@ -9,3 +9,7 @@ type Deck struct {
 	SideBoard   []string `json:"sideBoard"`
 	Type        string   `json:"type"`
 }
+
+func GetDeck(code string) (Deck, error) {
+	a
+}
