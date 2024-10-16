@@ -101,3 +101,7 @@ func CardGET(c *gin.Context) {
 
 	c.JSON(http.StatusFound, results)
 }
+
+func CardPOST(c *gin.Context) {
+
+}
