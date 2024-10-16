@@ -34,7 +34,7 @@ func (d *Database) Connect() {
 func (d Database) Disconnect() {
 	d.Health() // this will throw an fatal error when
 
-	fmt.Println("[info] Disconnecting from MongoDB")
+	fmt.Println("[info] Disconnecting from MongoDB") // these will be replaced with proper logging in a future PR
 	err := d.Client.Disconnect(context.Background())
 	if err != nil {
 		fmt.Println("[error] Failed to disconnect from MongoDB: ", err)
@@ -50,25 +50,31 @@ func (d Database) Health() {
 	}
 }
 
-func (d Database) Find(collection string, query bson.D, model interface{}) any {
+func (d Database) Find(collection string, query bson.M, model interface{}) any {
 	coll := d.Database.Collection(collection)
 
-	var results interface{}
-	err := coll.FindOne(context.TODO(), query).Decode(&results)
+	err := coll.FindOne(context.TODO(), query).Decode(model)
 	if err != nil {
 		if err == mongo.ErrNoDocuments {
-			fmt.Println("[warn] No documents found")
+			return nil // log here
 		}
 	}
 
-	bytes, err := bson.Marshal(results)
+	return model
+}
+
+func (d Database) Index(collection string, limit int64, model interface{}) interface{} {
+	opts := options.Find().SetLimit(limit)
+	coll := d.Database.Collection(collection)
+
+	cur, err := coll.Find(context.TODO(), bson.M{}, opts)
 	if err != nil {
-		fmt.Println("[error] Failed to marshal results:", err)
+		return nil
 	}
 
-	err2 := bson.Unmarshal(bytes, model)
-	if err2 != nil {
-		fmt.Println("[error] Failed to unmarshal results:", err2)
+	err = cur.All(context.TODO(), model)
+	if err == mongo.ErrNoDocuments {
+		return nil
 	}
 
 	return model

@@ -4,6 +4,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/spf13/cobra"
 	"mtgjson/api"
+	"mtgjson/context"
 	"mtgjson/server"
 )
 
@@ -22,16 +23,19 @@ $ mtgjson run -c /path/to/config/.json
 To start the API using environmental variables
 $ mtgjson run --env`,
 	PreRun: func(cmd *cobra.Command, args []string) {
-		api.InitConfig(cmd.PersistentFlags())
-		api.InitDatabase()
+		context.InitConfig(cmd.PersistentFlags())
+		context.InitDatabase()
 	},
 	Run: func(cmd *cobra.Command, args []string) {
 		router := gin.Default()
 		router.GET("/health", api.HealthGET)
+		router.GET("/card", api.CardGET)
+
+		router.POST("/card", api.CardPOST)
 		router.Run()
 	},
 	PostRun: func(cmd *cobra.Command, args []string) {
-		api.DestroyDatabase()
+		context.DestroyDatabase()
 	},
 }
 
