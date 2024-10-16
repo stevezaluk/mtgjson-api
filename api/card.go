@@ -9,6 +9,22 @@ import (
 	"regexp"
 )
 
+/*
+/card - Represents a card that exists either in a deck or in a set. Must have a unique MTGJSON V4 UUID
+*/
+
+func validateUuid(uuid string) bool {
+	var ret = false
+	var pattern = `^[0-9a-f]{8}-[0-9a-f]{4}-5[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$`
+
+	re := regexp.MustCompile(pattern)
+	if re.MatchString(uuid) {
+		ret = true
+	}
+
+	return ret
+}
+
 func CardGET(c *gin.Context) {
 	cardId := c.Query("cardId")
 	if cardId == "" {
@@ -16,9 +32,7 @@ func CardGET(c *gin.Context) {
 		return
 	}
 
-	var pattern = `^[0-9a-f]{8}-[0-9a-f]{4}-5[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$`
-	re := regexp.MustCompile(pattern)
-	if !re.MatchString(cardId) {
+	if !validateUuid(cardId) {
 		c.JSON(http.StatusBadRequest, gin.H{"message": "Card ID was not a valid v5 UUID", "cardId": cardId})
 		return
 	}
