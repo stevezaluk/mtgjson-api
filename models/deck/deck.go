@@ -1,5 +1,12 @@
 package deck
 
+import (
+	"go.mongodb.org/mongo-driver/bson"
+	"mtgjson/context"
+	"mtgjson/errors"
+	"mtgjson/server"
+)
+
 type Deck struct {
 	Code        string   `json:"code"`
 	Commander   []string `json:"commander"`
@@ -11,5 +18,15 @@ type Deck struct {
 }
 
 func GetDeck(code string) (Deck, error) {
-	a
+	var result Deck
+
+	var database = context.ServerContext.Value("database").(server.Database) // create function for this
+
+	query := bson.M{"code": code}
+	results := database.Find("deck", query, &result)
+	if results == nil {
+		return result, errors.ErrNoDeck
+	}
+
+	return result, nil
 }
