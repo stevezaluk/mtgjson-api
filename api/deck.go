@@ -11,7 +11,14 @@ import (
 func DeckGET(c *gin.Context) {
 	code := c.Query("deckCode")
 	if code == "" {
-		c.JSON(http.StatusNotImplemented, gin.H{"message": "Fetching all decks not implemented yet"})
+		limit := limitToInt64(c.DefaultQuery("limit", "100"))
+		results, err := deck.GetDecks(limit)
+		if err == errors.ErrNoDecks {
+			c.JSON(400, gin.H{"message": err.Error()})
+			return
+		}
+
+		c.JSON(http.StatusFound, results)
 		return
 	}
 

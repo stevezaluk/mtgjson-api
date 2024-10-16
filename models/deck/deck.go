@@ -30,3 +30,16 @@ func GetDeck(code string) (Deck, error) {
 
 	return result, nil
 }
+
+func GetDecks(limit int64) ([]Deck, error) {
+	var result []Deck
+
+	var database = context.ServerContext.Value("database").(server.Database)
+
+	results := database.Index("deck", limit, &result)
+	if results == nil {
+		return result, errors.ErrNoDecks
+	}
+
+	return result, nil
+}
