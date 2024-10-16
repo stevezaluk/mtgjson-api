@@ -63,6 +63,17 @@ func (d Database) Find(collection string, query bson.M, model interface{}) any {
 	return model
 }
 
+func (d Database) Replace(collection string, query bson.M, model interface{}) any {
+	coll := d.Database.Collection(collection)
+
+	result, err := coll.ReplaceOne(context.TODO(), query, model)
+	if err == mongo.ErrNoDocuments {
+		return nil
+	}
+
+	return result
+}
+
 func (d Database) Index(collection string, limit int64, model interface{}) interface{} {
 	opts := options.Find().SetLimit(limit)
 	coll := d.Database.Collection(collection)
