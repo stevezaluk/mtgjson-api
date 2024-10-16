@@ -30,6 +30,40 @@ func (d Deck) GetCommander() []card.CardSet {
 	return card.IterCards(d.Commander)
 }
 
+func (d Deck) CardExists(uuid string) bool {
+	var mainBoard = d.MainBoard
+	var ret = false
+
+	for i := 0; i < len(mainBoard); i++ {
+		_uuid := mainBoard[i]
+
+		if uuid == _uuid {
+			ret = true
+			break
+		}
+	}
+
+	return ret
+}
+
+func (d *Deck) AddCard(uuid string) error {
+	var exists = d.CardExists(uuid)
+	if exists {
+		return errors.ErrCardAlreadyExist
+	}
+
+	d.MainBoard = append(d.MainBoard, uuid)
+
+	var database = context.ServerContext.Value("database").(server.Database)
+	query := bson.M{"code": d.Code}
+	results := database.Replace("deck", query, &d)
+	if results == nil {
+		return errors.ErrDeckUpdateFailed
+	}
+
+	return nil
+}
+
 func GetDeck(code string) (Deck, error) {
 	var result Deck
 
