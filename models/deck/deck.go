@@ -4,6 +4,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 	"mtgjson/context"
 	"mtgjson/errors"
+	"mtgjson/models/card"
 	"mtgjson/server"
 )
 
@@ -15,6 +16,18 @@ type Deck struct {
 	ReleaseDate string   `json:"releaseDate"`
 	SideBoard   []string `json:"sideBoard"`
 	Type        string   `json:"type"`
+}
+
+func (d Deck) GetMainboard() []card.CardSet {
+	return card.IterCards(d.MainBoard)
+}
+
+func (d Deck) GetSideboard() []card.CardSet {
+	return card.IterCards(d.SideBoard)
+}
+
+func (d Deck) GetCommander() []card.CardSet {
+	return card.IterCards(d.Commander)
 }
 
 func GetDeck(code string) (Deck, error) {

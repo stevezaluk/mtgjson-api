@@ -4,8 +4,8 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 	"mtgjson/context"
 	"mtgjson/errors"
-	"mtgjson/server"
 	"mtgjson/models/card/meta"
+	"mtgjson/server"
 	"regexp"
 )
 
@@ -103,6 +103,22 @@ func validateUuid(uuid string) bool {
 	re := regexp.MustCompile(pattern)
 	if re.MatchString(uuid) {
 		ret = true
+	}
+
+	return ret
+}
+
+func IterCards(cards []string) []CardSet {
+	var ret []CardSet
+	for i := 0; i < len(cards); i++ {
+		uuid := cards[i]
+
+		card, err := GetCard(uuid)
+		if err != nil {
+			continue
+		}
+
+		ret = append(ret, card)
 	}
 
 	return ret
