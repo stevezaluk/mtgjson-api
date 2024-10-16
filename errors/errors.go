@@ -13,3 +13,4 @@ var ErrInvalidUUID = errors.New("card: invalid v5 uuid")
 Deck Errors - Holds all errors that could arise from fetching or inserting decks
 */
 var ErrNoDeck = errors.New("deck: failed to find deck with the specified code")
+var ErrNoDecks = errors.New("deck: No deck found on index operation")
