@@ -53,22 +53,11 @@ func (d Database) Health() {
 func (d Database) Find(collection string, query bson.M, model interface{}) any {
 	coll := d.Database.Collection(collection)
 
-	var results interface{}
-	err := coll.FindOne(context.TODO(), query).Decode(&results)
+	err := coll.FindOne(context.TODO(), query).Decode(model)
 	if err != nil {
 		if err == mongo.ErrNoDocuments {
-			return nil
+			return nil // log here
 		}
-	}
-
-	bytes, err := bson.Marshal(&results)
-	if err != nil {
-		fmt.Println("[error] Failed to marshal results:", err)
-	}
-
-	err2 := bson.Unmarshal(bytes, model)
-	if err2 != nil {
-		fmt.Println("[error] Failed to unmarshal results:", err2)
 	}
 
 	return model
