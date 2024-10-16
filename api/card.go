@@ -1,17 +1,22 @@
 package api
 
 import (
-	"github.com/gin-gonic/gin"
-	"go.mongodb.org/mongo-driver/bson"
+	"errors"
 	models "mtgjson/models/card"
 	"mtgjson/server"
 	"net/http"
 	"regexp"
+
+	"github.com/gin-gonic/gin"
+	"go.mongodb.org/mongo-driver/bson"
 )
 
 /*
 /card - Represents a card that exists either in a deck or in a set. Must have a unique MTGJSON V4 UUID
 */
+
+var ErrNoCard = errors.New("card: failed to find card with specified uuid")
+var ErrInvalidUUID = errors.New("card: invalid v5 uuid")
 
 func validateUuid(uuid string) bool {
 	var ret = false
@@ -25,6 +30,24 @@ func validateUuid(uuid string) bool {
 	return ret
 }
 
+func getCard(uuid string) (models.CardSet, error) {
+	var result models.CardSet
+
+	if !validateUuid(uuid) {
+		return result, ErrInvalidUUID
+	}
+
+	var database = ServerContext.Value("database").(server.Database)
+
+	query := bson.M{"identifiers.mtgjsonV4Id": uuid}
+	results := database.Find("card", query, &result)
+	if results == nil {
+		return result, ErrNoCard
+	}
+
+	return result, nil
+}
+
 func CardGET(c *gin.Context) {
 	cardId := c.Query("cardId")
 	if cardId == "" {
@@ -32,17 +55,12 @@ func CardGET(c *gin.Context) {
 		return
 	}
 
-	if !validateUuid(cardId) {
-		c.JSON(http.StatusBadRequest, gin.H{"message": "Card ID was not a valid v5 UUID", "cardId": cardId})
+	results, err := getCard(cardId)
+	if err == ErrNoCard {
+		c.JSON(404, gin.H{"message": err.Error(), "cardId": cardId})
 		return
-	}
-
-	var database = ServerContext.Value("database").(server.Database)
-
-	query := bson.M{"identifiers.mtgjsonV4Id": cardId}
-	results := database.Find("card", query, &models.CardSet{})
-	if results == nil {
-		c.JSON(http.StatusNotFound, gin.H{"message": "Failed to find card with the requested ID", "cardId": cardId})
+	} else if err == ErrInvalidUUID {
+		c.JSON(400, gin.H{"message": err.Error(), "cardId": cardId})
 		return
 	}
 
