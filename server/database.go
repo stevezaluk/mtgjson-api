@@ -62,3 +62,20 @@ func (d Database) Find(collection string, query bson.M, model interface{}) any {
 
 	return model
 }
+
+func (d Database) Index(collection string, limit int64, model interface{}) interface{} {
+	opts := options.Find().SetLimit(limit)
+	coll := d.Database.Collection(collection)
+
+	cur, err := coll.Find(context.TODO(), bson.M{}, opts)
+	if err != nil {
+		return nil
+	}
+
+	err = cur.All(context.TODO(), model)
+	if err == mongo.ErrNoDocuments {
+		return nil
+	}
+
+	return model
+}
