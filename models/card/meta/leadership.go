@@ -1,4 +1,4 @@
-package models
+package card
 
 type LeadershipSkills struct {
 	Brawl       bool `json:"brawl"`

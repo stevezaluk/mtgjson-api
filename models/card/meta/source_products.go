@@ -1,4 +1,4 @@
-package models
+package card
 
 type SourceProducts struct {
 	Etched  []string `json:"etched"`

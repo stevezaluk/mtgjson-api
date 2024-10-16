@@ -1,4 +1,4 @@
-package models
+package card
 
 type RelatedCards struct {
 	ReverseRelated []string `json:"reverseRelated"`

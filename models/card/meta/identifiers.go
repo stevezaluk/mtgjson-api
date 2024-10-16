@@ -1,4 +1,4 @@
-package models
+package card
 
 type CardIdentifiers struct {
 	CardKingdomEtchedId      string `json:"cardKingdomEtchedId"`

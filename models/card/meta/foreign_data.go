@@ -1,4 +1,4 @@
-package models
+package card
 
 type ForeignData struct {
 	FaceName    string          `json:"faceName"`

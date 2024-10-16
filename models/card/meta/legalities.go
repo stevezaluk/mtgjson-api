@@ -1,4 +1,4 @@
-package models
+package card
 
 type CardLegalities struct {
 	Alchemy         string `json:"alchemy"`

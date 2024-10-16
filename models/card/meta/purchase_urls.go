@@ -1,4 +1,4 @@
-package models
+package card
 
 type PurchaseUrls struct {
 	CardKingdom       string `json:"cardKingdom"`
