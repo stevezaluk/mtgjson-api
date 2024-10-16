@@ -35,6 +35,8 @@ $ mtgjson run --env`,
 
 		router.GET("/deck", api.DeckGET)
 		router.GET("/deck/content", api.DeckContentGET)
+		router.PUT("/deck/content", api.DeckContentPUT)
+
 		router.Run()
 	},
 	PostRun: func(cmd *cobra.Command, args []string) {
