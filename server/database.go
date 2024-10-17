@@ -74,6 +74,17 @@ func (d Database) Replace(collection string, query bson.M, model interface{}) an
 	return result
 }
 
+func (d Database) Delete(collection string, query bson.M) any {
+	coll := d.Database.Collection(collection)
+
+	result, err := coll.DeleteOne(context.TODO(), query)
+	if err == mongo.ErrNoDocuments {
+		return nil
+	}
+
+	return result
+}
+
 func (d Database) Index(collection string, limit int64, model interface{}) interface{} {
 	opts := options.Find().SetLimit(limit)
 	coll := d.Database.Collection(collection)
