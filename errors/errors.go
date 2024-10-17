@@ -18,3 +18,4 @@ var ErrCardAlreadyExist = errors.New("card: Could not complete operation. Card a
 var ErrDeckUpdateFailed = errors.New("deck: Failed to update deck with new card")
 var ErrDeckMissingId = errors.New("deck: Failed to create deck. Deck is missing a name and/or a deck code")
 var ErrDeckAlreadyExists = errors.New("deck: Failed to create deck. Deck already exists")
+var ErrDeckDeleteFailed = errors.New("deck: Failed to delete deck. Unknown server issue")
