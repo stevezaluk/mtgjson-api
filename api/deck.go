@@ -123,14 +123,22 @@ func DeckContentPUT(c *gin.Context) {
 	var updates DeckUpdate
 	c.BindJSON(&updates)
 
+	if len(updates.UUID) == 0 {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "UUID is empty. A list of mtgjsonV4 uuid's must be passed to update a deck"})
+		return
+	}
+
+	valid, invalidCards := _deck.ValidateCards()
+	if !valid {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "Failed to update deck. Some cards do not exist or are invalid", "uuid": invalidCards})
+		return
+	}
+
 	for i := 0; i < len(updates.UUID); i++ {
 		var uuid = updates.UUID[i]
 		err = _deck.AddCard(uuid)
 		if err == errors.ErrCardAlreadyExist {
 			c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
-			return
-		} else if err == errors.ErrNoCard {
-			c.JSON(http.StatusNotFound, gin.H{"message": err.Error()})
 			return
 		}
 	}
