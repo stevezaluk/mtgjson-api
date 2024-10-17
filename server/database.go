@@ -74,7 +74,7 @@ func (d Database) Replace(collection string, query bson.M, model interface{}) an
 	return result
 }
 
-func (d Database) Delete(collection string, query bson.M) any {
+func (d Database) Delete(collection string, query bson.M) *mongo.DeleteResult {
 	coll := d.Database.Collection(collection)
 
 	result, err := coll.DeleteOne(context.TODO(), query)
