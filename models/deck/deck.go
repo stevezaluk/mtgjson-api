@@ -68,6 +68,25 @@ func (d *Deck) AddCard(uuid string) error {
 	return nil
 }
 
+func (d *Deck) DeleteCard(uuid string) error {
+	var exists = d.CardExists(uuid)
+	if !exists {
+		return errors.ErrNoCard
+	}
+
+	var index int
+	for i := range d.MainBoard {
+		if d.MainBoard[i] == uuid {
+			index = i
+			break
+		}
+	}
+
+	d.MainBoard = append(d.MainBoard[:index], d.MainBoard[index+1:]...)
+
+	return nil
+}
+
 func GetDeck(code string) (Deck, error) {
 	var result Deck
 
