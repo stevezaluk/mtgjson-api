@@ -103,7 +103,7 @@ func DeckContentGET(c *gin.Context) {
 	c.JSON(http.StatusFound, resp)
 }
 
-func DeckContentPUT(c *gin.Context) {
+func DeckContentPOST(c *gin.Context) {
 	code := c.Query("deckCode")
 	if code == "" {
 		c.JSON(http.StatusBadRequest, gin.H{"message": "Deck code is required to fetch a deck's contents"})

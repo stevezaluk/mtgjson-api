@@ -38,7 +38,7 @@ $ mtgjson run --env`,
 		router.DELETE("/deck", api.DeckDELETE)
 
 		router.GET("/deck/content", api.DeckContentGET)
-		router.PUT("/deck/content", api.DeckContentPUT)
+		router.POST("/deck/content", api.DeckContentPOST)
 		router.DELETE("/deck/content", api.DeckContentDELETE)
 
 		router.Run()
