@@ -109,6 +109,22 @@ func (d *Deck) DeleteCard(uuid string) error {
 	return nil
 }
 
+func (d *Deck) DeleteDeck() any {
+	var database = context.ServerContext.Value("database").(server.Database)
+
+	query := bson.M{"code": d.Code}
+	result := database.Delete("deck", query)
+	if result == nil {
+		return errors.ErrNoDeck
+	}
+
+	if result.DeletedCount != 1 {
+		return errors.ErrDeckDeleteFailed
+	}
+
+	return result
+}
+
 func GetDeck(code string) (Deck, error) {
 	var result Deck
 
