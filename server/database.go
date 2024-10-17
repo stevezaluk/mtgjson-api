@@ -85,6 +85,17 @@ func (d Database) Delete(collection string, query bson.M) any {
 	return result
 }
 
+func (d Database) Insert(collection string, model interface{}) any {
+	coll := d.Database.Collection(collection)
+
+	result, err := coll.InsertOne(context.TODO(), model)
+	if err != nil {
+		return nil
+	}
+
+	return result
+}
+
 func (d Database) Index(collection string, limit int64, model interface{}) interface{} {
 	opts := options.Find().SetLimit(limit)
 	coll := d.Database.Collection(collection)
