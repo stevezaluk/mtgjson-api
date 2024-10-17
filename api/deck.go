@@ -82,10 +82,13 @@ func DeckContentPUT(c *gin.Context) {
 		} else if err == errors.ErrNoCard {
 			c.JSON(http.StatusNotFound, gin.H{"message": err.Error()})
 			return
-		} else if err == errors.ErrDeckUpdateFailed {
-			c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
-			return
 		}
+	}
+
+	err = _deck.UpdateDeck()
+	if err == errors.ErrDeckUpdateFailed {
+		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
+		return
 	}
 
 	c.JSON(http.StatusAccepted, gin.H{"message": "Successfully updated deck", "deckCode": code, "count": len(updates.UUID)})

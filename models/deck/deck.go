@@ -46,6 +46,17 @@ func (d Deck) CardExists(uuid string) bool {
 	return ret
 }
 
+func (d Deck) UpdateDeck() error {
+	var database = context.ServerContext.Value("database").(server.Database)
+
+	results := database.Replace("deck", bson.M{"code": d.Code}, &d)
+	if results == nil {
+		return errors.ErrDeckUpdateFailed
+	}
+
+	return nil
+}
+
 func (d *Deck) AddCard(uuid string) error {
 	var exists = d.CardExists(uuid)
 	if exists {
@@ -53,13 +64,6 @@ func (d *Deck) AddCard(uuid string) error {
 	}
 
 	d.MainBoard = append(d.MainBoard, uuid)
-
-	var database = context.ServerContext.Value("database").(server.Database)
-	query := bson.M{"code": d.Code}
-	results := database.Replace("deck", query, &d)
-	if results == nil {
-		return errors.ErrDeckUpdateFailed
-	}
 
 	return nil
 }
