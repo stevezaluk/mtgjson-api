@@ -31,6 +31,34 @@ func DeckGET(c *gin.Context) {
 	c.JSON(http.StatusFound, results)
 }
 
+func DeckPOST(c *gin.Context) {
+	var new deck.Deck
+
+	if c.Bind(&new) != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"message": "Failed to bind response to object. Object structure may be incorrect"})
+		return
+	}
+
+	if new.Name == "" || new.Code == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "The name or deck code is missing from the request"})
+		return
+	}
+
+	var valid, invalidCards = new.ValidateCards()
+	if !valid {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "Failed to create deck. Some cards do not exist or are invalid", "uuid": invalidCards})
+		return
+	}
+
+	var err = deck.NewDeck(new)
+	if err == errors.ErrDeckAlreadyExists {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "Deck already exists under this deck code", "deckCode": new.Code})
+		return
+	}
+
+	c.JSON(http.StatusAccepted, gin.H{"message": "Successfully created new deck", "deckCode": new.Code})
+}
+
 func DeckContentGET(c *gin.Context) {
 	code := c.Query("deckCode")
 	if code == "" {
