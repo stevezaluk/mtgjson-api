@@ -59,6 +59,28 @@ func DeckPOST(c *gin.Context) {
 	c.JSON(http.StatusAccepted, gin.H{"message": "Successfully created new deck", "deckCode": new.Code})
 }
 
+func DeckDELETE(c *gin.Context) {
+	code := c.Query("deckCode")
+	if code == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "Deck code is required to fetch a deck's contents"})
+		return
+	}
+
+	_deck, err := deck.GetDeck(code)
+	if err == errors.ErrNoDeck {
+		c.JSON(http.StatusNotFound, gin.H{"message": err.Error()})
+		return
+	}
+
+	result := _deck.DeleteDeck()
+	if result == errors.ErrDeckDeleteFailed {
+		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusAccepted, gin.H{"message": "Successfully deleted deck", "deckCode": _deck.Code})
+}
+
 func DeckContentGET(c *gin.Context) {
 	code := c.Query("deckCode")
 	if code == "" {
