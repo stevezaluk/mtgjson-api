@@ -46,6 +46,28 @@ func (d Deck) CardExists(uuid string) bool {
 	return ret
 }
 
+func (d Deck) ValidateCards() (bool, []string) {
+	var allCards []string
+	var invalidCards []string
+
+	allCards = append(d.MainBoard, d.Commander...)
+	allCards = append(allCards, d.SideBoard...)
+
+	result := true
+	for i := range allCards {
+		uuid := allCards[i]
+
+		_, err := card.GetCard(uuid)
+		if err != nil {
+			invalidCards = append(invalidCards, uuid)
+			result = false
+			// not ending the iteration here to ensure the caller is aware of all unidentifiable cards
+		}
+	}
+
+	return result, invalidCards
+}
+
 func (d Deck) UpdateDeck() error {
 	var database = context.ServerContext.Value("database").(server.Database)
 
@@ -112,4 +134,21 @@ func GetDecks(limit int64) ([]Deck, error) {
 	}
 
 	return result, nil
+}
+
+func NewDeck(deck Deck) error {
+	if deck.Name == "" || deck.Code == "" {
+		return errors.ErrDeckMissingId
+	}
+
+	_, valid := GetDeck(deck.Code)
+	if valid != errors.ErrNoDeck {
+		return errors.ErrDeckAlreadyExists
+	}
+
+	var database = context.ServerContext.Value("database").(server.Database)
+
+	database.Insert("deck", &deck)
+
+	return nil
 }
