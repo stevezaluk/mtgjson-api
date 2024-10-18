@@ -141,7 +141,7 @@ func GetCard(uuid string) (CardSet, error) {
 	return result, nil
 }
 
-func GetCards(limit int64) ([]CardSet, error) {
+func IndexCards(limit int64) ([]CardSet, error) {
 	var result []CardSet
 
 	var database = context.GetDatabase()

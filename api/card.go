@@ -29,7 +29,7 @@ func CardGET(c *gin.Context) {
 	cardId := c.Query("cardId")
 	if cardId == "" {
 		limit := limitToInt64(c.DefaultQuery("limit", "100"))
-		results, err := card.GetCards(limit)
+		results, err := card.IndexCards(limit)
 		if err == errors.ErrNoCards {
 			c.JSON(400, gin.H{"message": err.Error()})
 			return
