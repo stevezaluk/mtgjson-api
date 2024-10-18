@@ -18,15 +18,15 @@ type Deck struct {
 }
 
 func (d Deck) GetMainboard() []card.CardSet {
-	return card.IterCards(d.MainBoard)
+	return card.GetCards(d.MainBoard)
 }
 
 func (d Deck) GetSideboard() []card.CardSet {
-	return card.IterCards(d.SideBoard)
+	return card.GetCards(d.SideBoard)
 }
 
 func (d Deck) GetCommander() []card.CardSet {
-	return card.IterCards(d.Commander)
+	return card.GetCards(d.Commander)
 }
 
 func (d Deck) CardExists(uuid string) bool {

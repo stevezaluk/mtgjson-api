@@ -107,7 +107,7 @@ func ValidateUUID(uuid string) bool {
 	return ret
 }
 
-func IterCards(cards []string) []CardSet {
+func GetCards(cards []string) []CardSet {
 	var ret []CardSet
 	for i := 0; i < len(cards); i++ {
 		uuid := cards[i]
