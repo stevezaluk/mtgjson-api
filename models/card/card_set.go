@@ -4,8 +4,8 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 	"mtgjson/context"
 	"mtgjson/errors"
-	"mtgjson/server"
 	"mtgjson/models/card/meta"
+	"mtgjson/server"
 	"regexp"
 )
 
@@ -96,7 +96,7 @@ type CardSet struct {
 	Watermark               []string              `json:"watermark"`
 }
 
-func validateUuid(uuid string) bool {
+func ValidateUUID(uuid string) bool {
 	var ret = false
 	var pattern = `^[0-9a-f]{8}-[0-9a-f]{4}-5[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$`
 
@@ -108,10 +108,26 @@ func validateUuid(uuid string) bool {
 	return ret
 }
 
+func IterCards(cards []string) []CardSet {
+	var ret []CardSet
+	for i := 0; i < len(cards); i++ {
+		uuid := cards[i]
+
+		card, err := GetCard(uuid)
+		if err != nil {
+			continue
+		}
+
+		ret = append(ret, card)
+	}
+
+	return ret
+}
+
 func GetCard(uuid string) (CardSet, error) {
 	var result CardSet
 
-	if !validateUuid(uuid) {
+	if !ValidateUUID(uuid) {
 		return result, errors.ErrInvalidUUID
 	}
 
