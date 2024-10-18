@@ -96,7 +96,7 @@ type CardSet struct {
 	Watermark               []string              `json:"watermark"`
 }
 
-func validateUuid(uuid string) bool {
+func ValidateUUID(uuid string) bool {
 	var ret = false
 	var pattern = `^[0-9a-f]{8}-[0-9a-f]{4}-5[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$`
 
@@ -127,7 +127,7 @@ func IterCards(cards []string) []CardSet {
 func GetCard(uuid string) (CardSet, error) {
 	var result CardSet
 
-	if !validateUuid(uuid) {
+	if !ValidateUUID(uuid) {
 		return result, errors.ErrInvalidUUID
 	}
 
