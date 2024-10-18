@@ -41,7 +41,16 @@ func InitDatabase() {
 	ServerContext = ctx
 }
 
+func GetDatabase() server.Database {
+	database := ServerContext.Value("database")
+	if database == nil {
+		InitDatabase()
+	}
+
+	return database.(server.Database)
+}
+
 func DestroyDatabase() {
-	var database = ServerContext.Value("database").(server.Database)
+	var database = GetDatabase()
 	database.Disconnect()
 }

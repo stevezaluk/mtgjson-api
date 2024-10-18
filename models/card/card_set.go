@@ -5,7 +5,6 @@ import (
 	"mtgjson/context"
 	"mtgjson/errors"
 	"mtgjson/models/card/meta"
-	"mtgjson/server"
 	"regexp"
 )
 
@@ -131,7 +130,7 @@ func GetCard(uuid string) (CardSet, error) {
 		return result, errors.ErrInvalidUUID
 	}
 
-	var database = context.ServerContext.Value("database").(server.Database)
+	var database = context.GetDatabase()
 
 	query := bson.M{"identifiers.mtgjsonV4Id": uuid}
 	results := database.Find("card", query, &result)
@@ -145,7 +144,7 @@ func GetCard(uuid string) (CardSet, error) {
 func GetCards(limit int64) ([]CardSet, error) {
 	var result []CardSet
 
-	var database = context.ServerContext.Value("database").(server.Database)
+	var database = context.GetDatabase()
 
 	results := database.Index("card", limit, &result)
 	if results == nil {

@@ -5,7 +5,6 @@ import (
 	"mtgjson/context"
 	"mtgjson/errors"
 	"mtgjson/models/card"
-	"mtgjson/server"
 )
 
 type Deck struct {
@@ -69,7 +68,7 @@ func (d Deck) ValidateCards() (bool, []string) {
 }
 
 func (d Deck) UpdateDeck() error {
-	var database = context.ServerContext.Value("database").(server.Database)
+	var database = context.GetDatabase()
 
 	results := database.Replace("deck", bson.M{"code": d.Code}, &d)
 	if results == nil {
@@ -110,7 +109,7 @@ func (d *Deck) DeleteCard(uuid string) error {
 }
 
 func (d *Deck) DeleteDeck() any {
-	var database = context.ServerContext.Value("database").(server.Database)
+	var database = context.GetDatabase()
 
 	query := bson.M{"code": d.Code}
 	result := database.Delete("deck", query)
@@ -128,7 +127,7 @@ func (d *Deck) DeleteDeck() any {
 func GetDeck(code string) (Deck, error) {
 	var result Deck
 
-	var database = context.ServerContext.Value("database").(server.Database) // create function for this
+	var database = context.GetDatabase()
 
 	query := bson.M{"code": code}
 	results := database.Find("deck", query, &result)
@@ -142,7 +141,7 @@ func GetDeck(code string) (Deck, error) {
 func GetDecks(limit int64) ([]Deck, error) {
 	var result []Deck
 
-	var database = context.ServerContext.Value("database").(server.Database)
+	var database = context.GetDatabase()
 
 	results := database.Index("deck", limit, &result)
 	if results == nil {
@@ -162,7 +161,7 @@ func NewDeck(deck Deck) error {
 		return errors.ErrDeckAlreadyExists
 	}
 
-	var database = context.ServerContext.Value("database").(server.Database)
+	var database = context.GetDatabase()
 
 	database.Insert("deck", &deck)
 
