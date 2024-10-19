@@ -94,9 +94,9 @@ func DeckContentGET(c *gin.Context) {
 		return
 	}
 
-	var mainBoard = _deck.GetMainboard()
-	var sideBoard = _deck.GetSideboard()
-	var commander = _deck.GetCommander()
+	var mainBoard = _deck.FetchMainboard()
+	var sideBoard = _deck.FetchSideboard()
+	var commander = _deck.FetchCommander()
 
 	var resp = gin.H{"mainBoard": mainBoard, "sideBoard": sideBoard, "commander": commander}
 
