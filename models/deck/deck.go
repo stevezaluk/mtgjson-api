@@ -67,17 +67,6 @@ func (d Deck) ValidateCards() (bool, []string) {
 	return result, invalidCards
 }
 
-func (d Deck) UpdateDeck() error {
-	var database = context.GetDatabase()
-
-	results := database.Replace("deck", bson.M{"code": d.Code}, &d)
-	if results == nil {
-		return errors.ErrDeckUpdateFailed
-	}
-
-	return nil
-}
-
 func (d *Deck) AddCard(uuid string) error {
 	var exists = d.CardExists(uuid)
 	if exists {
@@ -108,20 +97,15 @@ func (d *Deck) DeleteCard(uuid string) error {
 	return nil
 }
 
-func (d *Deck) DeleteDeck() any {
+func (d Deck) UpdateDeck() error {
 	var database = context.GetDatabase()
 
-	query := bson.M{"code": d.Code}
-	result := database.Delete("deck", query)
-	if result == nil {
-		return errors.ErrNoDeck
+	results := database.Replace("deck", bson.M{"code": d.Code}, &d)
+	if results == nil {
+		return errors.ErrDeckUpdateFailed
 	}
 
-	if result.DeletedCount != 1 {
-		return errors.ErrDeckDeleteFailed
-	}
-
-	return result
+	return nil
 }
 
 func GetDeck(code string) (Deck, error) {
@@ -166,4 +150,20 @@ func NewDeck(deck Deck) error {
 	database.Insert("deck", &deck)
 
 	return nil
+}
+
+func (d *Deck) DeleteDeck() any {
+	var database = context.GetDatabase()
+
+	query := bson.M{"code": d.Code}
+	result := database.Delete("deck", query)
+	if result == nil {
+		return errors.ErrNoDeck
+	}
+
+	if result.DeletedCount != 1 {
+		return errors.ErrDeckDeleteFailed
+	}
+
+	return result
 }
