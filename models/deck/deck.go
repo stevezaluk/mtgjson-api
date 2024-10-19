@@ -17,15 +17,15 @@ type Deck struct {
 	Type        string   `json:"type"`
 }
 
-func (d Deck) GetMainboard() []card.CardSet {
+func (d Deck) GetMainboard() []card.Card {
 	return card.GetCards(d.MainBoard)
 }
 
-func (d Deck) GetSideboard() []card.CardSet {
+func (d Deck) GetSideboard() []card.Card {
 	return card.GetCards(d.SideBoard)
 }
 
-func (d Deck) GetCommander() []card.CardSet {
+func (d Deck) GetCommander() []card.Card {
 	return card.GetCards(d.Commander)
 }
 

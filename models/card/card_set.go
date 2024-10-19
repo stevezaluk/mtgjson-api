@@ -8,7 +8,7 @@ import (
 	"regexp"
 )
 
-type CardSet struct {
+type Card struct {
 	AsciiName               string                `json:"asciiName"`
 	AttractionLights        []string              `json:"attractionLights"`
 	ColorIdentity           []string              `json:"colorIdentity"`
@@ -107,8 +107,8 @@ func ValidateUUID(uuid string) bool {
 	return ret
 }
 
-func GetCards(cards []string) []CardSet {
-	var ret []CardSet
+func GetCards(cards []string) []Card {
+	var ret []Card
 	for i := 0; i < len(cards); i++ {
 		uuid := cards[i]
 
@@ -123,8 +123,8 @@ func GetCards(cards []string) []CardSet {
 	return ret
 }
 
-func GetCard(uuid string) (CardSet, error) {
-	var result CardSet
+func GetCard(uuid string) (Card, error) {
+	var result Card
 
 	if !ValidateUUID(uuid) {
 		return result, errors.ErrInvalidUUID
@@ -141,8 +141,8 @@ func GetCard(uuid string) (CardSet, error) {
 	return result, nil
 }
 
-func IndexCards(limit int64) ([]CardSet, error) {
-	var result []CardSet
+func IndexCards(limit int64) ([]Card, error) {
+	var result []Card
 
 	var database = context.GetDatabase()
 
