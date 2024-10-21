@@ -117,13 +117,7 @@ func DeckContentPOST(c *gin.Context) {
 		return
 	}
 
-	type DeckUpdate struct {
-		MainBoard []string `json:"mainBoard"`
-		SideBoard []string `json:"sideBoard"`
-		Commander []string `json:"commander"`
-	}
-
-	var updates DeckUpdate
+	var updates deck.DeckUpdate
 	c.BindJSON(&updates)
 
 	valid, invalidCards, noExistCards := card.ValidateCards(_deck.AllCards()) // this is not validating the cards passed by the user
