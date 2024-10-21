@@ -1,10 +1,12 @@
 package deck
 
 import (
-	"go.mongodb.org/mongo-driver/bson"
 	"mtgjson/context"
 	"mtgjson/errors"
 	"mtgjson/models/card"
+	"slices"
+
+	"go.mongodb.org/mongo-driver/bson"
 )
 
 const (
@@ -47,20 +49,20 @@ func (d *Deck) GetBoard(board string) *[]string {
 	return nil
 }
 
-func (d Deck) CardExists(uuid string) bool {
-	var mainBoard = d.MainBoard
+func (d Deck) CardExists(uuid string, board string) (bool, error) {
+	sourceBoard := d.GetBoard(board)
+	if sourceBoard == nil {
+		return false, errors.ErrBoardNotExist
+	}
 	var ret = false
 
-	for i := 0; i < len(mainBoard); i++ {
-		_uuid := mainBoard[i]
-
-		if uuid == _uuid {
+	for _, val := range *sourceBoard {
+		if val == uuid {
 			ret = true
 			break
 		}
 	}
-
-	return ret
+	return ret, nil
 }
 
 /*
@@ -91,21 +93,19 @@ func (d *Deck) AddCards(uuids []string, board string) error {
 	return nil
 }
 
-func (d *Deck) DeleteCard(uuid string) error {
-	var exists = d.CardExists(uuid)
-	if !exists {
-		return errors.ErrNoCard
+func (d *Deck) DeleteCards(uuids []string, board string) error {
+	sourceBoard := d.GetBoard(board)
+	if sourceBoard == nil {
+		return errors.ErrBoardNotExist
 	}
 
-	var index int
-	for i := range d.MainBoard {
-		if d.MainBoard[i] == uuid {
-			index = i
-			break
+	for _, uuid := range uuids {
+		for i, val := range *sourceBoard {
+			if uuid == val {
+				*sourceBoard = slices.Delete(*sourceBoard, i, i+1)
+			}
 		}
 	}
-
-	d.MainBoard = append(d.MainBoard[:index], d.MainBoard[index+1:]...)
 
 	return nil
 }

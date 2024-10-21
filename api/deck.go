@@ -152,21 +152,12 @@ func DeckContentDELETE(c *gin.Context) {
 		return
 	}
 
-	type DeckUpdate struct {
-		UUID []string
-	}
-
-	var updates DeckUpdate
+	var updates deck.DeckUpdate
 	c.BindJSON(&updates)
 
-	for i := range updates.UUID {
-		var uuid = updates.UUID[i]
-
-		err = _deck.DeleteCard(uuid)
-		if err == errors.ErrNoCard {
-			c.JSON(http.StatusNotFound, gin.H{"message": err.Error()})
-		}
-	}
+	_deck.DeleteCards(updates.MainBoard, deck.MAINBOARD)
+	_deck.DeleteCards(updates.SideBoard, deck.SIDEBOARD)
+	_deck.DeleteCards(updates.Commander, deck.COMMANDER)
 
 	err = _deck.UpdateDeck()
 	if err == errors.ErrDeckUpdateFailed {
@@ -174,5 +165,5 @@ func DeckContentDELETE(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusAccepted, gin.H{"message": "Successfully removed cards from deck", "deckCode": code, "count": len(updates.UUID)})
+	c.JSON(http.StatusAccepted, gin.H{"message": "Successfully removed cards from deck", "deckCode": code, "count": updates.Count()})
 }
