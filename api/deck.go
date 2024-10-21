@@ -41,13 +41,13 @@ func DeckPOST(c *gin.Context) {
 	}
 
 	if new.Name == "" || new.Code == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"message": "The name or deck code is missing from the request"})
+		c.JSON(http.StatusBadRequest, gin.H{"message": "Deck Code or Name must not be empty when creating a deck"})
 		return
 	}
 
 	var valid, invalidCards, noExistCards = card.ValidateCards(new.AllCards())
 	if !valid {
-		c.JSON(http.StatusBadRequest, gin.H{"message": "Failed to create deck. Some cards do not exist or are invalid", "invalid": invalidCards, "noExist": noExistCards})
+		c.JSON(http.StatusBadRequest, gin.H{"message": "Failed to create deck. Some cards do not exist in the database or are invalid", "invalid": invalidCards, "noExist": noExistCards})
 		return
 	}
 
@@ -63,7 +63,7 @@ func DeckPOST(c *gin.Context) {
 func DeckDELETE(c *gin.Context) {
 	code := c.Query("deckCode")
 	if code == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"message": "Deck code is required to fetch a deck's contents"})
+		c.JSON(http.StatusBadRequest, gin.H{"message": "Deck code is required to perform a DELETE operation"})
 		return
 	}
 
@@ -107,7 +107,7 @@ func DeckContentGET(c *gin.Context) {
 func DeckContentPOST(c *gin.Context) {
 	code := c.Query("deckCode")
 	if code == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"message": "Deck code is required to fetch a deck's contents"})
+		c.JSON(http.StatusBadRequest, gin.H{"message": "Deck code is required to perform a POST operation"})
 		return
 	}
 
@@ -122,7 +122,7 @@ func DeckContentPOST(c *gin.Context) {
 
 	valid, invalidCards, noExistCards := card.ValidateCards(updates.AllCards())
 	if !valid {
-		c.JSON(http.StatusBadRequest, gin.H{"message": "Failed to update deck. Some cards do not exist or are invalid", "invalid": invalidCards, "noExist": noExistCards})
+		c.JSON(http.StatusBadRequest, gin.H{"message": "Failed to update deck. Some cards do not exist in the database or are invalid", "invalid": invalidCards, "noExist": noExistCards})
 		return
 	}
 
@@ -142,7 +142,7 @@ func DeckContentPOST(c *gin.Context) {
 func DeckContentDELETE(c *gin.Context) {
 	code := c.Query("deckCode")
 	if code == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"message": "Deck code is required to fetch a deck's contents"})
+		c.JSON(http.StatusBadRequest, gin.H{"message": "Deck code is required to perform a DELETE operation"})
 		return
 	}
 
