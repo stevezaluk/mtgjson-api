@@ -120,7 +120,7 @@ func DeckContentPOST(c *gin.Context) {
 	var updates deck.DeckUpdate
 	c.BindJSON(&updates)
 
-	valid, invalidCards, noExistCards := card.ValidateCards(_deck.AllCards()) // this is not validating the cards passed by the user
+	valid, invalidCards, noExistCards := card.ValidateCards(updates.AllCards())
 	if !valid {
 		c.JSON(http.StatusBadRequest, gin.H{"message": "Failed to update deck. Some cards do not exist or are invalid", "invalid": invalidCards, "noExist": noExistCards})
 		return
@@ -136,9 +136,7 @@ func DeckContentPOST(c *gin.Context) {
 		return
 	}
 
-	totalCount := len(updates.MainBoard) + len(updates.SideBoard) + len(updates.Commander)
-
-	c.JSON(http.StatusAccepted, gin.H{"message": "Successfully updated deck", "deckCode": code, "count": totalCount})
+	c.JSON(http.StatusAccepted, gin.H{"message": "Successfully updated deck", "deckCode": code, "count": updates.Count()})
 }
 
 func DeckContentDELETE(c *gin.Context) {
