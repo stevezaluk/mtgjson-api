@@ -9,6 +9,15 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+/*
+DeckGET - All logic needed for fetching card metadata
+
+Parameters:
+c (gin.Context) - The request context
+
+Returns:
+Nothing
+*/
 func DeckGET(c *gin.Context) {
 	code := c.Query("deckCode")
 	if code == "" {
@@ -32,6 +41,15 @@ func DeckGET(c *gin.Context) {
 	c.JSON(http.StatusFound, results)
 }
 
+/*
+DeckPOST - All logic needed for creating new card metadata
+
+Parameters:
+c (gin.Context) - The request context
+
+Returns:
+Nothing
+*/
 func DeckPOST(c *gin.Context) {
 	var new deck.Deck
 
@@ -60,6 +78,15 @@ func DeckPOST(c *gin.Context) {
 	c.JSON(http.StatusAccepted, gin.H{"message": "Successfully created new deck", "deckCode": new.Code})
 }
 
+/*
+DeckDELETE - All logic needed for deleting card metadata
+
+Parameters:
+c (gin.Context) - The request context
+
+Returns:
+Nothing
+*/
 func DeckDELETE(c *gin.Context) {
 	code := c.Query("deckCode")
 	if code == "" {
@@ -82,6 +109,15 @@ func DeckDELETE(c *gin.Context) {
 	c.JSON(http.StatusAccepted, gin.H{"message": "Successfully deleted deck", "deckCode": _deck.Code})
 }
 
+/*
+DeckContentGET - All logic needed for fetching the contents of a deck
+
+Parameters:
+c (gin.Context) - The request context
+
+Returns:
+Nothing
+*/
 func DeckContentGET(c *gin.Context) {
 	code := c.Query("deckCode")
 	if code == "" {
@@ -104,6 +140,15 @@ func DeckContentGET(c *gin.Context) {
 	c.JSON(http.StatusFound, resp)
 }
 
+/*
+DeckContentPOST - All logic needed for updating deck contents
+
+Parameters:
+c (gin.Context) - The request context
+
+Returns:
+Nothing
+*/
 func DeckContentPOST(c *gin.Context) {
 	code := c.Query("deckCode")
 	if code == "" {
@@ -139,6 +184,15 @@ func DeckContentPOST(c *gin.Context) {
 	c.JSON(http.StatusAccepted, gin.H{"message": "Successfully updated deck", "deckCode": code, "count": updates.Count()})
 }
 
+/*
+DeckContentDELETE - All logic needed for removing cards from the deck
+
+Parameters:
+c (gin.Context) - The request context
+
+Returns:
+Nothing
+*/
 func DeckContentDELETE(c *gin.Context) {
 	code := c.Query("deckCode")
 	if code == "" {
