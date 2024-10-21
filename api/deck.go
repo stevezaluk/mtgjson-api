@@ -2,6 +2,7 @@ package api
 
 import (
 	"mtgjson/errors"
+	"mtgjson/models/card"
 	"mtgjson/models/deck"
 	"net/http"
 
@@ -44,9 +45,9 @@ func DeckPOST(c *gin.Context) {
 		return
 	}
 
-	var valid, invalidCards = new.ValidateCards()
+	var valid, invalidCards, noExistCards = card.ValidateCards(new.AllCards())
 	if !valid {
-		c.JSON(http.StatusBadRequest, gin.H{"message": "Failed to create deck. Some cards do not exist or are invalid", "uuid": invalidCards})
+		c.JSON(http.StatusBadRequest, gin.H{"message": "Failed to create deck. Some cards do not exist or are invalid", "invalid": invalidCards, "noExist": noExistCards})
 		return
 	}
 
@@ -117,31 +118,23 @@ func DeckContentPOST(c *gin.Context) {
 	}
 
 	type DeckUpdate struct {
-		UUID []string
+		MainBoard []string `json:"mainBoard"`
+		SideBoard []string `json:"sideBoard"`
+		Commander []string `json:"commander"`
 	}
 
 	var updates DeckUpdate
 	c.BindJSON(&updates)
 
-	if len(updates.UUID) == 0 {
-		c.JSON(http.StatusBadRequest, gin.H{"message": "UUID is empty. A list of mtgjsonV4 uuid's must be passed to update a deck"})
-		return
-	}
-
-	valid, invalidCards := _deck.ValidateCards()
+	valid, invalidCards, noExistCards := card.ValidateCards(_deck.AllCards()) // this is not validating the cards passed by the user
 	if !valid {
-		c.JSON(http.StatusBadRequest, gin.H{"message": "Failed to update deck. Some cards do not exist or are invalid", "uuid": invalidCards})
+		c.JSON(http.StatusBadRequest, gin.H{"message": "Failed to update deck. Some cards do not exist or are invalid", "invalid": invalidCards, "noExist": noExistCards})
 		return
 	}
 
-	for i := 0; i < len(updates.UUID); i++ {
-		var uuid = updates.UUID[i]
-		err = _deck.AddCard(uuid)
-		if err == errors.ErrCardAlreadyExist {
-			c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
-			return
-		}
-	}
+	_deck.AddCards(updates.MainBoard, deck.MAINBOARD)
+	_deck.AddCards(updates.SideBoard, deck.SIDEBOARD)
+	_deck.AddCards(updates.Commander, deck.COMMANDER)
 
 	err = _deck.UpdateDeck()
 	if err == errors.ErrDeckUpdateFailed {
@@ -149,7 +142,9 @@ func DeckContentPOST(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusAccepted, gin.H{"message": "Successfully updated deck", "deckCode": code, "count": len(updates.UUID)})
+	totalCount := len(updates.MainBoard) + len(updates.SideBoard) + len(updates.Commander)
+
+	c.JSON(http.StatusAccepted, gin.H{"message": "Successfully updated deck", "deckCode": code, "count": totalCount})
 }
 
 func DeckContentDELETE(c *gin.Context) {

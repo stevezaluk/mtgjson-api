@@ -7,6 +7,12 @@ import (
 	"mtgjson/models/card"
 )
 
+const (
+	MAINBOARD = "mainBoard"
+	SIDEBOARD = "sideBoard"
+	COMMANDER = "commanderBoard"
+)
+
 type Deck struct {
 	Code        string   `json:"code"`
 	Commander   []string `json:"commander"`
@@ -45,37 +51,32 @@ func (d Deck) CardExists(uuid string) bool {
 	return ret
 }
 
-func (d Deck) ValidateCards() (bool, []string) {
+/*
+AllCards - Combine all boards into a list of UUID's
+
+Parameters: None
+
+Returns:
+allCard ([]string) - A list of all UUID's in the deck
+*/
+func (d Deck) AllCards() []string {
 	var allCards []string
-	var invalidCards []string
 
-	allCards = append(d.MainBoard, d.Commander...)
-	allCards = append(allCards, d.SideBoard...)
+	allCards = append(d.MainBoard, d.SideBoard...)
+	allCards = append(allCards, d.Commander...)
 
-	result := true
-	for i := range allCards {
-		uuid := allCards[i]
-
-		_, err := card.GetCard(uuid)
-		if err != nil {
-			invalidCards = append(invalidCards, uuid)
-			result = false
-			// not ending the iteration here to ensure the caller is aware of all unidentifiable cards
-		}
-	}
-
-	return result, invalidCards
+	return allCards
 }
 
-func (d *Deck) AddCard(uuid string) error {
-	var exists = d.CardExists(uuid)
-	if exists {
-		return errors.ErrCardAlreadyExist
+func (d *Deck) AddCards(uuids []string, board string) {
+
+	if board == "mainBoard" {
+		d.MainBoard = append(d.MainBoard, uuids...)
+	} else if board == "sideBoard" {
+		d.SideBoard = append(d.SideBoard, uuids...)
+	} else if board == "commanderBoard" {
+		d.Commander = append(d.Commander, uuids...)
 	}
-
-	d.MainBoard = append(d.MainBoard, uuid)
-
-	return nil
 }
 
 func (d *Deck) DeleteCard(uuid string) error {
