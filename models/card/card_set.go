@@ -107,6 +107,36 @@ func ValidateUUID(uuid string) bool {
 	return ret
 }
 
+/*
+ValidateCards - Ensure a list of cards both exist and are valid UUID's
+
+Paremeters:
+uuids (array[string]) - A list of mtgjsonV4 UUID's to validate
+
+Returns:
+result (bool) - True if all cards passed validation, False if they didnt
+invalidCards (array[string]) - Values that are not valid UUID's
+noExistCards (array[string]) - Cards that do not exist in Mongo
+*/
+func ValidateCards(uuids []string) (bool, []string, []string) {
+	var invalidCards []string // cards that failed UUID validation
+	var noExistCards []string // cards that do not exist in Mongo
+	var result = true
+
+	for _, uuid := range uuids {
+		_, err := GetCard(uuid)
+		if err == errors.ErrNoCard {
+			result = false
+			noExistCards = append(noExistCards, uuid)
+		} else if err == errors.ErrInvalidUUID {
+			result = false
+			invalidCards = append(invalidCards, uuid)
+		}
+	}
+
+	return result, invalidCards, noExistCards
+}
+
 func GetCards(cards []string) []Card {
 	var ret []Card
 	for i := 0; i < len(cards); i++ {
