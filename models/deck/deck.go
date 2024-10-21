@@ -35,6 +35,18 @@ func (d Deck) FetchCommander() []card.Card {
 	return card.GetCards(d.Commander)
 }
 
+func (d *Deck) GetBoard(board string) *[]string {
+	if board == MAINBOARD {
+		return &d.MainBoard
+	} else if board == SIDEBOARD {
+		return &d.SideBoard
+	} else if board == COMMANDER {
+		return &d.Commander
+	}
+
+	return nil
+}
+
 func (d Deck) CardExists(uuid string) bool {
 	var mainBoard = d.MainBoard
 	var ret = false
@@ -68,15 +80,15 @@ func (d Deck) AllCards() []string {
 	return allCards
 }
 
-func (d *Deck) AddCards(uuids []string, board string) {
-
-	if board == "mainBoard" {
-		d.MainBoard = append(d.MainBoard, uuids...)
-	} else if board == "sideBoard" {
-		d.SideBoard = append(d.SideBoard, uuids...)
-	} else if board == "commanderBoard" {
-		d.Commander = append(d.Commander, uuids...)
+func (d *Deck) AddCards(uuids []string, board string) error {
+	sourceBoard := d.GetBoard(board)
+	if sourceBoard == nil {
+		return errors.ErrBoardNotExist
 	}
+
+	*sourceBoard = append(*sourceBoard, uuids...)
+
+	return nil
 }
 
 func (d *Deck) DeleteCard(uuid string) error {
