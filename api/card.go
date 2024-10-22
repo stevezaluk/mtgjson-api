@@ -9,7 +9,13 @@ import (
 )
 
 /*
-utility - Handles any validation or conversion that other functions dont
+limitToInt64 - Convert the limit query arg to an Integer
+
+Parameters:
+limit (string) - The limit as a string
+
+Returns:
+ret (int64) - The limit as an integer
 */
 
 func limitToInt64(limit string) int64 {
@@ -22,14 +28,19 @@ func limitToInt64(limit string) int64 {
 }
 
 /*
-/card - Represents a card that exists either in a deck or in a set. Must have a unique MTGJSON V4 UUID
-*/
+CardGET - All functionality for fetching card metadata
 
+Parameters:
+c (gin.Context) - The request context
+
+Returns:
+Nothing
+*/
 func CardGET(c *gin.Context) {
 	cardId := c.Query("cardId")
 	if cardId == "" {
 		limit := limitToInt64(c.DefaultQuery("limit", "100"))
-		results, err := card.GetCards(limit)
+		results, err := card.IndexCards(limit)
 		if err == errors.ErrNoCards {
 			c.JSON(400, gin.H{"message": err.Error()})
 			return

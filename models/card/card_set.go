@@ -5,11 +5,16 @@ import (
 	"mtgjson/context"
 	"mtgjson/errors"
 	"mtgjson/models/card/meta"
-	"mtgjson/server"
 	"regexp"
 )
 
-type CardSet struct {
+/*
+Card - A model representing an MTGJSON Card
+
+Ommiting card descriptions for brevity.
+See: https://mtgjson.com/data-models/card/card-set/
+*/
+type Card struct {
 	AsciiName               string                `json:"asciiName"`
 	AttractionLights        []string              `json:"attractionLights"`
 	ColorIdentity           []string              `json:"colorIdentity"`
@@ -96,6 +101,15 @@ type CardSet struct {
 	Watermark               []string              `json:"watermark"`
 }
 
+/*
+ValidateUUID - Ensure that the passed UUID is valid
+
+Paremeters:
+uuid (string) - The UUID you want to validate
+
+Returns:
+ret (bool) - True if the UUID is valid, false if it is not
+*/
 func ValidateUUID(uuid string) bool {
 	var ret = false
 	var pattern = `^[0-9a-f]{8}-[0-9a-f]{4}-5[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$`
@@ -108,8 +122,47 @@ func ValidateUUID(uuid string) bool {
 	return ret
 }
 
-func IterCards(cards []string) []CardSet {
-	var ret []CardSet
+/*
+ValidateCards - Ensure a list of cards both exist and are valid UUID's
+
+Paremeters:
+uuids (array[string]) - A list of mtgjsonV4 UUID's to validate
+
+Returns:
+result (bool) - True if all cards passed validation, False if they didnt
+invalidCards (array[string]) - Values that are not valid UUID's
+noExistCards (array[string]) - Cards that do not exist in Mongo
+*/
+func ValidateCards(uuids []string) (bool, []string, []string) {
+	var invalidCards []string // cards that failed UUID validation
+	var noExistCards []string // cards that do not exist in Mongo
+	var result = true
+
+	for _, uuid := range uuids {
+		_, err := GetCard(uuid)
+		if err == errors.ErrNoCard {
+			result = false
+			noExistCards = append(noExistCards, uuid)
+		} else if err == errors.ErrInvalidUUID {
+			result = false
+			invalidCards = append(invalidCards, uuid)
+		}
+	}
+
+	return result, invalidCards, noExistCards
+}
+
+/*
+GetCards - Takes a list of UUID's and returns card models for them
+
+Paramters:
+cards (slice[string]) - A list of UUID's you want card models for
+
+Returns
+ret (slice[card.Card]) - A list of card models
+*/
+func GetCards(cards []string) []Card {
+	var ret []Card
 	for i := 0; i < len(cards); i++ {
 		uuid := cards[i]
 
@@ -124,14 +177,25 @@ func IterCards(cards []string) []CardSet {
 	return ret
 }
 
-func GetCard(uuid string) (CardSet, error) {
-	var result CardSet
+/*
+GetCard - Fetch a card model for a UUID
+
+Parameters:
+uuid (string) - The UUID you want a card model for
+
+Returns
+result (card.Card) - The card that was found
+errors.ErrInvalidUUID - If the UUID is not valid
+errors.ErrNoCard - If the card is not found
+*/
+func GetCard(uuid string) (Card, error) {
+	var result Card
 
 	if !ValidateUUID(uuid) {
 		return result, errors.ErrInvalidUUID
 	}
 
-	var database = context.ServerContext.Value("database").(server.Database)
+	var database = context.GetDatabase()
 
 	query := bson.M{"identifiers.mtgjsonV4Id": uuid}
 	results := database.Find("card", query, &result)
@@ -142,10 +206,20 @@ func GetCard(uuid string) (CardSet, error) {
 	return result, nil
 }
 
-func GetCards(limit int64) ([]CardSet, error) {
-	var result []CardSet
+/*
+IndexCards - Return all cards from the database
 
-	var database = context.ServerContext.Value("database").(server.Database)
+Parameters:
+limit (int64) - Limit the ammount of cards you want returned
+
+Returns:
+result (slice[card.Card]) - The results of the operation
+errors.ErrNoCards - If the database has no cards
+*/
+func IndexCards(limit int64) ([]Card, error) {
+	var result []Card
+
+	var database = context.GetDatabase()
 
 	results := database.Index("card", limit, &result)
 	if results == nil {

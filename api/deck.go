@@ -2,12 +2,22 @@ package api
 
 import (
 	"mtgjson/errors"
+	"mtgjson/models/card"
 	"mtgjson/models/deck"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
 )
 
+/*
+DeckGET - All logic needed for fetching card metadata
+
+Parameters:
+c (gin.Context) - The request context
+
+Returns:
+Nothing
+*/
 func DeckGET(c *gin.Context) {
 	code := c.Query("deckCode")
 	if code == "" {
@@ -31,6 +41,15 @@ func DeckGET(c *gin.Context) {
 	c.JSON(http.StatusFound, results)
 }
 
+/*
+DeckPOST - All logic needed for creating new card metadata
+
+Parameters:
+c (gin.Context) - The request context
+
+Returns:
+Nothing
+*/
 func DeckPOST(c *gin.Context) {
 	var new deck.Deck
 
@@ -40,13 +59,13 @@ func DeckPOST(c *gin.Context) {
 	}
 
 	if new.Name == "" || new.Code == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"message": "The name or deck code is missing from the request"})
+		c.JSON(http.StatusBadRequest, gin.H{"message": "Deck Code or Name must not be empty when creating a deck"})
 		return
 	}
 
-	var valid, invalidCards = new.ValidateCards()
+	var valid, invalidCards, noExistCards = card.ValidateCards(new.AllCards())
 	if !valid {
-		c.JSON(http.StatusBadRequest, gin.H{"message": "Failed to create deck. Some cards do not exist or are invalid", "uuid": invalidCards})
+		c.JSON(http.StatusBadRequest, gin.H{"message": "Failed to create deck. Some cards do not exist in the database or are invalid", "invalid": invalidCards, "noExist": noExistCards})
 		return
 	}
 
@@ -59,10 +78,19 @@ func DeckPOST(c *gin.Context) {
 	c.JSON(http.StatusAccepted, gin.H{"message": "Successfully created new deck", "deckCode": new.Code})
 }
 
+/*
+DeckDELETE - All logic needed for deleting card metadata
+
+Parameters:
+c (gin.Context) - The request context
+
+Returns:
+Nothing
+*/
 func DeckDELETE(c *gin.Context) {
 	code := c.Query("deckCode")
 	if code == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"message": "Deck code is required to fetch a deck's contents"})
+		c.JSON(http.StatusBadRequest, gin.H{"message": "Deck code is required to perform a DELETE operation"})
 		return
 	}
 
@@ -81,6 +109,15 @@ func DeckDELETE(c *gin.Context) {
 	c.JSON(http.StatusAccepted, gin.H{"message": "Successfully deleted deck", "deckCode": _deck.Code})
 }
 
+/*
+DeckContentGET - All logic needed for fetching the contents of a deck
+
+Parameters:
+c (gin.Context) - The request context
+
+Returns:
+Nothing
+*/
 func DeckContentGET(c *gin.Context) {
 	code := c.Query("deckCode")
 	if code == "" {
@@ -94,19 +131,28 @@ func DeckContentGET(c *gin.Context) {
 		return
 	}
 
-	var mainBoard = _deck.GetMainboard()
-	var sideBoard = _deck.GetSideboard()
-	var commander = _deck.GetCommander()
+	var mainBoard = _deck.FetchMainboard()
+	var sideBoard = _deck.FetchSideboard()
+	var commander = _deck.FetchCommander()
 
 	var resp = gin.H{"mainBoard": mainBoard, "sideBoard": sideBoard, "commander": commander}
 
 	c.JSON(http.StatusFound, resp)
 }
 
+/*
+DeckContentPOST - All logic needed for updating deck contents
+
+Parameters:
+c (gin.Context) - The request context
+
+Returns:
+Nothing
+*/
 func DeckContentPOST(c *gin.Context) {
 	code := c.Query("deckCode")
 	if code == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"message": "Deck code is required to fetch a deck's contents"})
+		c.JSON(http.StatusBadRequest, gin.H{"message": "Deck code is required to perform a POST operation"})
 		return
 	}
 
@@ -116,32 +162,18 @@ func DeckContentPOST(c *gin.Context) {
 		return
 	}
 
-	type DeckUpdate struct {
-		UUID []string
-	}
-
-	var updates DeckUpdate
+	var updates deck.DeckUpdate
 	c.BindJSON(&updates)
 
-	if len(updates.UUID) == 0 {
-		c.JSON(http.StatusBadRequest, gin.H{"message": "UUID is empty. A list of mtgjsonV4 uuid's must be passed to update a deck"})
-		return
-	}
-
-	valid, invalidCards := _deck.ValidateCards()
+	valid, invalidCards, noExistCards := card.ValidateCards(updates.AllCards())
 	if !valid {
-		c.JSON(http.StatusBadRequest, gin.H{"message": "Failed to update deck. Some cards do not exist or are invalid", "uuid": invalidCards})
+		c.JSON(http.StatusBadRequest, gin.H{"message": "Failed to update deck. Some cards do not exist in the database or are invalid", "invalid": invalidCards, "noExist": noExistCards})
 		return
 	}
 
-	for i := 0; i < len(updates.UUID); i++ {
-		var uuid = updates.UUID[i]
-		err = _deck.AddCard(uuid)
-		if err == errors.ErrCardAlreadyExist {
-			c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
-			return
-		}
-	}
+	_deck.AddCards(updates.MainBoard, deck.MAINBOARD)
+	_deck.AddCards(updates.SideBoard, deck.SIDEBOARD)
+	_deck.AddCards(updates.Commander, deck.COMMANDER)
 
 	err = _deck.UpdateDeck()
 	if err == errors.ErrDeckUpdateFailed {
@@ -149,13 +181,22 @@ func DeckContentPOST(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusAccepted, gin.H{"message": "Successfully updated deck", "deckCode": code, "count": len(updates.UUID)})
+	c.JSON(http.StatusAccepted, gin.H{"message": "Successfully updated deck", "deckCode": code, "count": updates.Count()})
 }
 
+/*
+DeckContentDELETE - All logic needed for removing cards from the deck
+
+Parameters:
+c (gin.Context) - The request context
+
+Returns:
+Nothing
+*/
 func DeckContentDELETE(c *gin.Context) {
 	code := c.Query("deckCode")
 	if code == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"message": "Deck code is required to fetch a deck's contents"})
+		c.JSON(http.StatusBadRequest, gin.H{"message": "Deck code is required to perform a DELETE operation"})
 		return
 	}
 
@@ -165,21 +206,12 @@ func DeckContentDELETE(c *gin.Context) {
 		return
 	}
 
-	type DeckUpdate struct {
-		UUID []string
-	}
-
-	var updates DeckUpdate
+	var updates deck.DeckUpdate
 	c.BindJSON(&updates)
 
-	for i := range updates.UUID {
-		var uuid = updates.UUID[i]
-
-		err = _deck.DeleteCard(uuid)
-		if err == errors.ErrNoCard {
-			c.JSON(http.StatusNotFound, gin.H{"message": err.Error()})
-		}
-	}
+	_deck.DeleteCards(updates.MainBoard, deck.MAINBOARD)
+	_deck.DeleteCards(updates.SideBoard, deck.SIDEBOARD)
+	_deck.DeleteCards(updates.Commander, deck.COMMANDER)
 
 	err = _deck.UpdateDeck()
 	if err == errors.ErrDeckUpdateFailed {
@@ -187,5 +219,5 @@ func DeckContentDELETE(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusAccepted, gin.H{"message": "Successfully removed cards from deck", "deckCode": code, "count": len(updates.UUID)})
+	c.JSON(http.StatusAccepted, gin.H{"message": "Successfully removed cards from deck", "deckCode": code, "count": updates.Count()})
 }
