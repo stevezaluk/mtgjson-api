@@ -20,3 +20,8 @@ var ErrDeckMissingId = errors.New("deck: Failed to create deck. Deck is missing 
 var ErrDeckAlreadyExists = errors.New("deck: Failed to create deck. Deck already exists")
 var ErrDeckDeleteFailed = errors.New("deck: Failed to delete deck. Unknown server issue")
 var ErrBoardNotExist = errors.New("deck: Failed to add card to deck. Requested board does not exist")
+
+/*
+Set Errors - Holds all errors that could arise from fetching or creating sets
+*/
+var ErrNoSet = errors.New("set: failed to find set with the specified code")
