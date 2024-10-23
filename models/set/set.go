@@ -1,9 +1,13 @@
 package set
 
 import (
+	"mtgjson/context"
+	"mtgjson/errors"
 	"mtgjson/models/booster"
 	"mtgjson/models/sealed_product"
 	"mtgjson/models/set/meta"
+
+	"go.mongodb.org/mongo-driver/bson"
 )
 
 type Set struct {
@@ -37,4 +41,28 @@ type Set struct {
 	TokenSetSize     int64                            `json:"tokenSetSize"`
 	Translations     set.Translations                 `json:"translations"`
 	Type             string                           `json:"type"`
+}
+
+func GetSet(code string) (Set, error) {
+	var ret Set
+	var database = context.GetDatabase()
+
+	results := database.Find("set", bson.M{"code": code}, &ret)
+	if results == nil {
+		return ret, errors.ErrNoSet
+	}
+
+	return ret, nil
+}
+
+func IndexSets(limit int64) ([]Set, error) {
+	var ret []Set
+	var database = context.GetDatabase()
+
+	results := database.Index("set", limit, ret)
+	if results == nil {
+		return ret, errors.ErrNoSet
+	}
+
+	return ret, nil
 }
