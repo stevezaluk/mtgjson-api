@@ -1,9 +1,10 @@
 package api
 
 import (
-	"mtgjson/errors"
-	"mtgjson/models/card"
-	"mtgjson/models/deck"
+	deck_model "github.com/stevezaluk/mtgjson-models/deck"
+	"github.com/stevezaluk/mtgjson-models/errors"
+	"github.com/stevezaluk/mtgjson-sdk/card"
+	"github.com/stevezaluk/mtgjson-sdk/deck"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -51,7 +52,7 @@ Returns:
 Nothing
 */
 func DeckPOST(c *gin.Context) {
-	var new deck.Deck
+	var new deck_model.Deck
 
 	if c.Bind(&new) != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"message": "Failed to bind response to object. Object structure may be incorrect"})
@@ -100,7 +101,7 @@ func DeckDELETE(c *gin.Context) {
 		return
 	}
 
-	result := _deck.DeleteDeck()
+	result := deck.DeleteDeck(_deck.Code)
 	if result == errors.ErrDeckDeleteFailed {
 		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
 		return
@@ -131,9 +132,9 @@ func DeckContentGET(c *gin.Context) {
 		return
 	}
 
-	var mainBoard = _deck.FetchMainboard()
-	var sideBoard = _deck.FetchSideboard()
-	var commander = _deck.FetchCommander()
+	var mainBoard = deck.FetchMainboard(_deck)
+	var sideBoard = deck.FetchSideboard(_deck)
+	var commander = deck.FetchCommander(_deck)
 
 	var resp = gin.H{"mainBoard": mainBoard, "sideBoard": sideBoard, "commander": commander}
 
@@ -162,7 +163,7 @@ func DeckContentPOST(c *gin.Context) {
 		return
 	}
 
-	var updates deck.DeckUpdate
+	var updates deck_model.DeckUpdate
 	c.BindJSON(&updates)
 
 	valid, invalidCards, noExistCards := card.ValidateCards(updates.AllCards())
@@ -171,11 +172,11 @@ func DeckContentPOST(c *gin.Context) {
 		return
 	}
 
-	_deck.AddCards(updates.MainBoard, deck.MAINBOARD)
-	_deck.AddCards(updates.SideBoard, deck.SIDEBOARD)
-	_deck.AddCards(updates.Commander, deck.COMMANDER)
+	_deck.AddCards(updates.MainBoard, deck_model.MAINBOARD)
+	_deck.AddCards(updates.SideBoard, deck_model.SIDEBOARD)
+	_deck.AddCards(updates.Commander, deck_model.COMMANDER)
 
-	err = _deck.UpdateDeck()
+	err = deck.UpdateDeck(_deck)
 	if err == errors.ErrDeckUpdateFailed {
 		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
 		return
@@ -206,14 +207,14 @@ func DeckContentDELETE(c *gin.Context) {
 		return
 	}
 
-	var updates deck.DeckUpdate
+	var updates deck_model.DeckUpdate
 	c.BindJSON(&updates)
 
-	_deck.DeleteCards(updates.MainBoard, deck.MAINBOARD)
-	_deck.DeleteCards(updates.SideBoard, deck.SIDEBOARD)
-	_deck.DeleteCards(updates.Commander, deck.COMMANDER)
+	_deck.DeleteCards(updates.MainBoard, deck_model.MAINBOARD)
+	_deck.DeleteCards(updates.SideBoard, deck_model.SIDEBOARD)
+	_deck.DeleteCards(updates.Commander, deck_model.COMMANDER)
 
-	err = _deck.UpdateDeck()
+	err = deck.UpdateDeck(_deck)
 	if err == errors.ErrDeckUpdateFailed {
 		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
 		return

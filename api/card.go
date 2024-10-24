@@ -2,8 +2,8 @@ package api
 
 import (
 	"github.com/gin-gonic/gin"
-	"mtgjson/errors"
-	"mtgjson/models/card"
+	"github.com/stevezaluk/mtgjson-models/errors"
+	"github.com/stevezaluk/mtgjson-sdk/card"
 	"net/http"
 	"strconv"
 )

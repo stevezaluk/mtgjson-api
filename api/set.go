@@ -1,8 +1,8 @@
 package api
 
 import (
-	"mtgjson/errors"
-	"mtgjson/models/set"
+	"github.com/stevezaluk/mtgjson-models/errors"
+	"github.com/stevezaluk/mtgjson-sdk/set"
 	"net/http"
 
 	"github.com/gin-gonic/gin"

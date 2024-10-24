@@ -3,9 +3,9 @@ package cmd
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/spf13/cobra"
+	"github.com/stevezaluk/mtgjson-sdk/context"
+	"github.com/stevezaluk/mtgjson-sdk/server"
 	"mtgjson/api"
-	"mtgjson/context"
-	"mtgjson/server"
 )
 
 var defaultConfig string = "~/.config/mtgjson/config.json"
