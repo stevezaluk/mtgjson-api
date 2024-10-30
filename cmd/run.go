@@ -28,18 +28,18 @@ $ mtgjson run --env`,
 	},
 	Run: func(cmd *cobra.Command, args []string) {
 		router := gin.Default()
-		router.GET("/health", api.HealthGET)
+		router.GET("/api/v1/health", api.HealthGET)
 
-		router.GET("/card", api.CardGET)
-		router.POST("/card", api.CardPOST)
+		router.GET("/api/v1/card", api.CardGET)
+		router.POST("/api/v1/card", api.CardPOST)
 
-		router.GET("/deck", api.DeckGET)
-		router.POST("/deck", api.DeckPOST)
-		router.DELETE("/deck", api.DeckDELETE)
+		router.GET("/api/v1/deck", api.DeckGET)
+		router.POST("/api/v1/deck", api.DeckPOST)
+		router.DELETE("/api/v1/deck", api.DeckDELETE)
 
-		router.GET("/deck/content", api.DeckContentGET)
-		router.POST("/deck/content", api.DeckContentPOST)
-		router.DELETE("/deck/content", api.DeckContentDELETE)
+		router.GET("/api/v1/deck/content", api.DeckContentGET)
+		router.POST("/api/v1/deck/content", api.DeckContentPOST)
+		router.DELETE("/api/v1/deck/content", api.DeckContentDELETE)
 
 		router.Run()
 	},
