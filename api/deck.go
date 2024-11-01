@@ -23,7 +23,7 @@ func DeckGET(c *gin.Context) {
 	code := c.Query("deckCode")
 	if code == "" {
 		limit := limitToInt64(c.DefaultQuery("limit", "100"))
-		results, err := deck.GetDecks(limit)
+		results, err := deck.IndexDecks(limit)
 		if err == errors.ErrNoDecks {
 			c.JSON(400, gin.H{"message": err.Error()})
 			return
@@ -38,6 +38,8 @@ func DeckGET(c *gin.Context) {
 		c.JSON(http.StatusNotFound, gin.H{"message": err.Error()})
 		return
 	}
+
+	deck.GetDeckContents(&results)
 
 	c.JSON(http.StatusFound, results)
 }
@@ -64,7 +66,7 @@ func DeckPOST(c *gin.Context) {
 		return
 	}
 
-	var valid, invalidCards, noExistCards = card.ValidateCards(new.AllCards())
+	var valid, invalidCards, noExistCards = card.ValidateCards(new.AllCardIds())
 	if !valid {
 		c.JSON(http.StatusBadRequest, gin.H{"message": "Failed to create deck. Some cards do not exist in the database or are invalid", "invalid": invalidCards, "noExist": noExistCards})
 		return
@@ -132,11 +134,9 @@ func DeckContentGET(c *gin.Context) {
 		return
 	}
 
-	var mainBoard = deck.FetchMainboard(_deck)
-	var sideBoard = deck.FetchSideboard(_deck)
-	var commander = deck.FetchCommander(_deck)
+	deck.GetDeckContents(&_deck)
 
-	var resp = gin.H{"mainBoard": mainBoard, "sideBoard": sideBoard, "commander": commander}
+	var resp = gin.H{"mainBoard": _deck.Contents.Mainboard, "sideBoard": _deck.Contents.Sideboard, "commander": _deck.Contents.Commander}
 
 	c.JSON(http.StatusFound, resp)
 }
@@ -176,7 +176,7 @@ func DeckContentPOST(c *gin.Context) {
 	_deck.AddCards(updates.SideBoard, deck_model.SIDEBOARD)
 	_deck.AddCards(updates.Commander, deck_model.COMMANDER)
 
-	err = deck.UpdateDeck(_deck)
+	err = deck.ReplaceDeck(_deck)
 	if err == errors.ErrDeckUpdateFailed {
 		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
 		return
@@ -214,7 +214,7 @@ func DeckContentDELETE(c *gin.Context) {
 	_deck.DeleteCards(updates.SideBoard, deck_model.SIDEBOARD)
 	_deck.DeleteCards(updates.Commander, deck_model.COMMANDER)
 
-	err = deck.UpdateDeck(_deck)
+	err = deck.ReplaceDeck(_deck)
 	if err == errors.ErrDeckUpdateFailed {
 		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
 		return
