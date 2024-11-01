@@ -76,8 +76,16 @@ github.com/stevezaluk/mtgjson-models v1.0.0 h1:bhLKDtf6VQoC1AwNzD+OGCE4HsDdBDWjy
 github.com/stevezaluk/mtgjson-models v1.0.0/go.mod h1:a/eGQqz5d3YnzI9RutaTuj7/3ylq6RojMAWg/fYb7xc=
 github.com/stevezaluk/mtgjson-models v1.0.4 h1:jVrSH6Rq0mwstq8TvOMXXk+zszfv0vuf7T33x+aByX0=
 github.com/stevezaluk/mtgjson-models v1.0.4/go.mod h1:a/eGQqz5d3YnzI9RutaTuj7/3ylq6RojMAWg/fYb7xc=
+github.com/stevezaluk/mtgjson-models v1.0.5 h1:h80XtsOWInC5XHoA3Qn0R5//UTLyNIdBip4r0rNzaE0=
+github.com/stevezaluk/mtgjson-models v1.0.5/go.mod h1:a/eGQqz5d3YnzI9RutaTuj7/3ylq6RojMAWg/fYb7xc=
+github.com/stevezaluk/mtgjson-models v1.0.6 h1:mr+EZFMGo88u5OkcK/5iFdunPahrdNnNBV6QGVwSCIU=
+github.com/stevezaluk/mtgjson-models v1.0.6/go.mod h1:a/eGQqz5d3YnzI9RutaTuj7/3ylq6RojMAWg/fYb7xc=
+github.com/stevezaluk/mtgjson-models v1.0.7 h1:fIxwmLvWjcgkoG38ZileJOQt4ElppE2r2wRbjfwogWQ=
+github.com/stevezaluk/mtgjson-models v1.0.7/go.mod h1:a/eGQqz5d3YnzI9RutaTuj7/3ylq6RojMAWg/fYb7xc=
 github.com/stevezaluk/mtgjson-sdk v0.0.0-20241024155538-c2583341dcd2 h1:3kEIOqYok+qb6rUJKJJ0dbZmyG9Q2mBG/9KgjQEZNUo=
 github.com/stevezaluk/mtgjson-sdk v0.0.0-20241024155538-c2583341dcd2/go.mod h1:W18lCcs08l+JWtaUBpYi0XfbbZQLSU+tA731tP6rvM0=
+github.com/stevezaluk/mtgjson-sdk v1.0.1 h1:iMYK5ryFnihH03eMgK/3EodlkpY4aoeG81Zg0FtrV1A=
+github.com/stevezaluk/mtgjson-sdk v1.0.1/go.mod h1:AC2xcq4AWE0ND+od4bLC1mWBUr7cZlKmAy4lbg6jhyI=
 github.com/stretchr/objx v0.1.0/go.mod h1:HFkY916IF+rwdDfMAkV7OtwuqBVzrE8GR6GFx+wExME=
 github.com/stretchr/objx v0.4.0/go.mod h1:YvHI0jy2hoMjB+UWwv71VJQ9isScKT/TqJzVSSt89Yw=
 github.com/stretchr/objx v0.5.0/go.mod h1:Yh+to48EsGEfYuaHDzXPcE3xhTkx73EhmCGUpEOglKo=

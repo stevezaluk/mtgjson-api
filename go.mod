@@ -5,8 +5,8 @@ go 1.23.2
 require (
 	github.com/gin-gonic/gin v1.10.0
 	github.com/spf13/cobra v1.8.1
-	github.com/stevezaluk/mtgjson-models v1.0.4
-	github.com/stevezaluk/mtgjson-sdk v0.0.0-20241024155538-c2583341dcd2
+	github.com/stevezaluk/mtgjson-models v1.0.7
+	github.com/stevezaluk/mtgjson-sdk v1.0.1
 )
 
 require (
