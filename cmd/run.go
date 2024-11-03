@@ -60,5 +60,5 @@ func init() {
 	runCmd.PersistentFlags().StringP("config", "c", defaultConfig, "The path to your MTGJSON config file")
 	runCmd.PersistentFlags().BoolP("env", "e", false, "Ignore the default config path and attempt to use Environmental Variables")
 	runCmd.PersistentFlags().Int64P("port", "p", 2100, "Set the default port that the API listens on")
-	runCmd.PersistentFlags().BoolP("debug", "d", false, "Enabled Gin debug mode. Release mode is set by default")
+	runCmd.PersistentFlags().BoolP("debug", "d", false, "Enable Gin debug mode. Release mode is set by default")
 }
