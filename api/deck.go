@@ -74,7 +74,7 @@ func DeckPOST(c *gin.Context) {
 
 	var err = deck.NewDeck(new)
 	if err == errors.ErrDeckAlreadyExists {
-		c.JSON(http.StatusBadRequest, gin.H{"message": "Deck already exists under this deck code", "deckCode": new.Code})
+		c.JSON(http.StatusConflict, gin.H{"message": "Deck already exists under this deck code", "deckCode": new.Code})
 		return
 	}
 
