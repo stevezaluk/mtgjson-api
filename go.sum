@@ -86,6 +86,8 @@ github.com/stevezaluk/mtgjson-sdk v0.0.0-20241024155538-c2583341dcd2 h1:3kEIOqYo
 github.com/stevezaluk/mtgjson-sdk v0.0.0-20241024155538-c2583341dcd2/go.mod h1:W18lCcs08l+JWtaUBpYi0XfbbZQLSU+tA731tP6rvM0=
 github.com/stevezaluk/mtgjson-sdk v1.0.1 h1:iMYK5ryFnihH03eMgK/3EodlkpY4aoeG81Zg0FtrV1A=
 github.com/stevezaluk/mtgjson-sdk v1.0.1/go.mod h1:AC2xcq4AWE0ND+od4bLC1mWBUr7cZlKmAy4lbg6jhyI=
+github.com/stevezaluk/mtgjson-sdk v1.0.3 h1:LLscBSwF+9kjjmvv4YAJ87D6GJg3rY4i2+nV9QzsVWc=
+github.com/stevezaluk/mtgjson-sdk v1.0.3/go.mod h1:QKB2vNo78a0FvCTUpRmqJZ+hvZXqvN1PyXhr+ZwtBkw=
 github.com/stretchr/objx v0.1.0/go.mod h1:HFkY916IF+rwdDfMAkV7OtwuqBVzrE8GR6GFx+wExME=
 github.com/stretchr/objx v0.4.0/go.mod h1:YvHI0jy2hoMjB+UWwv71VJQ9isScKT/TqJzVSSt89Yw=
 github.com/stretchr/objx v0.5.0/go.mod h1:Yh+to48EsGEfYuaHDzXPcE3xhTkx73EhmCGUpEOglKo=

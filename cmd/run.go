@@ -1,15 +1,16 @@
 package cmd
 
 import (
+	"mtgjson/api"
+
 	"github.com/gin-gonic/gin"
 	"github.com/spf13/cobra"
+	"github.com/stevezaluk/mtgjson-sdk/config"
 	"github.com/stevezaluk/mtgjson-sdk/context"
-	"github.com/stevezaluk/mtgjson-sdk/server"
-	"mtgjson/api"
 )
 
-var defaultConfig string = "~/.config/mtgjson/config.json"
-var ServerConfig server.Config
+var defaultConfigPath string = "~/.config/mtgjson/config.json"
+var defaultConfig config.Config
 
 var runCmd = &cobra.Command{
 	Use:   "run",
@@ -23,7 +24,18 @@ $ mtgjson run -c /path/to/config/.json
 To start the API using environmental variables
 $ mtgjson run --env`,
 	PreRun: func(cmd *cobra.Command, args []string) {
-		context.InitConfig(cmd.PersistentFlags())
+		// need better error checking in this function
+		// ideally Parse and ParseFromEnv needs to be re-worked to return errors
+		// if the config path cant be found, rebound to env parsing
+		useEnv, _ := cmd.Flags().GetBool("env")
+		if useEnv {
+			defaultConfig = config.ParseFromEnv()
+		}
+
+		configPath, _ := cmd.Flags().GetString("config")
+		defaultConfig = config.Parse(configPath)
+
+		context.InitConfig(defaultConfig)
 		context.InitDatabase()
 
 		debugMode, _ := cmd.Flags().GetBool("debug")
@@ -57,7 +69,7 @@ $ mtgjson run --env`,
 
 func init() {
 	rootCmd.AddCommand(runCmd)
-	runCmd.PersistentFlags().StringP("config", "c", defaultConfig, "The path to your MTGJSON config file")
+	runCmd.PersistentFlags().StringP("config", "c", defaultConfigPath, "The path to your MTGJSON config file")
 	runCmd.PersistentFlags().BoolP("env", "e", false, "Ignore the default config path and attempt to use Environmental Variables")
 	runCmd.PersistentFlags().Int64P("port", "p", 2100, "Set the default port that the API listens on")
 	runCmd.PersistentFlags().BoolP("debug", "d", false, "Enable Gin debug mode. Release mode is set by default")
