@@ -6,7 +6,7 @@ require (
 	github.com/gin-gonic/gin v1.10.0
 	github.com/spf13/cobra v1.8.1
 	github.com/stevezaluk/mtgjson-models v1.0.7
-	github.com/stevezaluk/mtgjson-sdk v1.0.1
+	github.com/stevezaluk/mtgjson-sdk v1.0.3
 )
 
 require (
