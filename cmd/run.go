@@ -51,6 +51,7 @@ $ mtgjson run --env`,
 
 		router.GET("/api/v1/card", api.CardGET)
 		router.POST("/api/v1/card", api.CardPOST)
+		router.DELETE("/api/v1/card", api.CardDELETE)
 
 		router.GET("/api/v1/deck", api.DeckGET)
 		router.POST("/api/v1/deck", api.DeckPOST)

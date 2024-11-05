@@ -82,3 +82,22 @@ func CardPOST(c *gin.Context) {
 
 	c.JSON(http.StatusAccepted, gin.H{"message": "New card created successfully", "mtgjsonV4Id": new.Identifiers.MTGJsonV4Id})
 }
+
+func CardDELETE(c *gin.Context) {
+	cardId := c.Query("cardId")
+	if cardId == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "A cardId (mtgjsonV4Id) is required to delete a card"})
+		return
+	}
+
+	err := card.DeleteCard(cardId)
+	if err == errors.ErrNoCard {
+		c.JSON(http.StatusNotFound, gin.H{"message": "Failed to find card with the specified id", "mtgjsonV4Id": cardId})
+		return
+	} else if err == errors.ErrCardDeleteFailed {
+		c.JSON(http.StatusInternalServerError, gin.H{"message": "Failed to delete card. Internal server issue"})
+		return
+	}
+
+	c.JSON(http.StatusAccepted, gin.H{"message": "Card successfully deleted", "mtgjsonV4Id": cardId})
+}
