@@ -2,8 +2,9 @@ package api
 
 import (
 	"github.com/gin-gonic/gin"
+	card_model "github.com/stevezaluk/mtgjson-models/card"
 	"github.com/stevezaluk/mtgjson-models/errors"
-	"github.com/stevezaluk/mtgjson-sdk/card"
+	card "github.com/stevezaluk/mtgjson-sdk/card"
 	"net/http"
 	"strconv"
 )
@@ -63,5 +64,21 @@ func CardGET(c *gin.Context) {
 }
 
 func CardPOST(c *gin.Context) {
+	var new card_model.Card
 
+	if c.Bind(&new) != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"message": "Failed to bind response to object. Object structure may be incorrect"})
+		return
+	}
+
+	err := card.NewCard(new)
+	if err == errors.ErrCardAlreadyExist {
+		c.JSON(http.StatusConflict, gin.H{"message": "Card already exists under this identifier", "mtgjsonV4Id": new.Identifiers.MTGJsonV4Id})
+		return
+	} else if err == errors.ErrCardMissingId {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "Card name or mtgjsonV4Id must not be empty when creating a card"})
+		return
+	}
+
+	c.JSON(http.StatusAccepted, gin.H{"message": "New card created successfully", "mtgjsonV4Id": new.Identifiers.MTGJsonV4Id})
 }
