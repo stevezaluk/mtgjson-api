@@ -7,7 +7,7 @@ require (
 	github.com/spf13/cobra v1.8.1
 	github.com/spf13/viper v1.19.0
 	github.com/stevezaluk/mtgjson-models v1.0.9
-	github.com/stevezaluk/mtgjson-sdk v1.0.6
+	github.com/stevezaluk/mtgjson-sdk v1.0.8
 )
 
 require (
