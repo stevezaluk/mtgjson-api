@@ -5,12 +5,9 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/spf13/cobra"
-	"github.com/stevezaluk/mtgjson-sdk/config"
+	"github.com/spf13/viper"
 	"github.com/stevezaluk/mtgjson-sdk/context"
 )
-
-var defaultConfigPath string = "~/.config/mtgjson/config.json"
-var defaultConfig config.Config
 
 var runCmd = &cobra.Command{
 	Use:   "run",
@@ -24,25 +21,11 @@ $ mtgjson run -c /path/to/config/.json
 To start the API using environmental variables
 $ mtgjson run --env`,
 	PreRun: func(cmd *cobra.Command, args []string) {
-		// need better error checking in this function
-		// ideally Parse and ParseFromEnv needs to be re-worked to return errors
-		// if the config path cant be found, rebound to env parsing
-		useEnv, _ := cmd.Flags().GetBool("env")
-		if useEnv {
-			defaultConfig = config.ParseFromEnv()
-		}
-
-		configPath, _ := cmd.Flags().GetString("config")
-		defaultConfig = config.Parse(configPath)
-
-		context.InitConfig(defaultConfig)
 		context.InitDatabase()
 
-		debugMode, _ := cmd.Flags().GetBool("debug")
-		if debugMode {
-			gin.SetMode("debug")
-		} else {
-			gin.SetMode("release")
+		debugMode := viper.GetBool("debug")
+		if !debugMode {
+			gin.SetMode(gin.ReleaseMode)
 		}
 	},
 	Run: func(cmd *cobra.Command, args []string) {
@@ -70,8 +53,25 @@ $ mtgjson run --env`,
 
 func init() {
 	rootCmd.AddCommand(runCmd)
-	runCmd.PersistentFlags().StringP("config", "c", defaultConfigPath, "The path to your MTGJSON config file")
-	runCmd.PersistentFlags().BoolP("env", "e", false, "Ignore the default config path and attempt to use Environmental Variables")
-	runCmd.PersistentFlags().Int64P("port", "p", 2100, "Set the default port that the API listens on")
-	runCmd.PersistentFlags().BoolP("debug", "d", false, "Enable Gin debug mode. Release mode is set by default")
+
+	context.InitConfig(cfgFile)
+
+	runCmd.Flags().BoolP("debug", "d", false, "Enable Gin debug mode. Release mode is set by default")
+	viper.BindPFlag("debug", runCmd.Flags().Lookup("debug"))
+
+	runCmd.Flags().IntP("api.port", "p", 8080, "Set the host port that the API should serve on")
+	viper.BindPFlag("api.port", runCmd.Flags().Lookup("api.port"))
+
+	runCmd.Flags().String("mongo.ip", "127.0.0.1", "Set the IP Address of your running MongoDB instance")
+	viper.BindPFlag("mongo.ip", runCmd.Flags().Lookup("mongo.ip"))
+
+	runCmd.Flags().String("mongo.port", "127.0.0.1", "Set the Port of your running MongoDB instance")
+	viper.BindPFlag("mongo.port", runCmd.Flags().Lookup("mongo.port"))
+
+	runCmd.Flags().String("mongo.user", "127.0.0.1", "Set the username to use for authentication with MongoDB")
+	viper.BindPFlag("mongo.user", runCmd.Flags().Lookup("mongo.user"))
+
+	runCmd.Flags().String("mongo.pass", "127.0.0.1", "Set the password to use for authentication with MongoDB")
+	viper.BindPFlag("mongo.pass", runCmd.Flags().Lookup("mongo.pass"))
+
 }
