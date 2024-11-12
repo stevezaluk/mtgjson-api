@@ -55,9 +55,13 @@ func init() {
 	rootCmd.AddCommand(runCmd)
 
 	context.InitConfig(cfgFile)
+	context.InitLog()
 
 	runCmd.Flags().BoolP("debug", "d", false, "Enable Gin debug mode. Release mode is set by default")
 	viper.BindPFlag("debug", runCmd.Flags().Lookup("debug"))
+
+	runCmd.Flags().StringP("log.path", "l", "/var/log/mtgjson-api", "Set the directory that the API should save logs too")
+	viper.BindPFlag("log.path", runCmd.Flags().Lookup("log.path"))
 
 	runCmd.Flags().IntP("api.port", "p", 8080, "Set the host port that the API should serve on")
 	viper.BindPFlag("api.port", runCmd.Flags().Lookup("api.port"))
