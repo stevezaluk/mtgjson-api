@@ -7,6 +7,8 @@ import (
 	"github.com/spf13/cobra"
 )
 
+var cfgFile string
+
 var rootCmd = &cobra.Command{
 	Use:   "mtgjson",
 	Short: "An RESTful API built on top of the MTGJSON data set",
@@ -21,5 +23,7 @@ func Execute() {
 }
 
 func init() {
+	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.config/mtgjson-api/config.json)")
+
 	rootCmd.Flags().BoolP("verbose", "v", false, "Enable verbosity in logging")
 }
