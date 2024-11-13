@@ -87,4 +87,15 @@ func init() {
 	runCmd.Flags().String("mongo.pass", "127.0.0.1", "Set the password to use for authentication with MongoDB")
 	viper.BindPFlag("mongo.pass", runCmd.Flags().Lookup("mongo.pass"))
 
+	runCmd.Flags().String("auth0.domain", "", "The domain of your Auth0 tenant")
+	viper.BindPFlag("auth0.domain", runCmd.Flags().Lookup("auth0.domain"))
+
+	runCmd.Flags().String("auth0.audience", "", "The identifier of your Auth0 API")
+	viper.BindPFlag("auth0.audience", runCmd.Flags().Lookup("auth0.audience"))
+
+	runCmd.Flags().String("auth0.client_id", "", "The Client ID for your Auth0 API")
+	viper.BindPFlag("auth0.client_id", runCmd.Flags().Lookup("auth0.client_id"))
+
+	runCmd.Flags().String("auth0.client_secret", "", "The Client Secret for your Auth0 APi")
+	viper.BindPFlag("auth0.client_secret", runCmd.Flags().Lookup("auth0.client_secret"))
 }
