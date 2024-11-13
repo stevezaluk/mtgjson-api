@@ -4,6 +4,7 @@ import (
 	"mtgjson/api"
 
 	"github.com/gin-gonic/gin"
+	sloggin "github.com/samber/slog-gin"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"github.com/stevezaluk/mtgjson-sdk/context"
@@ -29,7 +30,15 @@ $ mtgjson run --env`,
 		}
 	},
 	Run: func(cmd *cobra.Command, args []string) {
-		router := gin.Default()
+		router := gin.New()
+
+		logger := context.GetLogger()
+
+		router.Use(
+			sloggin.New(logger),
+			gin.Recovery(),
+		)
+
 		router.GET("/api/v1/health", api.HealthGET)
 
 		router.GET("/api/v1/card", api.CardGET)
@@ -55,9 +64,13 @@ func init() {
 	rootCmd.AddCommand(runCmd)
 
 	context.InitConfig(cfgFile)
+	context.InitLog()
 
 	runCmd.Flags().BoolP("debug", "d", false, "Enable Gin debug mode. Release mode is set by default")
 	viper.BindPFlag("debug", runCmd.Flags().Lookup("debug"))
+
+	runCmd.Flags().StringP("log.path", "l", "/var/log/mtgjson-api", "Set the directory that the API should save logs too")
+	viper.BindPFlag("log.path", runCmd.Flags().Lookup("log.path"))
 
 	runCmd.Flags().IntP("api.port", "p", 8080, "Set the host port that the API should serve on")
 	viper.BindPFlag("api.port", runCmd.Flags().Lookup("api.port"))
