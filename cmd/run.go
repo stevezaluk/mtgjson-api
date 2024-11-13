@@ -4,6 +4,7 @@ import (
 	"mtgjson/api"
 
 	"github.com/gin-gonic/gin"
+	sloggin "github.com/samber/slog-gin"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"github.com/stevezaluk/mtgjson-sdk/context"
@@ -29,7 +30,15 @@ $ mtgjson run --env`,
 		}
 	},
 	Run: func(cmd *cobra.Command, args []string) {
-		router := gin.Default()
+		router := gin.New()
+
+		logger := context.GetLogger()
+
+		router.Use(
+			sloggin.New(logger),
+			gin.Recovery(),
+		)
+
 		router.GET("/api/v1/health", api.HealthGET)
 
 		router.GET("/api/v1/card", api.CardGET)
