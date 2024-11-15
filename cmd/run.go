@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"mtgjson/api"
+	"mtgjson/auth"
 
 	"github.com/gin-gonic/gin"
 	sloggin "github.com/samber/slog-gin"
@@ -37,6 +38,7 @@ $ mtgjson run --env`,
 		router.Use(
 			sloggin.New(logger),
 			gin.Recovery(),
+			auth.ValidateToken(),
 		)
 
 		router.GET("/api/v1/health", api.HealthGET)
