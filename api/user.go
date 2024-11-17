@@ -24,6 +24,9 @@ func UserGET(ctx *gin.Context) {
 	if err == errors.ErrNoUser {
 		ctx.JSON(http.StatusNotFound, gin.H{"message": "Failed to find user with the specified email address"})
 		return
+	} else if err == errors.ErrInvalidEmail {
+		ctx.JSON(http.StatusBadRequest, gin.H{"message": "Invalid email address used in query"})
+		return
 	}
 
 	ctx.JSON(http.StatusOK, result)
