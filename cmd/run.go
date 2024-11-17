@@ -29,6 +29,8 @@ $ mtgjson run --env`,
 		if !debugMode {
 			gin.SetMode(gin.ReleaseMode)
 		}
+
+		context.InitAuthAPI()
 	},
 	Run: func(cmd *cobra.Command, args []string) {
 		router := gin.New()
@@ -38,12 +40,13 @@ $ mtgjson run --env`,
 		router.Use(
 			sloggin.New(logger),
 			gin.Recovery(),
-			auth.ValidateToken(),
 		)
 
 		router.GET("/api/v1/health", api.HealthGET)
 
-		router.GET("/api/v1/card", api.CardGET)
+		router.POST("/api/v1/login", api.LoginPOST)
+
+		router.GET("/api/v1/card", auth.ValidateToken(), api.CardGET)
 		router.POST("/api/v1/card", api.CardPOST)
 		router.DELETE("/api/v1/card", api.CardDELETE)
 
