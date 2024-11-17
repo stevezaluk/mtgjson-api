@@ -47,6 +47,8 @@ $ mtgjson run --env`,
 
 		router.GET("/api/v1/health", auth.ValidateToken(), api.HealthGET)
 
+		router.GET("/api/v1/user", auth.ValidateToken(), api.UserGET)
+
 		router.GET("/api/v1/card", auth.ValidateToken(), api.CardGET)
 		router.POST("/api/v1/card", auth.ValidateToken(), api.CardPOST)
 		router.DELETE("/api/v1/card", auth.ValidateToken(), api.CardDELETE)
