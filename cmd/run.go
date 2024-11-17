@@ -43,6 +43,7 @@ $ mtgjson run --env`,
 		)
 
 		router.POST("/api/v1/login", api.LoginPOST)
+		router.POST("/api/v1/register", api.RegisterPOST)
 
 		router.GET("/api/v1/health", auth.ValidateToken(), api.HealthGET)
 
