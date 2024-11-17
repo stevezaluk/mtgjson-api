@@ -42,6 +42,10 @@ func GetValidator() (*validator.Validator, error) {
 
 func ValidateToken() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
+		if viper.GetBool("api.no_auth") { // if no auth is set, return to the next handler
+			return
+		}
+
 		authHeader := ctx.GetHeader("Authorization")
 		if authHeader == "" {
 			ctx.JSON(http.StatusUnauthorized, gin.H{"msg": "Authorization header is missing from request"}) // format this better

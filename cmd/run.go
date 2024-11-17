@@ -83,6 +83,9 @@ func init() {
 	runCmd.Flags().IntP("api.port", "p", 8080, "Set the host port that the API should serve on")
 	viper.BindPFlag("api.port", runCmd.Flags().Lookup("api.port"))
 
+	runCmd.Flags().Bool("api.no_auth", false, "Disable authentication with Auth0 for all endpoints")
+	viper.BindPFlag("api.no_auth", runCmd.Flags().Lookup("api.no_auth"))
+
 	runCmd.Flags().String("mongo.ip", "127.0.0.1", "Set the IP Address of your running MongoDB instance")
 	viper.BindPFlag("mongo.ip", runCmd.Flags().Lookup("mongo.ip"))
 
