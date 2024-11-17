@@ -42,21 +42,21 @@ $ mtgjson run --env`,
 			gin.Recovery(),
 		)
 
-		router.GET("/api/v1/health", api.HealthGET)
-
 		router.POST("/api/v1/login", api.LoginPOST)
 
+		router.GET("/api/v1/health", auth.ValidateToken(), api.HealthGET)
+
 		router.GET("/api/v1/card", auth.ValidateToken(), api.CardGET)
-		router.POST("/api/v1/card", api.CardPOST)
-		router.DELETE("/api/v1/card", api.CardDELETE)
+		router.POST("/api/v1/card", auth.ValidateToken(), api.CardPOST)
+		router.DELETE("/api/v1/card", auth.ValidateToken(), api.CardDELETE)
 
-		router.GET("/api/v1/deck", api.DeckGET)
-		router.POST("/api/v1/deck", api.DeckPOST)
-		router.DELETE("/api/v1/deck", api.DeckDELETE)
+		router.GET("/api/v1/deck", auth.ValidateToken(), api.DeckGET)
+		router.POST("/api/v1/deck", auth.ValidateToken(), api.DeckPOST)
+		router.DELETE("/api/v1/deck", auth.ValidateToken(), api.DeckDELETE)
 
-		router.GET("/api/v1/deck/content", api.DeckContentGET)
-		router.POST("/api/v1/deck/content", api.DeckContentPOST)
-		router.DELETE("/api/v1/deck/content", api.DeckContentDELETE)
+		router.GET("/api/v1/deck/content", auth.ValidateToken(), api.DeckContentGET)
+		router.POST("/api/v1/deck/content", auth.ValidateToken(), api.DeckContentPOST)
+		router.DELETE("/api/v1/deck/content", auth.ValidateToken(), api.DeckContentDELETE)
 
 		router.Run()
 	},
