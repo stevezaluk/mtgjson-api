@@ -8,6 +8,10 @@ import (
 	"github.com/stevezaluk/mtgjson-sdk/user"
 )
 
+/*
+Gin handler for POST request to the reset endpoint. This should not be called directly and
+should only be passed to the gin router
+*/
 func ResetPOST(ctx *gin.Context) {
 	type ResetPasswordRequest struct {
 		Email string `json:"email"`
