@@ -16,7 +16,14 @@ func UserGET(ctx *gin.Context) {
 	email := ctx.Query("email")
 
 	if email == "" {
-		ctx.JSON(http.StatusNotImplemented, gin.H{"message": "Listing all users is not implemented yet"})
+		limit := limitToInt64(ctx.DefaultQuery("limit", "100"))
+		result, err := user.IndexUsers(limit)
+		if err != nil {
+			ctx.JSON(http.StatusNotFound, gin.H{"message": "Failed to find users in database"})
+			return
+		}
+
+		ctx.JSON(http.StatusOK, result)
 		return
 	}
 

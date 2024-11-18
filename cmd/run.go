@@ -31,6 +31,7 @@ $ mtgjson run --env`,
 		}
 
 		context.InitAuthAPI()
+		context.InitAuthManagementAPI()
 	},
 	Run: func(cmd *cobra.Command, args []string) {
 		router := gin.New()
