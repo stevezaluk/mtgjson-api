@@ -31,6 +31,11 @@ func GetValidator() (*validator.Validator, error) {
 		validator.RS256,
 		issuer.String(),
 		[]string{viper.GetString("auth0.audience")},
+		validator.WithCustomClaims(
+			func() validator.CustomClaims {
+				return &CustomClaims{}
+			},
+		),
 	)
 
 	if err != nil {
@@ -69,6 +74,21 @@ func ValidateToken() gin.HandlerFunc {
 
 		if token == nil || err != nil {
 			ctx.JSON(http.StatusUnauthorized, gin.H{"msg": "Token is not valid", "err": err.Error()})
+			ctx.Abort()
+			return
+		}
+
+		ctx.Set("token", token)
+	}
+}
+
+func ValidateScope(requiredScope string) gin.HandlerFunc {
+	return func(ctx *gin.Context) {
+		token := ctx.Value("token").(*validator.ValidatedClaims)
+
+		claims := token.CustomClaims.(*CustomClaims)
+		if !claims.HasScope(requiredScope) {
+			ctx.JSON(http.StatusForbidden, gin.H{"message": "Missing required scoped permission to access this resource"})
 			ctx.Abort()
 			return
 		}
