@@ -47,22 +47,22 @@ $ mtgjson run --env`,
 		router.POST("/api/v1/register", api.RegisterPOST)
 		router.POST("/api/v1/reset", auth.ValidateToken(), api.ResetPOST)
 
-		router.GET("/api/v1/health", auth.ValidateToken(), api.HealthGET)
+		router.GET("/api/v1/health", auth.ValidateToken(), auth.ValidateScope("read:health"), api.HealthGET)
 
-		router.GET("/api/v1/user", auth.ValidateToken(), api.UserGET)
-		router.DELETE("/api/v1/user", auth.ValidateToken(), api.UserDELETE)
+		router.GET("/api/v1/user", auth.ValidateToken(), auth.ValidateScope("read:user"), api.UserGET)
+		router.DELETE("/api/v1/user", auth.ValidateToken(), auth.ValidateScope("write:user"), api.UserDELETE)
 
-		router.GET("/api/v1/card", auth.ValidateToken(), api.CardGET)
-		router.POST("/api/v1/card", auth.ValidateToken(), api.CardPOST)
-		router.DELETE("/api/v1/card", auth.ValidateToken(), api.CardDELETE)
+		router.GET("/api/v1/card", auth.ValidateToken(), auth.ValidateScope("read:card"), api.CardGET)
+		router.POST("/api/v1/card", auth.ValidateToken(), auth.ValidateScope("write:card"), api.CardPOST)
+		router.DELETE("/api/v1/card", auth.ValidateToken(), auth.ValidateScope("write:card"), api.CardDELETE)
 
-		router.GET("/api/v1/deck", auth.ValidateToken(), api.DeckGET)
-		router.POST("/api/v1/deck", auth.ValidateToken(), api.DeckPOST)
-		router.DELETE("/api/v1/deck", auth.ValidateToken(), api.DeckDELETE)
+		router.GET("/api/v1/deck", auth.ValidateToken(), auth.ValidateScope("read:deck"), api.DeckGET)
+		router.POST("/api/v1/deck", auth.ValidateToken(), auth.ValidateScope("write:deck"), api.DeckPOST)
+		router.DELETE("/api/v1/deck", auth.ValidateToken(), auth.ValidateScope("write:deck"), api.DeckDELETE)
 
-		router.GET("/api/v1/deck/content", auth.ValidateToken(), api.DeckContentGET)
-		router.POST("/api/v1/deck/content", auth.ValidateToken(), api.DeckContentPOST)
-		router.DELETE("/api/v1/deck/content", auth.ValidateToken(), api.DeckContentDELETE)
+		router.GET("/api/v1/deck/content", auth.ValidateToken(), auth.ValidateScope("read:deck"), api.DeckContentGET)
+		router.POST("/api/v1/deck/content", auth.ValidateToken(), auth.ValidateScope("write:deck"), api.DeckContentPOST)
+		router.DELETE("/api/v1/deck/content", auth.ValidateToken(), auth.ValidateScope("write:deck"), api.DeckContentDELETE)
 
 		router.Run()
 	},
