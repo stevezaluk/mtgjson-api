@@ -89,6 +89,9 @@ func init() {
 	runCmd.Flags().Bool("api.no_auth", false, "Disable authentication with Auth0 for all endpoints")
 	viper.BindPFlag("api.no_auth", runCmd.Flags().Lookup("api.no_auth"))
 
+	runCmd.Flags().Bool("api.no_scope", false, "Disable scoped permissions for all endpoints")
+	viper.BindPFlag("api.no_scope", runCmd.Flags().Lookup("api.no_scope"))
+
 	runCmd.Flags().String("mongo.ip", "127.0.0.1", "Set the IP Address of your running MongoDB instance")
 	viper.BindPFlag("mongo.ip", runCmd.Flags().Lookup("mongo.ip"))
 
