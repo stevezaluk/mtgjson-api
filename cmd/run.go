@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"mtgjson/api"
+	"mtgjson/auth"
 
 	"github.com/gin-gonic/gin"
 	sloggin "github.com/samber/slog-gin"
@@ -28,6 +29,9 @@ $ mtgjson run --env`,
 		if !debugMode {
 			gin.SetMode(gin.ReleaseMode)
 		}
+
+		context.InitAuthAPI()
+		context.InitAuthManagementAPI()
 	},
 	Run: func(cmd *cobra.Command, args []string) {
 		router := gin.New()
@@ -39,19 +43,26 @@ $ mtgjson run --env`,
 			gin.Recovery(),
 		)
 
-		router.GET("/api/v1/health", api.HealthGET)
+		router.POST("/api/v1/login", api.LoginPOST)
+		router.POST("/api/v1/register", api.RegisterPOST)
+		router.POST("/api/v1/reset", auth.ValidateToken(), api.ResetPOST)
 
-		router.GET("/api/v1/card", api.CardGET)
-		router.POST("/api/v1/card", api.CardPOST)
-		router.DELETE("/api/v1/card", api.CardDELETE)
+		router.GET("/api/v1/health", auth.ValidateToken(), auth.ValidateScope("read:health"), api.HealthGET)
 
-		router.GET("/api/v1/deck", api.DeckGET)
-		router.POST("/api/v1/deck", api.DeckPOST)
-		router.DELETE("/api/v1/deck", api.DeckDELETE)
+		router.GET("/api/v1/user", auth.ValidateToken(), auth.ValidateScope("read:user"), api.UserGET)
+		router.DELETE("/api/v1/user", auth.ValidateToken(), auth.ValidateScope("write:user"), api.UserDELETE)
 
-		router.GET("/api/v1/deck/content", api.DeckContentGET)
-		router.POST("/api/v1/deck/content", api.DeckContentPOST)
-		router.DELETE("/api/v1/deck/content", api.DeckContentDELETE)
+		router.GET("/api/v1/card", auth.ValidateToken(), auth.ValidateScope("read:card"), api.CardGET)
+		router.POST("/api/v1/card", auth.ValidateToken(), auth.ValidateScope("write:card"), api.CardPOST)
+		router.DELETE("/api/v1/card", auth.ValidateToken(), auth.ValidateScope("write:card"), api.CardDELETE)
+
+		router.GET("/api/v1/deck", auth.ValidateToken(), auth.ValidateScope("read:deck"), api.DeckGET)
+		router.POST("/api/v1/deck", auth.ValidateToken(), auth.ValidateScope("write:deck"), api.DeckPOST)
+		router.DELETE("/api/v1/deck", auth.ValidateToken(), auth.ValidateScope("write:deck"), api.DeckDELETE)
+
+		router.GET("/api/v1/deck/content", auth.ValidateToken(), auth.ValidateScope("read:deck"), api.DeckContentGET)
+		router.POST("/api/v1/deck/content", auth.ValidateToken(), auth.ValidateScope("write:deck"), api.DeckContentPOST)
+		router.DELETE("/api/v1/deck/content", auth.ValidateToken(), auth.ValidateScope("write:deck"), api.DeckContentDELETE)
 
 		router.Run()
 	},
@@ -75,6 +86,12 @@ func init() {
 	runCmd.Flags().IntP("api.port", "p", 8080, "Set the host port that the API should serve on")
 	viper.BindPFlag("api.port", runCmd.Flags().Lookup("api.port"))
 
+	runCmd.Flags().Bool("api.no_auth", false, "Disable authentication with Auth0 for all endpoints")
+	viper.BindPFlag("api.no_auth", runCmd.Flags().Lookup("api.no_auth"))
+
+	runCmd.Flags().Bool("api.no_scope", false, "Disable scoped permissions for all endpoints")
+	viper.BindPFlag("api.no_scope", runCmd.Flags().Lookup("api.no_scope"))
+
 	runCmd.Flags().String("mongo.ip", "127.0.0.1", "Set the IP Address of your running MongoDB instance")
 	viper.BindPFlag("mongo.ip", runCmd.Flags().Lookup("mongo.ip"))
 
@@ -87,4 +104,15 @@ func init() {
 	runCmd.Flags().String("mongo.pass", "127.0.0.1", "Set the password to use for authentication with MongoDB")
 	viper.BindPFlag("mongo.pass", runCmd.Flags().Lookup("mongo.pass"))
 
+	runCmd.Flags().String("auth0.domain", "", "The domain of your Auth0 tenant")
+	viper.BindPFlag("auth0.domain", runCmd.Flags().Lookup("auth0.domain"))
+
+	runCmd.Flags().String("auth0.audience", "", "The identifier of your Auth0 API")
+	viper.BindPFlag("auth0.audience", runCmd.Flags().Lookup("auth0.audience"))
+
+	runCmd.Flags().String("auth0.client_id", "", "The Client ID for your Auth0 API")
+	viper.BindPFlag("auth0.client_id", runCmd.Flags().Lookup("auth0.client_id"))
+
+	runCmd.Flags().String("auth0.client_secret", "", "The Client Secret for your Auth0 APi")
+	viper.BindPFlag("auth0.client_secret", runCmd.Flags().Lookup("auth0.client_secret"))
 }
