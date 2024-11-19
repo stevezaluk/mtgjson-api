@@ -84,6 +84,10 @@ func ValidateToken() gin.HandlerFunc {
 
 func ValidateScope(requiredScope string) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
+		if viper.GetBool("api.no_scope") {
+			return
+		}
+
 		token := ctx.Value("token").(*validator.ValidatedClaims)
 
 		claims := token.CustomClaims.(*CustomClaims)
