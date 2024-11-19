@@ -88,7 +88,7 @@ func ValidateScope(requiredScope string) gin.HandlerFunc {
 
 		claims := token.CustomClaims.(*CustomClaims)
 		if !claims.HasScope(requiredScope) {
-			ctx.JSON(http.StatusForbidden, gin.H{"message": "Missing required scoped permission to access this resource"})
+			ctx.JSON(http.StatusForbidden, gin.H{"message": "Invalid permissions to access this resource", "missingScope": requiredScope})
 			ctx.Abort()
 			return
 		}
