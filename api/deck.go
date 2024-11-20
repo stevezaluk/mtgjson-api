@@ -11,13 +11,8 @@ import (
 )
 
 /*
-DeckGET - All logic needed for fetching card metadata
-
-Parameters:
-c (gin.Context) - The request context
-
-Returns:
-Nothing
+Gin handler for GET request to the deck endpoint. This should not be called directly and
+should only be passed to the gin router
 */
 func DeckGET(c *gin.Context) {
 	code := c.Query("deckCode")
@@ -45,13 +40,8 @@ func DeckGET(c *gin.Context) {
 }
 
 /*
-DeckPOST - All logic needed for creating new card metadata
-
-Parameters:
-c (gin.Context) - The request context
-
-Returns:
-Nothing
+Gin handler for POST request to the deck endpoint. This should not be called directly and
+should only be passed to the gin router
 */
 func DeckPOST(c *gin.Context) {
 	var new deck_model.Deck
@@ -82,13 +72,8 @@ func DeckPOST(c *gin.Context) {
 }
 
 /*
-DeckDELETE - All logic needed for deleting card metadata
-
-Parameters:
-c (gin.Context) - The request context
-
-Returns:
-Nothing
+Gin handler for DELETE request to the deck endpoint. This should not be called directly and
+should only be passed to the gin router
 */
 func DeckDELETE(c *gin.Context) {
 	code := c.Query("deckCode")
@@ -113,13 +98,8 @@ func DeckDELETE(c *gin.Context) {
 }
 
 /*
-DeckContentGET - All logic needed for fetching the contents of a deck
-
-Parameters:
-c (gin.Context) - The request context
-
-Returns:
-Nothing
+Gin handler for GET request to the deck content endpoint. This should not be called directly and
+should only be passed to the gin router
 */
 func DeckContentGET(c *gin.Context) {
 	code := c.Query("deckCode")
@@ -142,13 +122,8 @@ func DeckContentGET(c *gin.Context) {
 }
 
 /*
-DeckContentPOST - All logic needed for updating deck contents
-
-Parameters:
-c (gin.Context) - The request context
-
-Returns:
-Nothing
+Gin handler for POST request to the deck content endpoint. This should not be called directly and
+should only be passed to the gin router
 */
 func DeckContentPOST(c *gin.Context) {
 	code := c.Query("deckCode")
@@ -186,13 +161,8 @@ func DeckContentPOST(c *gin.Context) {
 }
 
 /*
-DeckContentDELETE - All logic needed for removing cards from the deck
-
-Parameters:
-c (gin.Context) - The request context
-
-Returns:
-Nothing
+Gin handler for DELETE request to the deck content endpoint. This should not be called directly and
+should only be passed to the gin router
 */
 func DeckContentDELETE(c *gin.Context) {
 	code := c.Query("deckCode")

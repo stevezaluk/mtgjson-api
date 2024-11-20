@@ -10,13 +10,7 @@ import (
 )
 
 /*
-limitToInt64 - Convert the limit query arg to an Integer
-
-Parameters:
-limit (string) - The limit as a string
-
-Returns:
-ret (int64) - The limit as an integer
+Convert the limit argument from a string to a 64 bit integer
 */
 
 func limitToInt64(limit string) int64 {
@@ -29,13 +23,8 @@ func limitToInt64(limit string) int64 {
 }
 
 /*
-CardGET - All functionality for fetching card metadata
-
-Parameters:
-c (gin.Context) - The request context
-
-Returns:
-Nothing
+Gin handler for GET request to the card endpoint. This should not be called directly and
+should only be passed to the gin router
 */
 func CardGET(c *gin.Context) {
 	cardId := c.Query("cardId")
@@ -63,6 +52,10 @@ func CardGET(c *gin.Context) {
 	c.JSON(http.StatusFound, results)
 }
 
+/*
+Gin handler for POST request to the card endpoint. This should not be called directly and
+should only be passed to the gin router
+*/
 func CardPOST(c *gin.Context) {
 	var new card_model.Card
 
@@ -82,6 +75,11 @@ func CardPOST(c *gin.Context) {
 
 	c.JSON(http.StatusAccepted, gin.H{"message": "New card created successfully", "mtgjsonV4Id": new.Identifiers.MTGJsonV4Id})
 }
+
+/*
+Gin handler for DELETE request to the card endpoint. This should not be called directly and
+should only be passed to the gin router
+*/
 
 func CardDELETE(c *gin.Context) {
 	cardId := c.Query("cardId")
