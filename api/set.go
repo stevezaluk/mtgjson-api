@@ -8,6 +8,10 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+/*
+Gin handler for GET request to the set endpoint. This should not be called directly and
+should only be passed to the gin router
+*/
 func SetGET(c *gin.Context) {
 	setCode := c.Query("setCode")
 	if setCode == "" {
