@@ -11,13 +11,13 @@
 <br />
 <div align="center">
   <a href="https://github.com/stevezaluk/mtgjson-api">
-    <img src="docs/images/logo.png" alt="Logo" width="80" height="80">
+    <img src="docs/images/logo-mtgjson.png" alt="Logo" width="80" height="80">
   </a>
 
-<h3 align="center">project_title</h3>
+<h3 align="center">MTGJSON-API</h3>
 
   <p align="center">
-    project_description
+    A RESTful API for interacting with Magic: The Gathering card data
     <br />
     <a href="https://github.com/stevezaluk/mtgjson-api"><strong>Explore the docs »</strong></a>
     <br />
@@ -182,19 +182,16 @@ Don't forget to give the project a star! Thanks again!
 <!-- LICENSE -->
 ## License
 
-Distributed under The unlicense. See `LICENSE.txt` for more information.
+Distributed under Apache License 2.0. See `LICENSE.txt` for more information.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
-
-
 
 <!-- CONTACT -->
 ## Contact
 
-Your Name - [@twitter_handle](https://x.com/stevezaluk) - arcanegame@protonmail.com
+Steven A. Zaluk - [@steve_zaluk](https://x.com/stevezaluk) - arcanegame@protonmail.com
 
-Project Link: [https://github.com/stevezaluk/mtgjson-api](https://github.com/stevezaluk/mtgjson-api)
-SDK Link: [https://github.com/stevezaluk/mtgjson-sdk](https://github.com/stevezaluk/mtgjson-sdk)
+Project Link: [https://github.com/stevezaluk/mtgjson-api](https://github.com/stevezaluk/mtgjson-api)\n
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
