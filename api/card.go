@@ -32,7 +32,7 @@ func CardGET(c *gin.Context) {
 		limit := limitToInt64(c.DefaultQuery("limit", "100"))
 		results, err := card.IndexCards(limit)
 		if err == errors.ErrNoCards {
-			c.JSON(400, gin.H{"message": err.Error()})
+			c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
 			return
 		}
 
@@ -42,14 +42,14 @@ func CardGET(c *gin.Context) {
 
 	results, err := card.GetCard(cardId)
 	if err == errors.ErrNoCard {
-		c.JSON(404, gin.H{"message": err.Error(), "cardId": cardId})
+		c.JSON(http.StatusNotFound, gin.H{"message": err.Error(), "cardId": cardId})
 		return
 	} else if err == errors.ErrInvalidUUID {
-		c.JSON(400, gin.H{"message": err.Error(), "cardId": cardId})
+		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error(), "cardId": cardId})
 		return
 	}
 
-	c.JSON(http.StatusFound, results)
+	c.JSON(http.StatusOK, results)
 }
 
 /*
@@ -73,7 +73,7 @@ func CardPOST(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusAccepted, gin.H{"message": "New card created successfully", "mtgjsonV4Id": new.Identifiers.MTGJsonV4Id})
+	c.JSON(http.StatusOK, gin.H{"message": "New card created successfully", "mtgjsonV4Id": new.Identifiers.MTGJsonV4Id})
 }
 
 /*
@@ -97,5 +97,5 @@ func CardDELETE(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusAccepted, gin.H{"message": "Card successfully deleted", "mtgjsonV4Id": cardId})
+	c.JSON(http.StatusOK, gin.H{"message": "Card successfully deleted", "mtgjsonV4Id": cardId})
 }

@@ -20,11 +20,11 @@ func DeckGET(c *gin.Context) {
 		limit := limitToInt64(c.DefaultQuery("limit", "100"))
 		results, err := deck.IndexDecks(limit)
 		if err == errors.ErrNoDecks {
-			c.JSON(400, gin.H{"message": err.Error()})
+			c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
 			return
 		}
 
-		c.JSON(http.StatusFound, results)
+		c.JSON(http.StatusOK, results)
 		return
 	}
 
@@ -36,7 +36,7 @@ func DeckGET(c *gin.Context) {
 
 	deck.GetDeckContents(&results)
 
-	c.JSON(http.StatusFound, results)
+	c.JSON(http.StatusOK, results)
 }
 
 /*
@@ -68,7 +68,7 @@ func DeckPOST(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusAccepted, gin.H{"message": "Successfully created new deck", "deckCode": new.Code})
+	c.JSON(http.StatusOK, gin.H{"message": "Successfully created new deck", "deckCode": new.Code})
 }
 
 /*
@@ -94,7 +94,7 @@ func DeckDELETE(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusAccepted, gin.H{"message": "Successfully deleted deck", "deckCode": _deck.Code})
+	c.JSON(http.StatusOK, gin.H{"message": "Successfully deleted deck", "deckCode": _deck.Code})
 }
 
 /*
@@ -118,7 +118,7 @@ func DeckContentGET(c *gin.Context) {
 
 	var resp = gin.H{"mainBoard": _deck.Contents.Mainboard, "sideBoard": _deck.Contents.Sideboard, "commander": _deck.Contents.Commander}
 
-	c.JSON(http.StatusFound, resp)
+	c.JSON(http.StatusOK, resp)
 }
 
 /*
@@ -157,7 +157,7 @@ func DeckContentPOST(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusAccepted, gin.H{"message": "Successfully updated deck", "deckCode": code, "count": updates.Count()})
+	c.JSON(http.StatusOK, gin.H{"message": "Successfully updated deck", "deckCode": code, "count": updates.Count()})
 }
 
 /*
@@ -190,5 +190,5 @@ func DeckContentDELETE(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusAccepted, gin.H{"message": "Successfully removed cards from deck", "deckCode": code, "count": updates.Count()})
+	c.JSON(http.StatusOK, gin.H{"message": "Successfully removed cards from deck", "deckCode": code, "count": updates.Count()})
 }

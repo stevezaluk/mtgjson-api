@@ -18,19 +18,19 @@ func SetGET(c *gin.Context) {
 		limit := limitToInt64(c.DefaultQuery("limit", "100"))
 		results, err := set.IndexSets(limit)
 		if err == errors.ErrNoSet {
-			c.JSON(400, gin.H{"message": err.Error()})
+			c.JSON(http.StatusBadRequest, gin.H{"message": "No sets available to index"})
 			return
 		}
 
-		c.JSON(http.StatusFound, results)
+		c.JSON(http.StatusOK, results)
 		return
 	}
 
 	results, err := set.GetSet(setCode)
 	if err == errors.ErrNoSet {
-		c.JSON(400, gin.H{"message": err.Error(), "setCode": setCode})
+		c.JSON(http.StatusNotFound, gin.H{"message": "Failed to find set under the requested Set Code", "setCode": setCode})
 		return
 	}
 
-	c.JSON(http.StatusFound, results)
+	c.JSON(http.StatusOK, results)
 }
