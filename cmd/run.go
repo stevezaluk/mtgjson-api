@@ -52,6 +52,9 @@ func init() {
 	runCmd.Flags().StringP("log.path", "l", "/var/log/mtgjson-api", "Set the directory that the API should save logs too")
 	viper.BindPFlag("log.path", runCmd.Flags().Lookup("log.path"))
 
+	runCmd.Flags().String("log.filename", "", "The name of the file you want the API to save logs under")
+	viper.BindPFlag("log.filename", runCmd.Flags().Lookup("log.filename"))
+
 	runCmd.Flags().IntP("api.port", "p", 8080, "Set the host port that the API should serve on")
 	viper.BindPFlag("api.port", runCmd.Flags().Lookup("api.port"))
 
