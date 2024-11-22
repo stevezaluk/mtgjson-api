@@ -26,54 +26,54 @@ func limitToInt64(limit string) int64 {
 Gin handler for GET request to the card endpoint. This should not be called directly and
 should only be passed to the gin router
 */
-func CardGET(c *gin.Context) {
-	cardId := c.Query("cardId")
+func CardGET(ctx *gin.Context) {
+	cardId := ctx.Query("cardId")
 	if cardId == "" {
-		limit := limitToInt64(c.DefaultQuery("limit", "100"))
+		limit := limitToInt64(ctx.DefaultQuery("limit", "100"))
 		results, err := card.IndexCards(limit)
 		if err == errors.ErrNoCards {
-			c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
+			ctx.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
 			return
 		}
 
-		c.JSON(http.StatusFound, results)
+		ctx.JSON(http.StatusFound, results)
 		return
 	}
 
 	results, err := card.GetCard(cardId)
 	if err == errors.ErrNoCard {
-		c.JSON(http.StatusNotFound, gin.H{"message": err.Error(), "cardId": cardId})
+		ctx.JSON(http.StatusNotFound, gin.H{"message": err.Error(), "cardId": cardId})
 		return
 	} else if err == errors.ErrInvalidUUID {
-		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error(), "cardId": cardId})
+		ctx.JSON(http.StatusBadRequest, gin.H{"message": err.Error(), "cardId": cardId})
 		return
 	}
 
-	c.JSON(http.StatusOK, results)
+	ctx.JSON(http.StatusOK, results)
 }
 
 /*
 Gin handler for POST request to the card endpoint. This should not be called directly and
 should only be passed to the gin router
 */
-func CardPOST(c *gin.Context) {
+func CardPOST(ctx *gin.Context) {
 	var new card_model.Card
 
-	if c.Bind(&new) != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"message": "Failed to bind response to object. Object structure may be incorrect"})
+	if ctx.Bind(&new) != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"message": "Failed to bind response to object. Object structure may be incorrect"})
 		return
 	}
 
 	err := card.NewCard(new)
 	if err == errors.ErrCardAlreadyExist {
-		c.JSON(http.StatusConflict, gin.H{"message": "Card already exists under this identifier", "mtgjsonV4Id": new.Identifiers.MTGJsonV4Id})
+		ctx.JSON(http.StatusConflict, gin.H{"message": "Card already exists under this identifier", "mtgjsonV4Id": new.Identifiers.MTGJsonV4Id})
 		return
 	} else if err == errors.ErrCardMissingId {
-		c.JSON(http.StatusBadRequest, gin.H{"message": "Card name or mtgjsonV4Id must not be empty when creating a card"})
+		ctx.JSON(http.StatusBadRequest, gin.H{"message": "Card name or mtgjsonV4Id must not be empty when creating a card"})
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"message": "New card created successfully", "mtgjsonV4Id": new.Identifiers.MTGJsonV4Id})
+	ctx.JSON(http.StatusOK, gin.H{"message": "New card created successfully", "mtgjsonV4Id": new.Identifiers.MTGJsonV4Id})
 }
 
 /*
@@ -81,21 +81,21 @@ Gin handler for DELETE request to the card endpoint. This should not be called d
 should only be passed to the gin router
 */
 
-func CardDELETE(c *gin.Context) {
-	cardId := c.Query("cardId")
+func CardDELETE(ctx *gin.Context) {
+	cardId := ctx.Query("cardId")
 	if cardId == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"message": "A cardId (mtgjsonV4Id) is required to delete a card"})
+		ctx.JSON(http.StatusBadRequest, gin.H{"message": "A cardId (mtgjsonV4Id) is required to delete a card"})
 		return
 	}
 
 	err := card.DeleteCard(cardId)
 	if err == errors.ErrNoCard {
-		c.JSON(http.StatusNotFound, gin.H{"message": "Failed to find card with the specified id", "mtgjsonV4Id": cardId})
+		ctx.JSON(http.StatusNotFound, gin.H{"message": "Failed to find card with the specified id", "mtgjsonV4Id": cardId})
 		return
 	} else if err == errors.ErrCardDeleteFailed {
-		c.JSON(http.StatusInternalServerError, gin.H{"message": "Failed to delete card. Internal server issue"})
+		ctx.JSON(http.StatusInternalServerError, gin.H{"message": "Failed to delete card. Internal server issue"})
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"message": "Card successfully deleted", "mtgjsonV4Id": cardId})
+	ctx.JSON(http.StatusOK, gin.H{"message": "Card successfully deleted", "mtgjsonV4Id": cardId})
 }
