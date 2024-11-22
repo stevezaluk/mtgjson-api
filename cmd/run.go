@@ -2,14 +2,14 @@ package cmd
 
 import (
 	"mtgjson/api"
-	"mtgjson/auth"
 
 	"github.com/gin-gonic/gin"
-	sloggin "github.com/samber/slog-gin"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"github.com/stevezaluk/mtgjson-sdk/context"
 )
+
+var contextAPI api.API
 
 var runCmd = &cobra.Command{
 	Use:   "run",
@@ -23,51 +23,21 @@ $ mtgjson run -c /path/to/config/.json
 To start the API using environmental variables
 $ mtgjson run --env`,
 	PreRun: func(cmd *cobra.Command, args []string) {
-		context.InitDatabase()
-
-		debugMode := viper.GetBool("debug")
-		if !debugMode {
+		if !viper.GetBool("debug") {
 			gin.SetMode(gin.ReleaseMode)
 		}
 
-		context.InitAuthAPI()
-		context.InitAuthManagementAPI()
+		contextAPI = api.New()
+
+		contextAPI.AddCardRoutes()
+		contextAPI.AddDeckRoutes()
+		contextAPI.AddUserRoutes()
 	},
 	Run: func(cmd *cobra.Command, args []string) {
-		router := gin.New()
-
-		logger := context.GetLogger()
-
-		router.Use(
-			sloggin.New(logger),
-			gin.Recovery(),
-		)
-
-		router.POST("/api/v1/login", api.LoginPOST)
-		router.POST("/api/v1/register", api.RegisterPOST)
-		router.POST("/api/v1/reset", auth.ValidateToken(), api.ResetPOST)
-
-		router.GET("/api/v1/health", auth.ValidateToken(), auth.ValidateScope("read:health"), api.HealthGET)
-
-		router.GET("/api/v1/user", auth.ValidateToken(), auth.ValidateScope("read:user"), api.UserGET)
-		router.DELETE("/api/v1/user", auth.ValidateToken(), auth.ValidateScope("write:user"), api.UserDELETE)
-
-		router.GET("/api/v1/card", auth.ValidateToken(), auth.ValidateScope("read:card"), api.CardGET)
-		router.POST("/api/v1/card", auth.ValidateToken(), auth.ValidateScope("write:card"), api.CardPOST)
-		router.DELETE("/api/v1/card", auth.ValidateToken(), auth.ValidateScope("write:card"), api.CardDELETE)
-
-		router.GET("/api/v1/deck", auth.ValidateToken(), auth.ValidateScope("read:deck"), api.DeckGET)
-		router.POST("/api/v1/deck", auth.ValidateToken(), auth.ValidateScope("write:deck"), api.DeckPOST)
-		router.DELETE("/api/v1/deck", auth.ValidateToken(), auth.ValidateScope("write:deck"), api.DeckDELETE)
-
-		router.GET("/api/v1/deck/content", auth.ValidateToken(), auth.ValidateScope("read:deck"), api.DeckContentGET)
-		router.POST("/api/v1/deck/content", auth.ValidateToken(), auth.ValidateScope("write:deck"), api.DeckContentPOST)
-		router.DELETE("/api/v1/deck/content", auth.ValidateToken(), auth.ValidateScope("write:deck"), api.DeckContentDELETE)
-
-		router.Run()
+		contextAPI.Start(viper.GetInt("api.port"))
 	},
 	PostRun: func(cmd *cobra.Command, args []string) {
-		context.DestroyDatabase()
+		contextAPI.Stop()
 	},
 }
 
@@ -75,13 +45,15 @@ func init() {
 	rootCmd.AddCommand(runCmd)
 
 	context.InitConfig(cfgFile)
-	context.InitLog()
 
 	runCmd.Flags().BoolP("debug", "d", false, "Enable Gin debug mode. Release mode is set by default")
 	viper.BindPFlag("debug", runCmd.Flags().Lookup("debug"))
 
 	runCmd.Flags().StringP("log.path", "l", "/var/log/mtgjson-api", "Set the directory that the API should save logs too")
 	viper.BindPFlag("log.path", runCmd.Flags().Lookup("log.path"))
+
+	runCmd.Flags().String("log.filename", "", "The name of the file you want the API to save logs under")
+	viper.BindPFlag("log.filename", runCmd.Flags().Lookup("log.filename"))
 
 	runCmd.Flags().IntP("api.port", "p", 8080, "Set the host port that the API should serve on")
 	viper.BindPFlag("api.port", runCmd.Flags().Lookup("api.port"))

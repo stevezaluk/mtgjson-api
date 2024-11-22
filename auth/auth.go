@@ -68,7 +68,7 @@ func ValidateToken() gin.HandlerFunc {
 
 		authHeader := ctx.GetHeader("Authorization")
 		if authHeader == "" {
-			ctx.JSON(http.StatusUnauthorized, gin.H{"msg": "Authorization header is missing from request"}) // format this better
+			ctx.JSON(http.StatusUnauthorized, gin.H{"message": "Authorization header is missing from request"}) // format this better
 			ctx.Abort()
 			return
 		}
@@ -77,7 +77,7 @@ func ValidateToken() gin.HandlerFunc {
 
 		validator, err := GetValidator()
 		if err != nil {
-			ctx.JSON(http.StatusInternalServerError, gin.H{"msg": "Failed to start token validator"}) // format this better
+			ctx.JSON(http.StatusInternalServerError, gin.H{"message": "Failed to start token validator"}) // format this better
 			ctx.Abort()
 			return
 		}
@@ -88,7 +88,7 @@ func ValidateToken() gin.HandlerFunc {
 		)
 
 		if token == nil || err != nil {
-			ctx.JSON(http.StatusUnauthorized, gin.H{"msg": "Token is not valid", "err": err.Error()})
+			ctx.JSON(http.StatusUnauthorized, gin.H{"message": "Token is not valid", "err": err.Error()})
 			ctx.Abort()
 			return
 		}

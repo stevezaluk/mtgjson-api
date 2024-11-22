@@ -136,6 +136,30 @@ To properly configure authentication with Auth0, a few things need to be complet
 4. Click Machine to Machine Applications and ensure that it says "Authorized"
 5. Click Save Settings.
 
+#### Permissions (Scope Setup)
+
+A specific set of scopes must be defined for the API you have created for the scope validation to function properly. Below is a list of scoped permissions that must be created:
+
+* Read set permissions ```read:set``` - Provides permissions for indexing all sets and reading metadata from individual ones
+* Write set permissions ```write:set``` - Provides permissions for creating, modifying, and deleting sets
+* Read card permissions ```read:card``` - Provides permissions for indexing all cards and reading metadata from individual cards
+* Write card permissions ```write:card``` - Provides permissions for creating, modifying, and deleting cards
+* Read deck permissions ```read:deck``` - Provides permissions for indexing all decks and reading metadata from individual ones
+* Write deck permissions ```write:deck``` - Provides permissions for creating, modifying, and deleting decks
+* Read user permissions ```read:user``` - Provides permissions for indexing all users and reading metadata from individual ones
+* Write user permissions ```write:user``` - Provides permissions for creating new users and modifying existing ones
+* Read health permissions ```read:health``` - Provides permissions for fetching the health status of the API
+* Read metric permissions ```read:metrics``` - Provides permissions for fetching prometheus metrics from the API
+
+To add these permissions to the Auth0 API, follow the steps below:
+
+1. Click Applications and then API's on the left sidebar
+2. Click the API you created in the previous steps
+3. Click "Permissions"
+4. In the "Permission" box, define the permission as listed below and attach a description for it
+5. Click the "Add" button on the right of the "Description" box
+6. Repeat steps 4-5 for the rest of the permissions
+
 #### Final Steps
 
 After the above steps have been completed, make note of your Client ID, Client Secret, Domain, and Audience (API Identifier) and ensure that you add them to your configuration file or pass them through CLI Flags
