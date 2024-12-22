@@ -1,6 +1,7 @@
 package api
 
 import (
+	"errors"
 	deckModel "github.com/stevezaluk/mtgjson-models/deck"
 	sdkErrors "github.com/stevezaluk/mtgjson-models/errors"
 	"github.com/stevezaluk/mtgjson-sdk/card"
@@ -19,7 +20,7 @@ func DeckGET(ctx *gin.Context) {
 	if code == "" {
 		limit := limitToInt64(ctx.DefaultQuery("limit", "100"))
 		results, err := deck.IndexDecks(limit)
-		if err == sdkErrors.ErrNoDecks {
+		if errors.Is(err, sdkErrors.ErrNoDecks) {
 			ctx.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
 			return
 		}
@@ -29,7 +30,7 @@ func DeckGET(ctx *gin.Context) {
 	}
 
 	results, err := deck.GetDeck(code)
-	if err == sdkErrors.ErrNoDeck {
+	if errors.Is(err, sdkErrors.ErrNoDeck) {
 		ctx.JSON(http.StatusNotFound, gin.H{"message": err.Error()})
 		return
 	}
@@ -63,7 +64,7 @@ func DeckPOST(ctx *gin.Context) {
 	}
 
 	var err = deck.NewDeck(new)
-	if err == sdkErrors.ErrDeckAlreadyExists {
+	if errors.Is(err, sdkErrors.ErrDeckAlreadyExists) {
 		ctx.JSON(http.StatusConflict, gin.H{"message": "Deck already exists under this deck code", "deckCode": new.Code})
 		return
 	}
@@ -83,13 +84,13 @@ func DeckDELETE(ctx *gin.Context) {
 	}
 
 	_deck, err := deck.GetDeck(code)
-	if err == sdkErrors.ErrNoDeck {
+	if errors.Is(err, sdkErrors.ErrNoDeck) {
 		ctx.JSON(http.StatusNotFound, gin.H{"message": err.Error()})
 		return
 	}
 
 	result := deck.DeleteDeck(_deck.Code)
-	if result == sdkErrors.ErrDeckDeleteFailed {
+	if errors.Is(result, sdkErrors.ErrDeckDeleteFailed) {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
 		return
 	}
@@ -109,7 +110,7 @@ func DeckContentGET(ctx *gin.Context) {
 	}
 
 	_deck, err := deck.GetDeck(code)
-	if err == sdkErrors.ErrNoDeck {
+	if errors.Is(err, sdkErrors.ErrNoDeck) {
 		ctx.JSON(http.StatusNotFound, gin.H{"message": err.Error()})
 		return
 	}
@@ -133,7 +134,7 @@ func DeckContentPOST(ctx *gin.Context) {
 	}
 
 	_deck, err := deck.GetDeck(code)
-	if err == sdkErrors.ErrNoDeck {
+	if errors.Is(err, sdkErrors.ErrNoDeck) {
 		ctx.JSON(http.StatusNotFound, gin.H{"message": err.Error()})
 		return
 	}
@@ -152,7 +153,7 @@ func DeckContentPOST(ctx *gin.Context) {
 	_deck.AddCards(updates.Commander, deck_model.COMMANDER)
 
 	err = deck.ReplaceDeck(_deck)
-	if err == sdkErrors.ErrDeckUpdateFailed {
+	if errors.Is(err, sdkErrors.ErrDeckUpdateFailed) {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
 		return
 	}
@@ -172,7 +173,7 @@ func DeckContentDELETE(ctx *gin.Context) {
 	}
 
 	_deck, err := deck.GetDeck(code)
-	if err == sdkErrors.ErrNoDeck {
+	if errors.Is(err, sdkErrors.ErrNoDeck) {
 		ctx.JSON(http.StatusNotFound, gin.H{"message": err.Error()})
 		return
 	}
@@ -185,7 +186,7 @@ func DeckContentDELETE(ctx *gin.Context) {
 	_deck.DeleteCards(updates.Commander, deck_model.COMMANDER)
 
 	err = deck.ReplaceDeck(_deck)
-	if err == sdkErrors.ErrDeckUpdateFailed {
+	if errors.Is(err, sdkErrors.ErrDeckUpdateFailed) {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
 		return
 	}
