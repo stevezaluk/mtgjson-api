@@ -10,9 +10,8 @@ import (
 )
 
 /*
-Convert the limit argument from a string to a 64 bit integer
+limitToInt64 Convert the limit argument from a string to a 64 bit integer
 */
-
 func limitToInt64(limit string) int64 {
 	ret, err := strconv.ParseInt(limit, 10, 64)
 	if err != nil {
@@ -23,7 +22,7 @@ func limitToInt64(limit string) int64 {
 }
 
 /*
-Gin handler for GET request to the card endpoint. This should not be called directly and
+CardGET Gin handler for GET request to the card endpoint. This should not be called directly and
 should only be passed to the gin router
 */
 func CardGET(ctx *gin.Context) {
@@ -53,7 +52,7 @@ func CardGET(ctx *gin.Context) {
 }
 
 /*
-Gin handler for POST request to the card endpoint. This should not be called directly and
+CardPOST Gin handler for POST request to the card endpoint. This should not be called directly and
 should only be passed to the gin router
 */
 func CardPOST(ctx *gin.Context) {
@@ -77,7 +76,7 @@ func CardPOST(ctx *gin.Context) {
 }
 
 /*
-Gin handler for DELETE request to the card endpoint. This should not be called directly and
+CardDELETE Gin handler for DELETE request to the card endpoint. This should not be called directly and
 should only be passed to the gin router
 */
 
