@@ -4,7 +4,7 @@ import (
 	"github.com/gin-gonic/gin"
 	cardModel "github.com/stevezaluk/mtgjson-models/card"
 	"github.com/stevezaluk/mtgjson-models/errors"
-	card "github.com/stevezaluk/mtgjson-sdk/card"
+	"github.com/stevezaluk/mtgjson-sdk/card"
 	"net/http"
 	"strconv"
 )
