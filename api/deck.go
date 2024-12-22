@@ -11,7 +11,7 @@ import (
 )
 
 /*
-Gin handler for GET request to the deck endpoint. This should not be called directly and
+DeckGET Gin handler for GET request to the deck endpoint. This should not be called directly and
 should only be passed to the gin router
 */
 func DeckGET(ctx *gin.Context) {
@@ -40,7 +40,7 @@ func DeckGET(ctx *gin.Context) {
 }
 
 /*
-Gin handler for POST request to the deck endpoint. This should not be called directly and
+DeckPOST Gin handler for POST request to the deck endpoint. This should not be called directly and
 should only be passed to the gin router
 */
 func DeckPOST(ctx *gin.Context) {
@@ -72,7 +72,7 @@ func DeckPOST(ctx *gin.Context) {
 }
 
 /*
-Gin handler for DELETE request to the deck endpoint. This should not be called directly and
+DeckDELETE Gin handler for DELETE request to the deck endpoint. This should not be called directly and
 should only be passed to the gin router
 */
 func DeckDELETE(ctx *gin.Context) {
@@ -98,7 +98,7 @@ func DeckDELETE(ctx *gin.Context) {
 }
 
 /*
-Gin handler for GET request to the deck content endpoint. This should not be called directly and
+DeckContentGET Gin handler for GET request to the deck content endpoint. This should not be called directly and
 should only be passed to the gin router
 */
 func DeckContentGET(ctx *gin.Context) {
@@ -122,7 +122,7 @@ func DeckContentGET(ctx *gin.Context) {
 }
 
 /*
-Gin handler for POST request to the deck content endpoint. This should not be called directly and
+DeckContentPOST Gin handler for POST request to the deck content endpoint. This should not be called directly and
 should only be passed to the gin router
 */
 func DeckContentPOST(ctx *gin.Context) {
@@ -161,7 +161,7 @@ func DeckContentPOST(ctx *gin.Context) {
 }
 
 /*
-Gin handler for DELETE request to the deck content endpoint. This should not be called directly and
+DeckContentDELETE Gin handler for DELETE request to the deck content endpoint. This should not be called directly and
 should only be passed to the gin router
 */
 func DeckContentDELETE(ctx *gin.Context) {
