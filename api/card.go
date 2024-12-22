@@ -1,6 +1,7 @@
 package api
 
 import (
+	"errors"
 	"github.com/gin-gonic/gin"
 	cardModel "github.com/stevezaluk/mtgjson-models/card"
 	sdkErrors "github.com/stevezaluk/mtgjson-models/errors"
@@ -30,7 +31,7 @@ func CardGET(ctx *gin.Context) {
 	if cardId == "" {
 		limit := limitToInt64(ctx.DefaultQuery("limit", "100"))
 		results, err := card.IndexCards(limit)
-		if err == sdkErrors.ErrNoCards {
+		if errors.Is(err, sdkErrors.ErrNoCards) {
 			ctx.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
 			return
 		}
@@ -40,10 +41,10 @@ func CardGET(ctx *gin.Context) {
 	}
 
 	results, err := card.GetCard(cardId)
-	if err == sdkErrors.ErrNoCard {
+	if errors.Is(err, sdkErrors.ErrNoCard) {
 		ctx.JSON(http.StatusNotFound, gin.H{"message": err.Error(), "cardId": cardId})
 		return
-	} else if err == sdkErrors.ErrInvalidUUID {
+	} else if errors.Is(err, sdkErrors.ErrInvalidUUID) {
 		ctx.JSON(http.StatusBadRequest, gin.H{"message": err.Error(), "cardId": cardId})
 		return
 	}
@@ -64,10 +65,10 @@ func CardPOST(ctx *gin.Context) {
 	}
 
 	err := card.NewCard(new)
-	if err == sdkErrors.ErrCardAlreadyExist {
+	if errors.Is(err, sdkErrors.ErrCardAlreadyExist) {
 		ctx.JSON(http.StatusConflict, gin.H{"message": "Card already exists under this identifier", "mtgjsonV4Id": new.Identifiers.MtgjsonV4Id})
 		return
-	} else if err == sdkErrors.ErrCardMissingId {
+	} else if errors.Is(err, sdkErrors.ErrCardMissingId) {
 		ctx.JSON(http.StatusBadRequest, gin.H{"message": "Card name or mtgjsonV4Id must not be empty when creating a card"})
 		return
 	}
@@ -88,10 +89,10 @@ func CardDELETE(ctx *gin.Context) {
 	}
 
 	err := card.DeleteCard(cardId)
-	if err == sdkErrors.ErrNoCard {
+	if errors.Is(err, sdkErrors.ErrNoCard) {
 		ctx.JSON(http.StatusNotFound, gin.H{"message": "Failed to find card with the specified id", "mtgjsonV4Id": cardId})
 		return
-	} else if err == sdkErrors.ErrCardDeleteFailed {
+	} else if errors.Is(err, sdkErrors.ErrCardDeleteFailed) {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"message": "Failed to delete card. Internal server issue"})
 		return
 	}
