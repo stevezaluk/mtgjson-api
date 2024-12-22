@@ -1,7 +1,7 @@
 package api
 
 import (
-	deck_model "github.com/stevezaluk/mtgjson-models/deck"
+	deckModel "github.com/stevezaluk/mtgjson-models/deck"
 	"github.com/stevezaluk/mtgjson-models/errors"
 	"github.com/stevezaluk/mtgjson-sdk/card"
 	"github.com/stevezaluk/mtgjson-sdk/deck"
@@ -44,7 +44,7 @@ Gin handler for POST request to the deck endpoint. This should not be called dir
 should only be passed to the gin router
 */
 func DeckPOST(ctx *gin.Context) {
-	var new deck_model.Deck
+	var new deckModel.Deck
 
 	if ctx.Bind(&new) != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"message": "Failed to bind response to object. Object structure may be incorrect"})
@@ -138,7 +138,7 @@ func DeckContentPOST(ctx *gin.Context) {
 		return
 	}
 
-	var updates deck_model.DeckUpdate
+	var updates deckModel.DeckUpdate
 	ctx.BindJSON(&updates)
 
 	valid, invalidCards, noExistCards := card.ValidateCards(updates.AllCards())
@@ -177,7 +177,7 @@ func DeckContentDELETE(ctx *gin.Context) {
 		return
 	}
 
-	var updates deck_model.DeckUpdate
+	var updates deckModel.DeckUpdate
 	ctx.BindJSON(&updates)
 
 	_deck.DeleteCards(updates.MainBoard, deck_model.MAINBOARD)
