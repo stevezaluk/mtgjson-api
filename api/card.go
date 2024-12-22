@@ -2,7 +2,7 @@ package api
 
 import (
 	"github.com/gin-gonic/gin"
-	card_model "github.com/stevezaluk/mtgjson-models/card"
+	cardModel "github.com/stevezaluk/mtgjson-models/card"
 	"github.com/stevezaluk/mtgjson-models/errors"
 	card "github.com/stevezaluk/mtgjson-sdk/card"
 	"net/http"
@@ -57,23 +57,23 @@ Gin handler for POST request to the card endpoint. This should not be called dir
 should only be passed to the gin router
 */
 func CardPOST(ctx *gin.Context) {
-	var new card_model.Card
+	var new *cardModel.CardSet
 
-	if ctx.Bind(&new) != nil {
+	if ctx.Bind(new) != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"message": "Failed to bind response to object. Object structure may be incorrect"})
 		return
 	}
 
 	err := card.NewCard(new)
 	if err == errors.ErrCardAlreadyExist {
-		ctx.JSON(http.StatusConflict, gin.H{"message": "Card already exists under this identifier", "mtgjsonV4Id": new.Identifiers.MTGJsonV4Id})
+		ctx.JSON(http.StatusConflict, gin.H{"message": "Card already exists under this identifier", "mtgjsonV4Id": new.Identifiers.MtgjsonV4Id})
 		return
 	} else if err == errors.ErrCardMissingId {
 		ctx.JSON(http.StatusBadRequest, gin.H{"message": "Card name or mtgjsonV4Id must not be empty when creating a card"})
 		return
 	}
 
-	ctx.JSON(http.StatusOK, gin.H{"message": "New card created successfully", "mtgjsonV4Id": new.Identifiers.MTGJsonV4Id})
+	ctx.JSON(http.StatusOK, gin.H{"message": "New card created successfully", "mtgjsonV4Id": new.Identifiers.MtgjsonV4Id})
 }
 
 /*
