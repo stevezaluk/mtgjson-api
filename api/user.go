@@ -1,15 +1,16 @@
 package api
 
 import (
+	"errors"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/stevezaluk/mtgjson-models/errors"
+	sdkErrors "github.com/stevezaluk/mtgjson-models/errors"
 	"github.com/stevezaluk/mtgjson-sdk/user"
 )
 
 /*
-Gin handler for GET request to the user endpoint. This should not be called directly and
+UserGET Gin handler for GET request to the user endpoint. This should not be called directly and
 should only be passed to the gin router
 */
 func UserGET(ctx *gin.Context) {
@@ -28,10 +29,10 @@ func UserGET(ctx *gin.Context) {
 	}
 
 	result, err := user.GetUser(email)
-	if err == errors.ErrNoUser {
+	if errors.Is(err, sdkErrors.ErrNoUser) {
 		ctx.JSON(http.StatusNotFound, gin.H{"message": "Failed to find user with the specified email address"})
 		return
-	} else if err == errors.ErrInvalidEmail {
+	} else if errors.Is(err, sdkErrors.ErrInvalidEmail) {
 		ctx.JSON(http.StatusBadRequest, gin.H{"message": "Invalid email address used in query"})
 		return
 	}
@@ -40,7 +41,7 @@ func UserGET(ctx *gin.Context) {
 }
 
 /*
-Gin handler for DELETE request to the user endpoint. This should not be called directly and
+UserDELETE Gin handler for DELETE request to the user endpoint. This should not be called directly and
 should only be passed to the gin router
 */
 func UserDELETE(ctx *gin.Context) {
@@ -52,13 +53,13 @@ func UserDELETE(ctx *gin.Context) {
 	}
 
 	err := user.DeactivateUser(email)
-	if err == errors.ErrNoUser {
+	if errors.Is(err, sdkErrors.ErrNoUser) {
 		ctx.JSON(http.StatusNotFound, gin.H{"message": "Failed to find user with the specified email address"})
 		return
-	} else if err == errors.ErrInvalidEmail {
+	} else if errors.Is(err, sdkErrors.ErrInvalidEmail) {
 		ctx.JSON(http.StatusBadRequest, gin.H{"message": "Invalid email address used in query"})
 		return
-	} else if err == errors.ErrUserDeleteFailed {
+	} else if errors.Is(err, sdkErrors.ErrUserDeleteFailed) {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"message": "Failed to delete user from MongoDB. User account may still be active"})
 		return
 	} else if err != nil {

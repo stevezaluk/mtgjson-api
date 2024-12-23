@@ -1,7 +1,8 @@
 package api
 
 import (
-	"github.com/stevezaluk/mtgjson-models/errors"
+	"errors"
+	sdkErrors "github.com/stevezaluk/mtgjson-models/errors"
 	"github.com/stevezaluk/mtgjson-sdk/set"
 	"net/http"
 
@@ -9,7 +10,7 @@ import (
 )
 
 /*
-Gin handler for GET request to the set endpoint. This should not be called directly and
+SetGET Gin handler for GET request to the set endpoint. This should not be called directly and
 should only be passed to the gin router
 */
 func SetGET(ctx *gin.Context) {
@@ -17,7 +18,7 @@ func SetGET(ctx *gin.Context) {
 	if setCode == "" {
 		limit := limitToInt64(ctx.DefaultQuery("limit", "100"))
 		results, err := set.IndexSets(limit)
-		if err == errors.ErrNoSet {
+		if errors.Is(err, sdkErrors.ErrNoSet) {
 			ctx.JSON(http.StatusBadRequest, gin.H{"message": "No sets available to index"})
 			return
 		}
@@ -27,7 +28,7 @@ func SetGET(ctx *gin.Context) {
 	}
 
 	results, err := set.GetSet(setCode)
-	if err == errors.ErrNoSet {
+	if errors.Is(err, sdkErrors.ErrNoSet) {
 		ctx.JSON(http.StatusNotFound, gin.H{"message": "Failed to find set under the requested Set Code", "setCode": setCode})
 		return
 	}

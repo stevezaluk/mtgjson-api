@@ -1,18 +1,18 @@
 package api
 
 import (
+	"errors"
 	"github.com/gin-gonic/gin"
-	card_model "github.com/stevezaluk/mtgjson-models/card"
-	"github.com/stevezaluk/mtgjson-models/errors"
-	card "github.com/stevezaluk/mtgjson-sdk/card"
+	cardModel "github.com/stevezaluk/mtgjson-models/card"
+	sdkErrors "github.com/stevezaluk/mtgjson-models/errors"
+	"github.com/stevezaluk/mtgjson-sdk/card"
 	"net/http"
 	"strconv"
 )
 
 /*
-Convert the limit argument from a string to a 64 bit integer
+limitToInt64 Convert the limit argument from a string to a 64 bit integer
 */
-
 func limitToInt64(limit string) int64 {
 	ret, err := strconv.ParseInt(limit, 10, 64)
 	if err != nil {
@@ -23,7 +23,7 @@ func limitToInt64(limit string) int64 {
 }
 
 /*
-Gin handler for GET request to the card endpoint. This should not be called directly and
+CardGET Gin handler for GET request to the card endpoint. This should not be called directly and
 should only be passed to the gin router
 */
 func CardGET(ctx *gin.Context) {
@@ -31,7 +31,7 @@ func CardGET(ctx *gin.Context) {
 	if cardId == "" {
 		limit := limitToInt64(ctx.DefaultQuery("limit", "100"))
 		results, err := card.IndexCards(limit)
-		if err == errors.ErrNoCards {
+		if errors.Is(err, sdkErrors.ErrNoCards) {
 			ctx.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
 			return
 		}
@@ -41,10 +41,10 @@ func CardGET(ctx *gin.Context) {
 	}
 
 	results, err := card.GetCard(cardId)
-	if err == errors.ErrNoCard {
+	if errors.Is(err, sdkErrors.ErrNoCard) {
 		ctx.JSON(http.StatusNotFound, gin.H{"message": err.Error(), "cardId": cardId})
 		return
-	} else if err == errors.ErrInvalidUUID {
+	} else if errors.Is(err, sdkErrors.ErrInvalidUUID) {
 		ctx.JSON(http.StatusBadRequest, gin.H{"message": err.Error(), "cardId": cardId})
 		return
 	}
@@ -53,31 +53,31 @@ func CardGET(ctx *gin.Context) {
 }
 
 /*
-Gin handler for POST request to the card endpoint. This should not be called directly and
+CardPOST Gin handler for POST request to the card endpoint. This should not be called directly and
 should only be passed to the gin router
 */
 func CardPOST(ctx *gin.Context) {
-	var new card_model.Card
+	var new *cardModel.CardSet
 
-	if ctx.Bind(&new) != nil {
+	if ctx.Bind(new) != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"message": "Failed to bind response to object. Object structure may be incorrect"})
 		return
 	}
 
 	err := card.NewCard(new)
-	if err == errors.ErrCardAlreadyExist {
-		ctx.JSON(http.StatusConflict, gin.H{"message": "Card already exists under this identifier", "mtgjsonV4Id": new.Identifiers.MTGJsonV4Id})
+	if errors.Is(err, sdkErrors.ErrCardAlreadyExist) {
+		ctx.JSON(http.StatusConflict, gin.H{"message": "Card already exists under this identifier", "mtgjsonV4Id": new.Identifiers.MtgjsonV4Id})
 		return
-	} else if err == errors.ErrCardMissingId {
+	} else if errors.Is(err, sdkErrors.ErrCardMissingId) {
 		ctx.JSON(http.StatusBadRequest, gin.H{"message": "Card name or mtgjsonV4Id must not be empty when creating a card"})
 		return
 	}
 
-	ctx.JSON(http.StatusOK, gin.H{"message": "New card created successfully", "mtgjsonV4Id": new.Identifiers.MTGJsonV4Id})
+	ctx.JSON(http.StatusOK, gin.H{"message": "New card created successfully", "mtgjsonV4Id": new.Identifiers.MtgjsonV4Id})
 }
 
 /*
-Gin handler for DELETE request to the card endpoint. This should not be called directly and
+CardDELETE Gin handler for DELETE request to the card endpoint. This should not be called directly and
 should only be passed to the gin router
 */
 
@@ -89,10 +89,10 @@ func CardDELETE(ctx *gin.Context) {
 	}
 
 	err := card.DeleteCard(cardId)
-	if err == errors.ErrNoCard {
+	if errors.Is(err, sdkErrors.ErrNoCard) {
 		ctx.JSON(http.StatusNotFound, gin.H{"message": "Failed to find card with the specified id", "mtgjsonV4Id": cardId})
 		return
-	} else if err == errors.ErrCardDeleteFailed {
+	} else if errors.Is(err, sdkErrors.ErrCardDeleteFailed) {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"message": "Failed to delete card. Internal server issue"})
 		return
 	}

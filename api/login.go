@@ -1,15 +1,16 @@
 package api
 
 import (
+	"errors"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/stevezaluk/mtgjson-models/errors"
+	sdkErrors "github.com/stevezaluk/mtgjson-models/errors"
 	"github.com/stevezaluk/mtgjson-sdk/user"
 )
 
 /*
-Gin handler for POST request to the login endpoint. This should not be called directly and
+LoginPOST Gin handler for POST request to the login endpoint. This should not be called directly and
 should only be passed to the gin router
 */
 func LoginPOST(ctx *gin.Context) {
@@ -31,7 +32,7 @@ func LoginPOST(ctx *gin.Context) {
 	}
 
 	_, err := user.GetUser(request.Email)
-	if err == errors.ErrNoUser {
+	if errors.Is(err, sdkErrors.ErrNoUser) {
 		ctx.JSON(http.StatusNotFound, gin.H{"message": "Failed to find the user account with the requested email address"})
 		return
 	}
