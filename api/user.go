@@ -9,7 +9,7 @@ import (
 )
 
 /*
-Gin handler for GET request to the user endpoint. This should not be called directly and
+UserGET Gin handler for GET request to the user endpoint. This should not be called directly and
 should only be passed to the gin router
 */
 func UserGET(ctx *gin.Context) {
@@ -40,7 +40,7 @@ func UserGET(ctx *gin.Context) {
 }
 
 /*
-Gin handler for DELETE request to the user endpoint. This should not be called directly and
+UserDELETE Gin handler for DELETE request to the user endpoint. This should not be called directly and
 should only be passed to the gin router
 */
 func UserDELETE(ctx *gin.Context) {
