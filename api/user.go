@@ -4,7 +4,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/stevezaluk/mtgjson-models/errors"
+	sdkErrors "github.com/stevezaluk/mtgjson-models/errors"
 	"github.com/stevezaluk/mtgjson-sdk/user"
 )
 
@@ -28,10 +28,10 @@ func UserGET(ctx *gin.Context) {
 	}
 
 	result, err := user.GetUser(email)
-	if err == errors.ErrNoUser {
+	if err == sdkErrors.ErrNoUser {
 		ctx.JSON(http.StatusNotFound, gin.H{"message": "Failed to find user with the specified email address"})
 		return
-	} else if err == errors.ErrInvalidEmail {
+	} else if err == sdkErrors.ErrInvalidEmail {
 		ctx.JSON(http.StatusBadRequest, gin.H{"message": "Invalid email address used in query"})
 		return
 	}
@@ -52,13 +52,13 @@ func UserDELETE(ctx *gin.Context) {
 	}
 
 	err := user.DeactivateUser(email)
-	if err == errors.ErrNoUser {
+	if err == sdkErrors.ErrNoUser {
 		ctx.JSON(http.StatusNotFound, gin.H{"message": "Failed to find user with the specified email address"})
 		return
-	} else if err == errors.ErrInvalidEmail {
+	} else if err == sdkErrors.ErrInvalidEmail {
 		ctx.JSON(http.StatusBadRequest, gin.H{"message": "Invalid email address used in query"})
 		return
-	} else if err == errors.ErrUserDeleteFailed {
+	} else if err == sdkErrors.ErrUserDeleteFailed {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"message": "Failed to delete user from MongoDB. User account may still be active"})
 		return
 	} else if err != nil {
