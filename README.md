@@ -104,6 +104,7 @@ If you wish to enable authentication within the API the following values must al
 * Auth0 Audience (string) ```auth0.audience``` - The identifier (audience) of your API
 * Auth0 Client ID (string) ```auth0.client_id``` - The Client ID for your Auth0 Application
 * Auth0 Client Secret (string) ```auth0.client_secret``` - The Client secret for your Auth0 application
+* Auth0 Scope (string) ```auth0.scope``` - The scopes the API should recognize (seperated by spaces)
 
 Additionally, if you decide to run the API without authentication, you can bypass with the following values. These can also be defined as flags which can be useful for testing the API:
 
