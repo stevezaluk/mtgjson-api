@@ -1,15 +1,16 @@
 package api
 
 import (
+	"errors"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/stevezaluk/mtgjson-models/errors"
+	sdkErrors "github.com/stevezaluk/mtgjson-models/errors"
 	"github.com/stevezaluk/mtgjson-sdk/user"
 )
 
 /*
-Gin handler for POST request to the register endpoint. This should not be called directly and
+RegisterPOST Gin handler for POST request to the register endpoint. This should not be called directly and
 should only be passed to the gin router
 */
 func RegisterPOST(ctx *gin.Context) {
@@ -32,13 +33,13 @@ func RegisterPOST(ctx *gin.Context) {
 	}
 
 	_, err := user.RegisterUser(request.Username, request.Email, request.Password)
-	if err == errors.ErrInvalidPasswordLength {
+	if errors.Is(err, sdkErrors.ErrInvalidPasswordLength) {
 		ctx.JSON(http.StatusBadRequest, gin.H{"message": "User password is not long enough. Password must be at least 12 characters, 1 special character, and 1 number"})
 		return
-	} else if err == errors.ErrInvalidEmail {
+	} else if errors.Is(err, sdkErrors.ErrInvalidEmail) {
 		ctx.JSON(http.StatusBadRequest, gin.H{"message": "User email is not valid or is not an email address"})
 		return
-	} else if err == errors.ErrFailedToRegisterUser {
+	} else if errors.Is(err, sdkErrors.ErrFailedToRegisterUser) {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"message": "Failed to register the user with Auth0"})
 		return
 	}
