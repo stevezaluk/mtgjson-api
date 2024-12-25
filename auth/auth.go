@@ -94,6 +94,7 @@ func ValidateTokenHandler() gin.HandlerFunc {
 		}
 
 		ctx.Set("token", token)
+		ctx.Set("tokenStr", tokenStr)
 	}
 }
 
