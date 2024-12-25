@@ -108,13 +108,25 @@ func ValidateScopeHandler(requiredScope string) gin.HandlerFunc {
 			return
 		}
 
-		token := ctx.Value("token").(*validator.ValidatedClaims)
-
-		claims := token.CustomClaims.(*CustomClaims)
-		if !claims.HasScope(requiredScope) {
+		if !ValidateScope(ctx, requiredScope) {
 			ctx.JSON(http.StatusForbidden, gin.H{"message": "Invalid permissions to access this resource", "missingScope": requiredScope})
 			ctx.Abort()
 			return
 		}
 	}
+}
+
+/*
+ValidateScope Fetch validated claims from the gin context and ensure that
+the user has the desired scope
+*/
+func ValidateScope(ctx *gin.Context, requiredScope string) bool {
+	token := ctx.Value("token").(*validator.ValidatedClaims)
+
+	claims := token.CustomClaims.(*CustomClaims)
+	if !claims.HasScope(requiredScope) {
+		return false
+	}
+
+	return true
 }
