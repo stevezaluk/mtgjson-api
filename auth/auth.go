@@ -55,12 +55,12 @@ func GetValidator() (*validator.Validator, error) {
 }
 
 /*
-ValidateToken Gin handler for validating tokens received from your Auth0 tenant. An Authorization header is
+ValidateTokenHandler Gin handler for validating tokens received from your Auth0 tenant. An Authorization header is
 required to be passed in the request for this to properly function. If the token is valid, then it
 is stored in the gin context under 'token'. If the token is invalid, the request is aborted.
 Additionally, if the 'api.no_auth' flag is set, the validator returns to the next handler without any validation
 */
-func ValidateToken() gin.HandlerFunc {
+func ValidateTokenHandler() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		if viper.GetBool("api.no_auth") { // if no auth is set, return to the next handler
 			return
@@ -98,10 +98,10 @@ func ValidateToken() gin.HandlerFunc {
 }
 
 /*
-ValidateScope Gin handler for validating custom claims returned with the token. This is added as a handler in between the ValidateToken
+ValidateScopeHandler Gin handler for validating custom claims returned with the token. This is added as a handler in between the ValidateToken
 handler and the core logic handler for the defined route.
 */
-func ValidateScope(requiredScope string) gin.HandlerFunc {
+func ValidateScopeHandler(requiredScope string) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		if viper.GetBool("api.no_scope") {
 			return
