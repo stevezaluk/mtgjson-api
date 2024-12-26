@@ -2,6 +2,7 @@ package auth
 
 import (
 	"context"
+	"github.com/stevezaluk/mtgjson-sdk/user"
 	"net/http"
 	"net/url"
 	"strings"
@@ -94,7 +95,15 @@ func ValidateTokenHandler() gin.HandlerFunc {
 		}
 
 		ctx.Set("token", token)
-		ctx.Set("tokenStr", tokenStr)
+
+		userEmail, err := user.GetEmailFromToken(tokenStr)
+		if err != nil {
+			ctx.JSON(http.StatusInternalServerError, gin.H{"message": "Failed to fetch email from access token. This is needed for establishing ownership in created objects", "err": err.Error()})
+			ctx.Abort()
+			return
+		}
+
+		ctx.Set("userEmail", userEmail)
 	}
 }
 
