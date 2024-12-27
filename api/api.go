@@ -65,7 +65,7 @@ func (api API) addManagementRoutes() {
 	api.Router.GET("/api/v1/health", auth.ValidateTokenHandler(), auth.ValidateScopeHandler("read:health"), HealthGET)
 	api.Router.POST("/api/v1/login", LoginPOST)
 	api.Router.POST("/api/v1/register", RegisterPOST)
-	api.Router.POST("/api/v1/reset", auth.ValidateTokenHandler(), ResetPOST)
+	api.Router.GET("/api/v1/reset", auth.ValidateTokenHandler(), auth.ValidateScopeHandler("reset:password"), ResetGET)
 }
 
 /*
