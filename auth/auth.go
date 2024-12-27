@@ -63,10 +63,6 @@ Additionally, if the 'api.no_auth' flag is set, the validator returns to the nex
 */
 func ValidateTokenHandler() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
-		if viper.GetBool("api.no_auth") { // if no auth is set, return to the next handler
-			return
-		}
-
 		authHeader := ctx.GetHeader("Authorization")
 		if authHeader == "" {
 			ctx.JSON(http.StatusUnauthorized, gin.H{"message": "Authorization header is missing from request"}) // format this better
@@ -105,10 +101,6 @@ handler and the core logic handler for the defined route.
 */
 func ValidateScopeHandler(requiredScope string) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
-		if viper.GetBool("api.no_scope") {
-			return
-		}
-
 		if !ValidateScope(ctx, requiredScope) {
 			ctx.JSON(http.StatusForbidden, gin.H{"message": "Invalid permissions to access this resource", "missingScope": requiredScope})
 			ctx.Abort()
