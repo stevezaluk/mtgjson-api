@@ -10,7 +10,7 @@ import (
 )
 
 /*
-Abstraction of a Gin API. This stores the gin router and provides a scalable
+API Abstraction of a Gin API. This stores the gin router and provides a scalable
 way to add additional routes in the future. Call api.New() to create a new instance
 of this object
 */
@@ -19,7 +19,7 @@ type API struct {
 }
 
 /*
-Initializes the database, logger, auth api, and management API and provides them to the gin router as middleware
+Init Initializes the database, logger, auth api, and management API and provides them to the gin router as middleware
 */
 func (api API) Init() {
 	context.InitLog()
@@ -29,7 +29,7 @@ func (api API) Init() {
 }
 
 /*
-Add GET, POST, and DELETE routes to the API for the card namespace
+AddCardRoutes Add GET, POST, and DELETE routes to the API for the card namespace
 */
 func (api API) AddCardRoutes() {
 	api.Router.GET("/api/v1/card", auth.ValidateTokenHandler(), auth.StoreUserEmailHandler(), auth.ValidateScopeHandler("read:card"), CardGET)
@@ -38,7 +38,7 @@ func (api API) AddCardRoutes() {
 }
 
 /*
-Add GET, POST, and DELETE routes to the API for the deck and deck content namespace
+AddDeckRoutes Add GET, POST, and DELETE routes to the API for the deck and deck content namespace
 */
 func (api API) AddDeckRoutes() {
 	api.Router.GET("/api/v1/deck", auth.ValidateTokenHandler(), auth.StoreUserEmailHandler(), auth.ValidateScopeHandler("read:deck"), DeckGET)
@@ -51,7 +51,7 @@ func (api API) AddDeckRoutes() {
 }
 
 /*
-Add GET and DELETE routes to the API for the user namespace
+AddUserRoutes Add GET and DELETE routes to the API for the user namespace
 */
 func (api API) AddUserRoutes() {
 	api.Router.GET("/api/v1/user", auth.ValidateTokenHandler(), auth.StoreUserEmailHandler(), auth.ValidateScopeHandler("read:profile"), UserGET)
@@ -59,7 +59,7 @@ func (api API) AddUserRoutes() {
 }
 
 /*
-Add GET and POST routes to the API for the login, resgister, reset, and health endpoints
+addManagementRoutes Add GET and POST routes to the API for the login, resgister, reset, and health endpoints
 */
 func (api API) addManagementRoutes() {
 	api.Router.GET("/api/v1/health", auth.ValidateTokenHandler(), auth.StoreUserEmailHandler(), auth.ValidateScopeHandler("read:health"), HealthGET)
@@ -77,14 +77,14 @@ func (api API) Start(port int) {
 }
 
 /*
-Destrory and release the database, and log file
+Stop Destrory and release the database, and log file
 */
 func (api API) Stop() {
 	context.DestroyDatabase()
 }
 
 /*
-Creates a new instance of api.API and returns it
+New Creates a new instance of api.API and returns it
 */
 func New() API {
 	var router = gin.New()
