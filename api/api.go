@@ -54,7 +54,7 @@ func (api API) AddDeckRoutes() {
 Add GET and DELETE routes to the API for the user namespace
 */
 func (api API) AddUserRoutes() {
-	api.Router.GET("/api/v1/user", auth.ValidateTokenHandler(), auth.ValidateScopeHandler("read:user"), UserGET)
+	api.Router.GET("/api/v1/user", auth.ValidateTokenHandler(), auth.ValidateScopeHandler("read:profile"), UserGET)
 	api.Router.DELETE("/api/v1/user", auth.ValidateTokenHandler(), auth.ValidateScopeHandler("write:user"), UserDELETE)
 }
 
