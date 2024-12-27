@@ -6,6 +6,7 @@ import (
 	sdkErrors "github.com/stevezaluk/mtgjson-models/errors"
 	"github.com/stevezaluk/mtgjson-sdk/card"
 	"github.com/stevezaluk/mtgjson-sdk/deck"
+	"mtgjson/auth"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -16,10 +17,20 @@ DeckGET Gin handler for GET request to the deck endpoint. This should not be cal
 should only be passed to the gin router
 */
 func DeckGET(ctx *gin.Context) {
+	userEmail := ctx.GetString("userEmail")
+	owner := ctx.DefaultQuery("owner", userEmail)
+
+	if owner != "system" && owner != userEmail { // caller is trying to read another users deck
+		if !auth.ValidateScope(ctx, "read:user-deck") {
+			ctx.JSON(http.StatusForbidden, gin.H{"message": "Invalid permissions to read other users decks", "requiredScope": "read:user-deck"})
+			return
+		}
+	}
+
 	code := ctx.Query("deckCode")
 	if code == "" {
 		limit := limitToInt64(ctx.DefaultQuery("limit", "100"))
-		results, err := deck.IndexDecks(limit)
+		results, err := deck.IndexDecks(limit) // update this function with owner
 		if errors.Is(err, sdkErrors.ErrNoDecks) {
 			ctx.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
 			return
@@ -29,7 +40,7 @@ func DeckGET(ctx *gin.Context) {
 		return
 	}
 
-	results, err := deck.GetDeck(code)
+	results, err := deck.GetDeck(code, owner)
 	if errors.Is(err, sdkErrors.ErrNoDeck) {
 		ctx.JSON(http.StatusNotFound, gin.H{"message": err.Error()})
 		return
@@ -60,6 +71,28 @@ func DeckPOST(ctx *gin.Context) {
 		return
 	}
 
+	if newDeck.MtgjsonApiMeta != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"message": "The mtgjsonApiMeta field must be null. This will be filled out automatically during deck creation"})
+		return
+	}
+
+	userEmail := ctx.GetString("userEmail")
+	owner := ctx.DefaultQuery("owner", userEmail)
+
+	if owner == "system" {
+		if !auth.ValidateScope(ctx, "write:system-deck") {
+			ctx.JSON(http.StatusForbidden, gin.H{"message": "Invalid permissions to modify of system or pre-constructed decks", "requiredScope": "write:system-deck"})
+			return
+		}
+	}
+
+	if owner != userEmail {
+		if !auth.ValidateScope(ctx, "write:user-deck") {
+			ctx.JSON(http.StatusForbidden, gin.H{"message": "Invalid permissions to modify another users deck content", "requiredScope": "write:user-deck"})
+			return
+		}
+	}
+
 	allCards, allCardErr := deck.AllCardIds(newDeck.ContentIds)
 	if allCardErr != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"message": "Error deck is missing the contentIds field"})
@@ -78,7 +111,7 @@ func DeckPOST(ctx *gin.Context) {
 		return
 	}
 
-	var err = deck.NewDeck(newDeck)
+	var err = deck.NewDeck(newDeck, owner)
 	if errors.Is(err, sdkErrors.ErrDeckAlreadyExists) {
 		ctx.JSON(http.StatusConflict, gin.H{"message": "Deck already exists under this deck code", "deckCode": newDeck.Code})
 		return
@@ -98,13 +131,29 @@ func DeckDELETE(ctx *gin.Context) {
 		return
 	}
 
-	_deck, err := deck.GetDeck(code)
+	userEmail := ctx.GetString("userEmail")
+	owner := ctx.DefaultQuery("owner", userEmail)
+	if owner == "system" { // caller is trying to delete a system created (pre-constructed) deck
+		if !auth.ValidateScope(ctx, "write:system-deck") {
+			ctx.JSON(http.StatusForbidden, gin.H{"message": "Invalid permissions to delete pre-constructed decks", "requiredScope": "write:system-deck"})
+			return
+		}
+	}
+
+	if owner != userEmail { // caller is trying to delete a different users deck
+		if !auth.ValidateScope(ctx, "write:user-deck") {
+			ctx.JSON(http.StatusForbidden, gin.H{"message": "Invalid permissions to delete other users decks", "requiredScope": "write:user-deck"})
+			return
+		}
+	}
+
+	_deck, err := deck.GetDeck(code, owner)
 	if errors.Is(err, sdkErrors.ErrNoDeck) {
 		ctx.JSON(http.StatusNotFound, gin.H{"message": err.Error()})
 		return
 	}
 
-	result := deck.DeleteDeck(_deck.Code)
+	result := deck.DeleteDeck(_deck.Code, owner)
 	if errors.Is(result, sdkErrors.ErrDeckDeleteFailed) {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
 		return
@@ -124,7 +173,16 @@ func DeckContentGET(ctx *gin.Context) {
 		return
 	}
 
-	_deck, err := deck.GetDeck(code)
+	userEmail := ctx.GetString("userEmail")
+	owner := ctx.DefaultQuery("owner", userEmail)
+	if owner != "system" && owner != userEmail { // caller is trying to read the contents of another users deck
+		if !auth.ValidateScope(ctx, "read:user-deck") {
+			ctx.JSON(http.StatusForbidden, gin.H{"message": "Invalid permissions to read other users decks", "requiredScope": "read:user-deck"})
+			return
+		}
+	}
+
+	_deck, err := deck.GetDeck(code, owner)
 	if errors.Is(err, sdkErrors.ErrNoDeck) {
 		ctx.JSON(http.StatusNotFound, gin.H{"message": err.Error()})
 		return
@@ -149,7 +207,24 @@ func DeckContentPOST(ctx *gin.Context) {
 		return
 	}
 
-	_deck, err := deck.GetDeck(code)
+	userEmail := ctx.GetString("userEmail")
+	owner := ctx.DefaultQuery("owner", userEmail)
+
+	if owner == "system" {
+		if !auth.ValidateScope(ctx, "write:system-deck") {
+			ctx.JSON(http.StatusForbidden, gin.H{"message": "Invalid permissions to modify content of system or pre-constructed decks", "requiredScope": "write:system-deck"})
+			return
+		}
+	}
+
+	if owner != userEmail {
+		if !auth.ValidateScope(ctx, "write:user-deck") {
+			ctx.JSON(http.StatusForbidden, gin.H{"message": "Invalid permissions to modify another users deck content", "requiredScope": "write:user-deck"})
+			return
+		}
+	}
+
+	_deck, err := deck.GetDeck(code, owner)
 	if errors.Is(err, sdkErrors.ErrNoDeck) {
 		ctx.JSON(http.StatusNotFound, gin.H{"message": err.Error()})
 		return
@@ -202,7 +277,24 @@ func DeckContentDELETE(ctx *gin.Context) {
 		return
 	}
 
-	_deck, err := deck.GetDeck(code)
+	userEmail := ctx.GetString("userEmail")
+	owner := ctx.DefaultQuery("owner", userEmail)
+
+	if owner == "system" {
+		if !auth.ValidateScope(ctx, "write:system-deck") {
+			ctx.JSON(http.StatusForbidden, gin.H{"message": "Invalid permissions to modify content of system or pre-constructed decks", "requiredScope": "write:system-deck"})
+			return
+		}
+	}
+
+	if owner != userEmail {
+		if !auth.ValidateScope(ctx, "write:user-deck") {
+			ctx.JSON(http.StatusForbidden, gin.H{"message": "Invalid permissions to modify another users deck content", "requiredScope": "write:user-deck"})
+			return
+		}
+	}
+
+	_deck, err := deck.GetDeck(code, owner)
 	if errors.Is(err, sdkErrors.ErrNoDeck) {
 		ctx.JSON(http.StatusNotFound, gin.H{"message": err.Error()})
 		return

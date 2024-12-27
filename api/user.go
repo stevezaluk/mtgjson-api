@@ -2,6 +2,7 @@ package api
 
 import (
 	"errors"
+	"mtgjson/auth"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -14,7 +15,15 @@ UserGET Gin handler for GET request to the user endpoint. This should not be cal
 should only be passed to the gin router
 */
 func UserGET(ctx *gin.Context) {
-	email := ctx.Query("email")
+	userEmail := ctx.GetString("userEmail")
+	email := ctx.DefaultQuery("email", userEmail)
+
+	if email != userEmail {
+		if !auth.ValidateScope(ctx, "read:user") {
+			ctx.JSON(http.StatusForbidden, gin.H{"message": "Invalid permissions to read other user's account data", "requiredScope": "read:user"})
+			return
+		}
+	}
 
 	if email == "" {
 		limit := limitToInt64(ctx.DefaultQuery("limit", "100"))
@@ -45,7 +54,15 @@ UserDELETE Gin handler for DELETE request to the user endpoint. This should not 
 should only be passed to the gin router
 */
 func UserDELETE(ctx *gin.Context) {
-	email := ctx.Query("email")
+	userEmail := ctx.GetString("userEmail")
+	email := ctx.DefaultQuery("email", userEmail)
+
+	if email != userEmail {
+		if !auth.ValidateScope(ctx, "write:user") {
+			ctx.JSON(http.StatusForbidden, gin.H{"message": "Invalid permissions to delete other users", "requiredScope": "write:user"})
+			return
+		}
+	}
 
 	if email == "" {
 		ctx.JSON(http.StatusBadRequest, gin.H{"message": "An email address must be used to delete an account"})

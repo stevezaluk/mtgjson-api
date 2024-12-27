@@ -2,6 +2,7 @@ package auth
 
 import (
 	"context"
+	"github.com/stevezaluk/mtgjson-sdk/user"
 	"net/http"
 	"net/url"
 	"strings"
@@ -55,17 +56,13 @@ func GetValidator() (*validator.Validator, error) {
 }
 
 /*
-ValidateToken Gin handler for validating tokens received from your Auth0 tenant. An Authorization header is
+ValidateTokenHandler Gin handler for validating tokens received from your Auth0 tenant. An Authorization header is
 required to be passed in the request for this to properly function. If the token is valid, then it
 is stored in the gin context under 'token'. If the token is invalid, the request is aborted.
 Additionally, if the 'api.no_auth' flag is set, the validator returns to the next handler without any validation
 */
-func ValidateToken() gin.HandlerFunc {
+func ValidateTokenHandler() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
-		if viper.GetBool("api.no_auth") { // if no auth is set, return to the next handler
-			return
-		}
-
 		authHeader := ctx.GetHeader("Authorization")
 		if authHeader == "" {
 			ctx.JSON(http.StatusUnauthorized, gin.H{"message": "Authorization header is missing from request"}) // format this better
@@ -94,26 +91,52 @@ func ValidateToken() gin.HandlerFunc {
 		}
 
 		ctx.Set("token", token)
+		ctx.Set("tokenStr", tokenStr)
 	}
 }
 
 /*
-ValidateScope Gin handler for validating custom claims returned with the token. This is added as a handler in between the ValidateToken
+ValidateScopeHandler Gin handler for validating custom claims returned with the token. This is added as a handler in between the ValidateToken
 handler and the core logic handler for the defined route.
 */
-func ValidateScope(requiredScope string) gin.HandlerFunc {
+func ValidateScopeHandler(requiredScope string) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
-		if viper.GetBool("api.no_scope") {
-			return
-		}
-
-		token := ctx.Value("token").(*validator.ValidatedClaims)
-
-		claims := token.CustomClaims.(*CustomClaims)
-		if !claims.HasScope(requiredScope) {
+		if !ValidateScope(ctx, requiredScope) {
 			ctx.JSON(http.StatusForbidden, gin.H{"message": "Invalid permissions to access this resource", "missingScope": requiredScope})
 			ctx.Abort()
 			return
 		}
 	}
+}
+
+/*
+StoreUserEmailHandler Gin handler for fetching and storing the users email address after there token has been validated. This function
+is crucial in evaluating user ownership over objects
+*/
+func StoreUserEmailHandler() gin.HandlerFunc {
+	return func(ctx *gin.Context) {
+		userEmail, err := user.GetEmailFromToken(ctx.GetString("tokenStr"))
+		if err != nil {
+			ctx.JSON(http.StatusInternalServerError, gin.H{"message": "Failed to fetch email from access token. This is needed for establishing ownership in created objects", "err": err.Error()})
+			ctx.Abort()
+			return
+		}
+
+		ctx.Set("userEmail", userEmail)
+	}
+}
+
+/*
+ValidateScope Fetch validated claims from the gin context and ensure that
+the user has the desired scope
+*/
+func ValidateScope(ctx *gin.Context, requiredScope string) bool {
+	token := ctx.Value("token").(*validator.ValidatedClaims)
+
+	claims := token.CustomClaims.(*CustomClaims)
+	if !claims.HasScope(requiredScope) {
+		return false
+	}
+
+	return true
 }

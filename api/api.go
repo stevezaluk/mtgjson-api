@@ -32,40 +32,40 @@ func (api API) Init() {
 Add GET, POST, and DELETE routes to the API for the card namespace
 */
 func (api API) AddCardRoutes() {
-	api.Router.GET("/api/v1/card", auth.ValidateToken(), auth.ValidateScope("read:card"), CardGET)
-	api.Router.POST("/api/v1/card", auth.ValidateToken(), auth.ValidateScope("write:card"), CardPOST)
-	api.Router.DELETE("/api/v1/card", auth.ValidateToken(), auth.ValidateScope("write:card"), CardDELETE)
+	api.Router.GET("/api/v1/card", auth.ValidateTokenHandler(), auth.StoreUserEmailHandler(), auth.ValidateScopeHandler("read:card"), CardGET)
+	api.Router.POST("/api/v1/card", auth.ValidateTokenHandler(), auth.StoreUserEmailHandler(), auth.ValidateScopeHandler("write:card"), CardPOST)
+	api.Router.DELETE("/api/v1/card", auth.ValidateTokenHandler(), auth.StoreUserEmailHandler(), auth.ValidateScopeHandler("write:card"), CardDELETE)
 }
 
 /*
 Add GET, POST, and DELETE routes to the API for the deck and deck content namespace
 */
 func (api API) AddDeckRoutes() {
-	api.Router.GET("/api/v1/deck", auth.ValidateToken(), auth.ValidateScope("read:deck"), DeckGET)
-	api.Router.POST("/api/v1/deck", auth.ValidateToken(), auth.ValidateScope("write:deck"), DeckPOST)
-	api.Router.DELETE("/api/v1/deck", auth.ValidateToken(), auth.ValidateScope("write:deck"), DeckDELETE)
+	api.Router.GET("/api/v1/deck", auth.ValidateTokenHandler(), auth.StoreUserEmailHandler(), auth.ValidateScopeHandler("read:deck"), DeckGET)
+	api.Router.POST("/api/v1/deck", auth.ValidateTokenHandler(), auth.StoreUserEmailHandler(), auth.ValidateScopeHandler("write:deck"), DeckPOST)
+	api.Router.DELETE("/api/v1/deck", auth.ValidateTokenHandler(), auth.StoreUserEmailHandler(), auth.ValidateScopeHandler("write:deck"), DeckDELETE)
 
-	api.Router.GET("/api/v1/deck/content", auth.ValidateToken(), auth.ValidateScope("read:deck"), DeckContentGET)
-	api.Router.POST("/api/v1/deck/content", auth.ValidateToken(), auth.ValidateScope("write:deck"), DeckContentPOST)
-	api.Router.DELETE("/api/v1/deck/content", auth.ValidateToken(), auth.ValidateScope("write:deck"), DeckContentDELETE)
+	api.Router.GET("/api/v1/deck/content", auth.ValidateTokenHandler(), auth.StoreUserEmailHandler(), auth.ValidateScopeHandler("read:deck"), DeckContentGET)
+	api.Router.POST("/api/v1/deck/content", auth.ValidateTokenHandler(), auth.StoreUserEmailHandler(), auth.ValidateScopeHandler("write:deck"), DeckContentPOST)
+	api.Router.DELETE("/api/v1/deck/content", auth.ValidateTokenHandler(), auth.StoreUserEmailHandler(), auth.ValidateScopeHandler("write:deck"), DeckContentDELETE)
 }
 
 /*
 Add GET and DELETE routes to the API for the user namespace
 */
 func (api API) AddUserRoutes() {
-	api.Router.GET("/api/v1/user", auth.ValidateToken(), auth.ValidateScope("read:user"), UserGET)
-	api.Router.DELETE("/api/v1/user", auth.ValidateToken(), auth.ValidateScope("write:user"), UserDELETE)
+	api.Router.GET("/api/v1/user", auth.ValidateTokenHandler(), auth.StoreUserEmailHandler(), auth.ValidateScopeHandler("read:profile"), UserGET)
+	api.Router.DELETE("/api/v1/user", auth.ValidateTokenHandler(), auth.StoreUserEmailHandler(), auth.ValidateScopeHandler("write:user"), UserDELETE)
 }
 
 /*
 Add GET and POST routes to the API for the login, resgister, reset, and health endpoints
 */
 func (api API) addManagementRoutes() {
-	api.Router.GET("/api/v1/health", auth.ValidateToken(), auth.ValidateScope("read:health"), HealthGET)
+	api.Router.GET("/api/v1/health", auth.ValidateTokenHandler(), auth.StoreUserEmailHandler(), auth.ValidateScopeHandler("read:health"), HealthGET)
 	api.Router.POST("/api/v1/login", LoginPOST)
 	api.Router.POST("/api/v1/register", RegisterPOST)
-	api.Router.POST("/api/v1/reset", auth.ValidateToken(), ResetPOST)
+	api.Router.GET("/api/v1/reset", auth.ValidateTokenHandler(), auth.StoreUserEmailHandler(), auth.ValidateScopeHandler("reset:password"), ResetGET)
 }
 
 /*
