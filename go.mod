@@ -8,8 +8,8 @@ require (
 	github.com/samber/slog-gin v1.13.6
 	github.com/spf13/cobra v1.8.1
 	github.com/spf13/viper v1.19.0
-	github.com/stevezaluk/mtgjson-models v1.2.6
-	github.com/stevezaluk/mtgjson-sdk v1.2.6
+	github.com/stevezaluk/mtgjson-models v1.2.9
+	github.com/stevezaluk/mtgjson-sdk v1.2.7
 )
 
 require (
