@@ -1,44 +1,40 @@
 package api
 
 import (
+	"errors"
+	"mtgjson/auth"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/stevezaluk/mtgjson-models/errors"
+	sdkErrors "github.com/stevezaluk/mtgjson-models/errors"
 	"github.com/stevezaluk/mtgjson-sdk/user"
 )
 
 /*
-Gin handler for POST request to the reset endpoint. This should not be called directly and
+ResetGET Gin handler for POST request to the reset endpoint. This should not be called directly and
 should only be passed to the gin router
 */
-func ResetPOST(ctx *gin.Context) {
-	type ResetPasswordRequest struct {
-		Email string `json:"email"`
+func ResetGET(ctx *gin.Context) {
+	userEmail := ctx.GetString("userEmail")
+	email := ctx.DefaultQuery("email", userEmail)
+
+	if email != userEmail {
+		if !auth.ValidateScope(ctx, "write:user") {
+			ctx.JSON(http.StatusForbidden, gin.H{"message": "Invalid permissions to reset other users passwords", "requiredScope": "write:user"})
+			return
+		}
 	}
 
-	var request ResetPasswordRequest
-
-	if ctx.Bind(&request) != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{"message": "Failed to bind response to object. Object structure may be incorrect"})
-		return
-	}
-
-	if request.Email == "" {
-		ctx.JSON(http.StatusBadRequest, gin.H{"message": "Email is blank. All fields must be filled"})
-		return
-	}
-
-	_, err := user.GetUser(request.Email)
-	if err == errors.ErrInvalidEmail {
+	_, err := user.GetUser(email)
+	if errors.Is(err, sdkErrors.ErrInvalidEmail) {
 		ctx.JSON(http.StatusBadRequest, gin.H{"message": "Invalid email address used in query"})
 		return
-	} else if err == errors.ErrNoUser {
+	} else if errors.Is(err, sdkErrors.ErrNoUser) {
 		ctx.JSON(http.StatusNotFound, gin.H{"message": "Failed to find user with the specified email address"})
 		return
 	}
 
-	err = user.ResetUserPassword(request.Email)
+	err = user.ResetUserPassword(email)
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
 		return
