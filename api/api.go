@@ -1,16 +1,16 @@
 package api
 
 import (
-	"mtgjson/auth"
-	"strconv"
-
 	"github.com/gin-gonic/gin"
 	"github.com/samber/slog-gin"
 	"github.com/stevezaluk/mtgjson-sdk/context"
+	"log/slog"
+	"mtgjson/auth"
+	"strconv"
 )
 
 /*
-Abstraction of a Gin API. This stores the gin router and provides a scalable
+API Abstraction of a Gin API. This stores the gin router and provides a scalable
 way to add additional routes in the future. Call api.New() to create a new instance
 of this object
 */
@@ -19,7 +19,7 @@ type API struct {
 }
 
 /*
-Initializes the database, logger, auth api, and management API and provides them to the gin router as middleware
+Init Initializes the database, logger, auth api, and management API and provides them to the gin router as middleware
 */
 func (api API) Init() {
 	context.InitLog()
@@ -29,18 +29,18 @@ func (api API) Init() {
 }
 
 /*
-Add GET, POST, and DELETE routes to the API for the card namespace
+AddCardRoutes Add GET, POST, and DELETE routes to the API for the card namespace
 */
-func (api API) AddCardRoutes() {
+func (api API) addCardRoutes() {
 	api.Router.GET("/api/v1/card", auth.ValidateTokenHandler(), auth.StoreUserEmailHandler(), auth.ValidateScopeHandler("read:card"), CardGET)
 	api.Router.POST("/api/v1/card", auth.ValidateTokenHandler(), auth.StoreUserEmailHandler(), auth.ValidateScopeHandler("write:card"), CardPOST)
 	api.Router.DELETE("/api/v1/card", auth.ValidateTokenHandler(), auth.StoreUserEmailHandler(), auth.ValidateScopeHandler("write:card"), CardDELETE)
 }
 
 /*
-Add GET, POST, and DELETE routes to the API for the deck and deck content namespace
+AddDeckRoutes Add GET, POST, and DELETE routes to the API for the deck and deck content namespace
 */
-func (api API) AddDeckRoutes() {
+func (api API) addDeckRoutes() {
 	api.Router.GET("/api/v1/deck", auth.ValidateTokenHandler(), auth.StoreUserEmailHandler(), auth.ValidateScopeHandler("read:deck"), DeckGET)
 	api.Router.POST("/api/v1/deck", auth.ValidateTokenHandler(), auth.StoreUserEmailHandler(), auth.ValidateScopeHandler("write:deck"), DeckPOST)
 	api.Router.DELETE("/api/v1/deck", auth.ValidateTokenHandler(), auth.StoreUserEmailHandler(), auth.ValidateScopeHandler("write:deck"), DeckDELETE)
@@ -51,40 +51,71 @@ func (api API) AddDeckRoutes() {
 }
 
 /*
-Add GET and DELETE routes to the API for the user namespace
+AddUserRoutes Add GET and DELETE routes to the API for the user namespace
 */
-func (api API) AddUserRoutes() {
+func (api API) addUserRoutes() {
 	api.Router.GET("/api/v1/user", auth.ValidateTokenHandler(), auth.StoreUserEmailHandler(), auth.ValidateScopeHandler("read:profile"), UserGET)
 	api.Router.DELETE("/api/v1/user", auth.ValidateTokenHandler(), auth.StoreUserEmailHandler(), auth.ValidateScopeHandler("write:user"), UserDELETE)
 }
 
 /*
-Add GET and POST routes to the API for the login, resgister, reset, and health endpoints
+addManagementRoutes Add GET and POST routes to the API for the health and (eventually) the metrics endpoint
 */
 func (api API) addManagementRoutes() {
 	api.Router.GET("/api/v1/health", auth.ValidateTokenHandler(), auth.StoreUserEmailHandler(), auth.ValidateScopeHandler("read:health"), HealthGET)
+}
+
+/*
+AddAuthRoutes Add GET and POST routes to the API for the login, register, and reset password endpoints
+*/
+func (api API) addAuthRoutes() {
 	api.Router.POST("/api/v1/login", LoginPOST)
 	api.Router.POST("/api/v1/register", RegisterPOST)
 	api.Router.GET("/api/v1/reset", auth.ValidateTokenHandler(), auth.StoreUserEmailHandler(), auth.ValidateScopeHandler("reset:password"), ResetGET)
+}
+
+func (api API) AddRoutes(routes []string) {
+	api.addManagementRoutes()
+
+	for _, route := range routes {
+		if route == "card" {
+			api.addCardRoutes()
+		}
+
+		if route == "deck" {
+			api.addDeckRoutes()
+		}
+
+		if route == "user" {
+			api.addUserRoutes()
+		}
+
+		if route == "auth" {
+			api.addAuthRoutes()
+		}
+	}
 }
 
 /*
 Start the API and add management routes to the router
 */
 func (api API) Start(port int) {
-	api.addManagementRoutes()
-	api.Router.Run(":" + strconv.Itoa(port))
+	err := api.Router.Run(":" + strconv.Itoa(port))
+	if err != nil {
+		slog.Error("Failed to start api", "err", err.Error())
+		return
+	}
 }
 
 /*
-Destrory and release the database, and log file
+Stop Destroy and release the database, and log file
 */
 func (api API) Stop() {
 	context.DestroyDatabase()
 }
 
 /*
-Creates a new instance of api.API and returns it
+New Creates a new instance of api.API and returns it
 */
 func New() API {
 	var router = gin.New()
