@@ -59,20 +59,47 @@ func (api API) AddUserRoutes() {
 }
 
 /*
-addManagementRoutes Add GET and POST routes to the API for the login, resgister, reset, and health endpoints
+addManagementRoutes Add GET and POST routes to the API for the health and (eventually) the metrics endpoint
 */
 func (api API) addManagementRoutes() {
 	api.Router.GET("/api/v1/health", auth.ValidateTokenHandler(), auth.StoreUserEmailHandler(), auth.ValidateScopeHandler("read:health"), HealthGET)
+}
+
+/*
+AddAuthRoutes Add GET and POST routes to the API for the login, register, and reset password endpoints
+*/
+func (api API) AddAuthRoutes() {
 	api.Router.POST("/api/v1/login", LoginPOST)
 	api.Router.POST("/api/v1/register", RegisterPOST)
 	api.Router.GET("/api/v1/reset", auth.ValidateTokenHandler(), auth.StoreUserEmailHandler(), auth.ValidateScopeHandler("reset:password"), ResetGET)
+}
+
+func (api API) AddRoutes(routes []string) {
+	api.addManagementRoutes()
+
+	for _, route := range routes {
+		if route == "card" {
+			api.AddCardRoutes()
+		}
+
+		if route == "deck" {
+			api.AddDeckRoutes()
+		}
+
+		if route == "user" {
+			api.AddUserRoutes()
+		}
+
+		if route == "auth" {
+			api.AddAuthRoutes()
+		}
+	}
 }
 
 /*
 Start the API and add management routes to the router
 */
 func (api API) Start(port int) {
-	api.addManagementRoutes()
 	err := api.Router.Run(":" + strconv.Itoa(port))
 	if err != nil {
 		slog.Error("Failed to start api", "err", err.Error())

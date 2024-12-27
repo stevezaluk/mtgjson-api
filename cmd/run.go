@@ -28,12 +28,9 @@ $ mtgjson run --env`,
 		}
 
 		contextAPI = api.New()
-
-		contextAPI.AddCardRoutes()
-		contextAPI.AddDeckRoutes()
-		contextAPI.AddUserRoutes()
 	},
 	Run: func(cmd *cobra.Command, args []string) {
+		contextAPI.AddRoutes(viper.GetStringSlice("api.namespaces"))
 		contextAPI.Start(viper.GetInt("api.port"))
 	},
 	PostRun: func(cmd *cobra.Command, args []string) {
@@ -51,6 +48,9 @@ func init() {
 
 	runCmd.Flags().StringP("log.path", "l", "/var/log/mtgjson-api", "Set the directory that the API should save logs too")
 	viper.BindPFlag("log.path", runCmd.Flags().Lookup("log.path"))
+
+	runCmd.Flags().StringSliceP("api.namespaces", "n", []string{"card", "deck", "auth", "user"}, "The namespaces that should be added to the API. Valid Namespaces: card, deck, auth, user")
+	viper.BindPFlag("api.namespaces", runCmd.Flags().Lookup("api.namespaces"))
 
 	runCmd.Flags().String("log.filename", "", "The name of the file you want the API to save logs under")
 	viper.BindPFlag("log.filename", runCmd.Flags().Lookup("log.filename"))
