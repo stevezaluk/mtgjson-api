@@ -1,12 +1,12 @@
 package api
 
 import (
-	"mtgjson/auth"
-	"strconv"
-
 	"github.com/gin-gonic/gin"
 	"github.com/samber/slog-gin"
 	"github.com/stevezaluk/mtgjson-sdk/context"
+	"log/slog"
+	"mtgjson/auth"
+	"strconv"
 )
 
 /*
@@ -73,11 +73,15 @@ Start the API and add management routes to the router
 */
 func (api API) Start(port int) {
 	api.addManagementRoutes()
-	api.Router.Run(":" + strconv.Itoa(port))
+	err := api.Router.Run(":" + strconv.Itoa(port))
+	if err != nil {
+		slog.Error("Failed to start api", "err", err.Error())
+		return
+	}
 }
 
 /*
-Stop Destrory and release the database, and log file
+Stop Destroy and release the database, and log file
 */
 func (api API) Stop() {
 	context.DestroyDatabase()
