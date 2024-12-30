@@ -194,6 +194,10 @@ func SetContentGET(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, _set.Contents)
 }
 
+/*
+SetContentPOST Gin handler for sending post requests to the set content endpoint. This function should not be called
+directly and should only be passed to the gin router
+*/
 func SetContentPOST(ctx *gin.Context) {
 	userEmail := ctx.GetString("userEmail")
 	owner := ctx.DefaultQuery("owner", userEmail)
@@ -244,4 +248,71 @@ func SetContentPOST(ctx *gin.Context) {
 	}
 
 	ctx.JSON(http.StatusOK, gin.H{"message": "Successfully updated set", "setCode": code}) // re-add count here
+}
+
+/*
+SetContentDELETE Gin handler for making DELETE requests to the set content endpoint. This function should not be called
+directly and should only be passed to the gin router
+*/
+func SetContentDELETE(ctx *gin.Context) {
+	userEmail := ctx.GetString("userEmail")
+	owner := ctx.DefaultQuery("owner", userEmail)
+
+	if owner == "system" {
+		if !auth.ValidateScope(ctx, "write:system-set") {
+			ctx.JSON(http.StatusForbidden, gin.H{"message": "Invalid permissions to modify content of system or pre-constructed sets", "requiredScope": "write:system-set"})
+			return
+		}
+	}
+
+	if owner != userEmail {
+		if !auth.ValidateScope(ctx, "write:user-set") {
+			ctx.JSON(http.StatusForbidden, gin.H{"message": "Invalid permissions to modify content of user owned sets", "requiredScope": "write:user-set"})
+			return
+		}
+	}
+
+	code := ctx.Query("setCode")
+	if code == "" {
+		ctx.JSON(http.StatusBadRequest, gin.H{"message": "Deck code is required to perform this operation"})
+		return
+	}
+
+	_set, err := set.GetSet(code, owner)
+	if errors.Is(err, sdkErrors.ErrNoSet) {
+		ctx.JSON(http.StatusNotFound, gin.H{"message": "No set found under the passed set code"})
+		return
+	}
+
+	var updates []string
+	if ctx.Bind(&updates) != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"message": "Failed to bind response object. Object structure may be incorrect"})
+		return
+	}
+
+	if updates == nil || len(updates) == 0 {
+		ctx.JSON(http.StatusBadRequest, gin.H{"message": "At least one card must be passed in the body of this request. List cannot be empty"})
+		return
+	}
+
+	valid, invalidCards, noExistCards := card.ValidateCards(updates)
+	if valid != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"message": "Error while validating cards for set update", "err": valid.Error()})
+		return
+	}
+
+	if len(invalidCards) != 0 || len(noExistCards) != 0 {
+		ctx.JSON(http.StatusBadRequest, gin.H{"message": "Failed to update set. Some cards do not exist or are not valid", "invalidCards": invalidCards, "noExistCards": noExistCards})
+		return
+	}
+
+	set.RemoveCards(_set, updates)
+
+	err = set.ReplaceSet(_set)
+	if errors.Is(err, sdkErrors.ErrSetUpdateFailed) {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, gin.H{"message": "Successfully removed cards from set", "setCode": code})
 }
