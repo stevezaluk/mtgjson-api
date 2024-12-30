@@ -106,11 +106,6 @@ If you wish to enable authentication within the API the following values must al
 * Auth0 Client Secret (string) ```auth0.client_secret``` - The Client secret for your Auth0 application
 * Auth0 Scope (string) ```auth0.scope``` - The scopes the API should recognize (seperated by spaces)
 
-Additionally, if you decide to run the API without authentication, you can bypass with the following values. These can also be defined as flags which can be useful for testing the API:
-
-* API No Auth (bool) ```api.no_auth``` - Disable authentication for all endpoints
-* API No Scope (bool) ```api.no_scope``` - Disable scope validation for all endpoints
-
 #### Log Flags
 
 Finally you can define the path in which log files are stored using the following flag:
@@ -141,16 +136,26 @@ To properly configure authentication with Auth0, a few things need to be complet
 
 A specific set of scopes must be defined for the API you have created for the scope validation to function properly. Below is a list of scoped permissions that must be created:
 
-* Read set permissions ```read:set``` - Provides permissions for indexing all sets and reading metadata from individual ones
-* Write set permissions ```write:set``` - Provides permissions for creating, modifying, and deleting sets
-* Read card permissions ```read:card``` - Provides permissions for indexing all cards and reading metadata from individual cards
-* Write card permissions ```write:card``` - Provides permissions for creating, modifying, and deleting cards
-* Read deck permissions ```read:deck``` - Provides permissions for indexing all decks and reading metadata from individual ones
-* Write deck permissions ```write:deck``` - Provides permissions for creating, modifying, and deleting decks
-* Read user permissions ```read:user``` - Provides permissions for indexing all users and reading metadata from individual ones
-* Write user permissions ```write:user``` - Provides permissions for creating new users and modifying existing ones
-* Read health permissions ```read:health``` - Provides permissions for fetching the health status of the API
-* Read metric permissions ```read:metrics``` - Provides permissions for fetching prometheus metrics from the API
+* Read health permissions ```read:health``` - Provides permissions for read the health status of the API
+* Read metric permissions ```read:metrics``` - Provides permissions for read prometheus metrics from the API
+* Read user permissions ```read:user``` - Provides permissions to read any user's metadata from the API
+* Write user permissions ```write:user``` - Provides permissions to create a user's metadata from the API
+* Read profile permissions ```read:profile``` - Provides permissions to read the callers user metadata but nobody else's
+* Read set permissions ```read:set``` - 	Provides permissions to read pre-constructed sets and sets created by the caller
+* Read user set permissions ```read:user-set``` - Provides permissions to read any user created set
+* Write set permissions ```write:set``` - Provides permissions to create sets under the callers account
+* Write system set permissions ```write:system-set``` - Provides permissions to create and modify sets under the system user (pre-constructed) sets
+* Write user set permissions ```write:user-set``` - Provides permissions to create and modify sets under any user account
+* Read card permissions ```read:card``` - Provides permissions to read pre-constructed cards and cards created by the caller
+* Read user card permissions ```read:user-card``` - Provides permissions to read any user created card
+* Write card permissions ```write:card``` - Provides permissions to create cards under the callers account
+* Write system card permissions ```write:system-card``` - Provides permissions to create cards under the system user (pre-constructed) cards
+* Write user card permissions ```write:user-card``` - Provides permissions to create cards under any user's account
+* Read deck permissions ```read:deck``` - Provides permissions to read pre-constructed decks and decks created by the caller
+* Read uers deck ```read:user-deck``` - Provides permissions to read any user created decks
+* Write deck permissions ```write:deck``` - Provides permissions to create decks under the callers account
+* Write system deck permissions ```write:system-deck``` - Provides permissions to create decks under the system user (pre-constructed sets) 
+* Write user deck permissions ```write:user-deck``` - Provides permissions to create decks under any user's account
 
 To add these permissions to the Auth0 API, follow the steps below:
 
