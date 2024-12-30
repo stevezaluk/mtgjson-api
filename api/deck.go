@@ -59,23 +59,6 @@ DeckPOST Gin handler for the POST request to the Deck Endpoint. This function sh
 directly and should only be passed to the gin router
 */
 func DeckPOST(ctx *gin.Context) {
-	var newDeck *deckModel.Deck
-
-	if ctx.Bind(&newDeck) != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{"message": "Failed to bind response to object. Object structure may be incorrect"})
-		return
-	}
-
-	if newDeck.Name == "" || newDeck.Code == "" {
-		ctx.JSON(http.StatusBadRequest, gin.H{"message": "Deck Code or Name must not be empty when creating a deck"})
-		return
-	}
-
-	if newDeck.MtgjsonApiMeta != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"message": "The mtgjsonApiMeta field must be null. This will be filled out automatically during deck creation"})
-		return
-	}
-
 	userEmail := ctx.GetString("userEmail")
 	owner := ctx.DefaultQuery("owner", userEmail)
 
@@ -93,6 +76,24 @@ func DeckPOST(ctx *gin.Context) {
 		}
 	}
 
+	var newDeck *deckModel.Deck
+
+	if ctx.Bind(&newDeck) != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"message": "Failed to bind response to object. Object structure may be incorrect"})
+		return
+	}
+
+	if newDeck.Name == "" || newDeck.Code == "" {
+		ctx.JSON(http.StatusBadRequest, gin.H{"message": "Deck Code or Name must not be empty when creating a deck"})
+		return
+	}
+
+	if newDeck.MtgjsonApiMeta != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"message": "The mtgjsonApiMeta field must be null. This will be filled out automatically during deck creation"})
+		return
+	}
+
+	// add nil check here for contentIds and skip if they are nil. NewDeck will create this automatically
 	allCards, allCardErr := deck.AllCardIds(newDeck.ContentIds)
 	if allCardErr != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"message": "Error deck is missing the contentIds field"})
