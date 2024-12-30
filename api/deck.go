@@ -205,12 +205,6 @@ DeckContentPOST Gin handler for the POST request to the Deck Content Endpoint. T
 directly and should only be passed to the gin router
 */
 func DeckContentPOST(ctx *gin.Context) {
-	code := ctx.Query("deckCode")
-	if code == "" {
-		ctx.JSON(http.StatusBadRequest, gin.H{"message": "Deck code is required to perform a POST operation"})
-		return
-	}
-
 	userEmail := ctx.GetString("userEmail")
 	owner := ctx.DefaultQuery("owner", userEmail)
 
@@ -226,6 +220,12 @@ func DeckContentPOST(ctx *gin.Context) {
 			ctx.JSON(http.StatusForbidden, gin.H{"message": "Invalid permissions to modify another users deck content", "requiredScope": "write:user-deck"})
 			return
 		}
+	}
+
+	code := ctx.Query("deckCode")
+	if code == "" {
+		ctx.JSON(http.StatusBadRequest, gin.H{"message": "Deck code is required to perform a POST operation"})
+		return
 	}
 
 	_deck, err := deck.GetDeck(code, owner)
