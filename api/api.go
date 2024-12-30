@@ -5,7 +5,7 @@ import (
 	"github.com/samber/slog-gin"
 	"github.com/stevezaluk/mtgjson-sdk/context"
 	"log/slog"
-	"mtgjson/auth"
+	"mtgjson/middleware"
 	"strconv"
 )
 
@@ -29,61 +29,68 @@ func (api API) Init() {
 }
 
 /*
-AddCardRoutes Add GET, POST, and DELETE routes to the API for the card namespace
+addCardRoutes Add GET, POST, and DELETE routes to the API for the card namespace
 */
 func (api API) addCardRoutes() {
-	api.Router.GET("/api/v1/card", auth.ValidateTokenHandler(), auth.StoreUserEmailHandler(), auth.ValidateScopeHandler("read:card"), CardGET)
-	api.Router.POST("/api/v1/card", auth.ValidateTokenHandler(), auth.StoreUserEmailHandler(), auth.ValidateScopeHandler("write:card"), CardPOST)
-	api.Router.DELETE("/api/v1/card", auth.ValidateTokenHandler(), auth.StoreUserEmailHandler(), auth.ValidateScopeHandler("write:card"), CardDELETE)
+	api.Router.GET("/api/v1/card", middleware.ValidateTokenHandler(), middleware.StoreUserEmailHandler(), middleware.ValidateScopeHandler("read:card"), CardGET)
+	api.Router.POST("/api/v1/card", middleware.ValidateTokenHandler(), middleware.StoreUserEmailHandler(), middleware.ValidateScopeHandler("write:card"), CardPOST)
+	api.Router.DELETE("/api/v1/card", middleware.ValidateTokenHandler(), middleware.StoreUserEmailHandler(), middleware.ValidateScopeHandler("write:card"), CardDELETE)
 }
 
 /*
-AddDeckRoutes Add GET, POST, and DELETE routes to the API for the deck and deck content namespace
+addDeckRoutes Add GET, POST, and DELETE routes to the API for the deck and deck content namespace
 */
 func (api API) addDeckRoutes() {
-	api.Router.GET("/api/v1/deck", auth.ValidateTokenHandler(), auth.StoreUserEmailHandler(), auth.ValidateScopeHandler("read:deck"), DeckGET)
-	api.Router.POST("/api/v1/deck", auth.ValidateTokenHandler(), auth.StoreUserEmailHandler(), auth.ValidateScopeHandler("write:deck"), DeckPOST)
-	api.Router.DELETE("/api/v1/deck", auth.ValidateTokenHandler(), auth.StoreUserEmailHandler(), auth.ValidateScopeHandler("write:deck"), DeckDELETE)
+	api.Router.GET("/api/v1/deck", middleware.ValidateTokenHandler(), middleware.StoreUserEmailHandler(), middleware.ValidateScopeHandler("read:deck"), DeckGET)
+	api.Router.POST("/api/v1/deck", middleware.ValidateTokenHandler(), middleware.StoreUserEmailHandler(), middleware.ValidateScopeHandler("write:deck"), DeckPOST)
+	api.Router.DELETE("/api/v1/deck", middleware.ValidateTokenHandler(), middleware.StoreUserEmailHandler(), middleware.ValidateScopeHandler("write:deck"), DeckDELETE)
 
-	api.Router.GET("/api/v1/deck/content", auth.ValidateTokenHandler(), auth.StoreUserEmailHandler(), auth.ValidateScopeHandler("read:deck"), DeckContentGET)
-	api.Router.POST("/api/v1/deck/content", auth.ValidateTokenHandler(), auth.StoreUserEmailHandler(), auth.ValidateScopeHandler("write:deck"), DeckContentPOST)
-	api.Router.DELETE("/api/v1/deck/content", auth.ValidateTokenHandler(), auth.StoreUserEmailHandler(), auth.ValidateScopeHandler("write:deck"), DeckContentDELETE)
-}
-
-func (api API) addSetRoutes() {
-	api.Router.GET("/api/v1/set", auth.ValidateTokenHandler(), auth.StoreUserEmailHandler(), auth.ValidateScopeHandler("read:set"), SetGET)
-	api.Router.POST("/api/v1/set", auth.ValidateTokenHandler(), auth.StoreUserEmailHandler(), auth.ValidateScopeHandler("write:set"), SetPOST)
-	api.Router.DELETE("/api/v1/set", auth.ValidateTokenHandler(), auth.StoreUserEmailHandler(), auth.ValidateScopeHandler("write:set"), SetDELETE)
-
-	api.Router.GET("/api/v1/set/content", auth.ValidateTokenHandler(), auth.StoreUserEmailHandler(), auth.ValidateScopeHandler("read:set"), SetContentGET)
-	api.Router.POST("/api/v1/set/content", auth.ValidateTokenHandler(), auth.StoreUserEmailHandler(), auth.ValidateScopeHandler("write:set"), SetContentPOST)
-	api.Router.DELETE("/api/v1/set/content", auth.ValidateTokenHandler(), auth.StoreUserEmailHandler(), auth.ValidateScopeHandler("write:set"), SetContentDELETE)
+	api.Router.GET("/api/v1/deck/content", middleware.ValidateTokenHandler(), middleware.StoreUserEmailHandler(), middleware.ValidateScopeHandler("read:deck"), DeckContentGET)
+	api.Router.POST("/api/v1/deck/content", middleware.ValidateTokenHandler(), middleware.StoreUserEmailHandler(), middleware.ValidateScopeHandler("write:deck"), DeckContentPOST)
+	api.Router.DELETE("/api/v1/deck/content", middleware.ValidateTokenHandler(), middleware.StoreUserEmailHandler(), middleware.ValidateScopeHandler("write:deck"), DeckContentDELETE)
 }
 
 /*
-AddUserRoutes Add GET and DELETE routes to the API for the user namespace
+addSetRoutesAdd GET, POST, and DELETE routes to the API for the set and set content namespace
+*/
+func (api API) addSetRoutes() {
+	api.Router.GET("/api/v1/set", middleware.ValidateTokenHandler(), middleware.StoreUserEmailHandler(), middleware.ValidateScopeHandler("read:set"), SetGET)
+	api.Router.POST("/api/v1/set", middleware.ValidateTokenHandler(), middleware.StoreUserEmailHandler(), middleware.ValidateScopeHandler("write:set"), SetPOST)
+	api.Router.DELETE("/api/v1/set", middleware.ValidateTokenHandler(), middleware.StoreUserEmailHandler(), middleware.ValidateScopeHandler("write:set"), SetDELETE)
+
+	api.Router.GET("/api/v1/set/content", middleware.ValidateTokenHandler(), middleware.StoreUserEmailHandler(), middleware.ValidateScopeHandler("read:set"), SetContentGET)
+	api.Router.POST("/api/v1/set/content", middleware.ValidateTokenHandler(), middleware.StoreUserEmailHandler(), middleware.ValidateScopeHandler("write:set"), SetContentPOST)
+	api.Router.DELETE("/api/v1/set/content", middleware.ValidateTokenHandler(), middleware.StoreUserEmailHandler(), middleware.ValidateScopeHandler("write:set"), SetContentDELETE)
+}
+
+/*
+addUserRoutes Add GET and DELETE routes to the API for the user namespace
 */
 func (api API) addUserRoutes() {
-	api.Router.GET("/api/v1/user", auth.ValidateTokenHandler(), auth.StoreUserEmailHandler(), auth.ValidateScopeHandler("read:profile"), UserGET)
-	api.Router.DELETE("/api/v1/user", auth.ValidateTokenHandler(), auth.StoreUserEmailHandler(), auth.ValidateScopeHandler("write:user"), UserDELETE)
+	api.Router.GET("/api/v1/user", middleware.ValidateTokenHandler(), middleware.StoreUserEmailHandler(), middleware.ValidateScopeHandler("read:profile"), UserGET)
+	api.Router.DELETE("/api/v1/user", middleware.ValidateTokenHandler(), middleware.StoreUserEmailHandler(), middleware.ValidateScopeHandler("write:user"), UserDELETE)
 }
 
 /*
 addManagementRoutes Add GET and POST routes to the API for the health and (eventually) the metrics endpoint
 */
 func (api API) addManagementRoutes() {
-	api.Router.GET("/api/v1/health", auth.ValidateTokenHandler(), auth.StoreUserEmailHandler(), auth.ValidateScopeHandler("read:health"), HealthGET)
+	api.Router.GET("/api/v1/health", middleware.ValidateTokenHandler(), middleware.StoreUserEmailHandler(), middleware.ValidateScopeHandler("read:health"), HealthGET)
 }
 
 /*
-AddAuthRoutes Add GET and POST routes to the API for the login, register, and reset password endpoints
+addAuthRoutes Add GET and POST routes to the API for the login, register, and reset password endpoints
 */
 func (api API) addAuthRoutes() {
 	api.Router.POST("/api/v1/login", LoginPOST)
 	api.Router.POST("/api/v1/register", RegisterPOST)
-	api.Router.GET("/api/v1/reset", auth.ValidateTokenHandler(), auth.StoreUserEmailHandler(), auth.ValidateScopeHandler("reset:password"), ResetGET)
+	api.Router.GET("/api/v1/reset", middleware.ValidateTokenHandler(), middleware.StoreUserEmailHandler(), middleware.ValidateScopeHandler("reset:password"), ResetGET)
 }
 
+/*
+AddRoutes Iterate through a list of namespaces passed in the routes parameter and add routes for the requested
+namespaces
+*/
 func (api API) AddRoutes(routes []string) {
 	api.addManagementRoutes()
 

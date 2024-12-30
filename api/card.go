@@ -12,7 +12,7 @@ import (
 )
 
 /*
-limitToInt64 Convert the limit argument from a string to a 64 bit integer
+limitToInt64 Convert the limit argument from a string to a 64-bit integer
 */
 func limitToInt64(limit string) int64 {
 	ret, err := strconv.ParseInt(limit, 10, 64)
@@ -24,7 +24,7 @@ func limitToInt64(limit string) int64 {
 }
 
 /*
-CardGET Gin handler for GET request to the card endpoint. This should not be called directly and
+CardGET Gin handler for GET request to the Card endpoint. This should not be called directly and
 should only be passed to the gin router
 */
 func CardGET(ctx *gin.Context) {
@@ -64,10 +64,27 @@ func CardGET(ctx *gin.Context) {
 }
 
 /*
-CardPOST Gin handler for POST request to the card endpoint. This should not be called directly and
+CardPOST Gin handler for POST request to the Card endpoint. This should not be called directly and
 should only be passed to the gin router
 */
 func CardPOST(ctx *gin.Context) {
+	userEmail := ctx.GetString("userEmail")
+	owner := ctx.DefaultQuery("owner", userEmail)
+
+	if owner == "system" {
+		if !auth.ValidateScope(ctx, "write:system-card") {
+			ctx.JSON(http.StatusForbidden, gin.H{"message": "Invalid permissions to modify of system or pre-constructed cards", "requiredScope": "write:system-card"})
+			return
+		}
+	}
+
+	if owner != userEmail {
+		if !auth.ValidateScope(ctx, "write:user-card") {
+			ctx.JSON(http.StatusForbidden, gin.H{"message": "Invalid permissions to modify another users card's", "requiredScope": "write:user-card"})
+			return
+		}
+	}
+
 	var newCard *cardModel.CardSet
 
 	err := ctx.Bind(&newCard)
@@ -91,23 +108,6 @@ func CardPOST(ctx *gin.Context) {
 		return
 	}
 
-	userEmail := ctx.GetString("userEmail")
-	owner := ctx.DefaultQuery("owner", userEmail)
-
-	if owner == "system" {
-		if !auth.ValidateScope(ctx, "write:system-card") {
-			ctx.JSON(http.StatusForbidden, gin.H{"message": "Invalid permissions to modify of system or pre-constructed cards", "requiredScope": "write:system-card"})
-			return
-		}
-	}
-
-	if owner != userEmail {
-		if !auth.ValidateScope(ctx, "write:user-card") {
-			ctx.JSON(http.StatusForbidden, gin.H{"message": "Invalid permissions to modify another users card's", "requiredScope": "write:user-card"})
-			return
-		}
-	}
-
 	err = card.NewCard(newCard, owner)
 	if errors.Is(err, sdkErrors.ErrCardAlreadyExist) {
 		ctx.JSON(http.StatusConflict, gin.H{"message": "Card already exists under this identifier", "mtgjsonV4Id": newCard.Identifiers.MtgjsonV4Id})
@@ -121,17 +121,10 @@ func CardPOST(ctx *gin.Context) {
 }
 
 /*
-CardDELETE Gin handler for DELETE request to the card endpoint. This should not be called directly and
+CardDELETE Gin handler for DELETE request to the Card endpoint. This should not be called directly and
 should only be passed to the gin router
 */
-
 func CardDELETE(ctx *gin.Context) {
-	cardId := ctx.Query("cardId")
-	if cardId == "" {
-		ctx.JSON(http.StatusBadRequest, gin.H{"message": "A cardId (mtgjsonV4Id) is required to delete a card"})
-		return
-	}
-
 	userEmail := ctx.GetString("userEmail")
 	owner := ctx.DefaultQuery("owner", userEmail)
 
@@ -147,6 +140,12 @@ func CardDELETE(ctx *gin.Context) {
 			ctx.JSON(http.StatusForbidden, gin.H{"message": "Invalid permissions to modify another users cards", "requiredScope": "write:user-card"})
 			return
 		}
+	}
+
+	cardId := ctx.Query("cardId")
+	if cardId == "" {
+		ctx.JSON(http.StatusBadRequest, gin.H{"message": "A cardId (mtgjsonV4Id) is required to delete a card"})
+		return
 	}
 
 	err := card.DeleteCard(cardId, owner)

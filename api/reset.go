@@ -11,8 +11,8 @@ import (
 )
 
 /*
-ResetGET Gin handler for POST request to the reset endpoint. This should not be called directly and
-should only be passed to the gin router
+ResetGET Gin handler for the GET request to the Reset Endpoint. This function should not be called
+directly and should only be passed to the gin router
 */
 func ResetGET(ctx *gin.Context) {
 	userEmail := ctx.GetString("userEmail")

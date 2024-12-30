@@ -10,8 +10,8 @@ import (
 )
 
 /*
-RegisterPOST Gin handler for POST request to the register endpoint. This should not be called directly and
-should only be passed to the gin router
+RegisterPOST Gin handler for the POST request to the Register Endpoint. This function should not be called
+directly and should only be passed to the gin router
 */
 func RegisterPOST(ctx *gin.Context) {
 	type RegisterRequest struct {

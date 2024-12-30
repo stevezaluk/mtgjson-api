@@ -11,8 +11,8 @@ import (
 )
 
 /*
-UserGET Gin handler for GET request to the user endpoint. This should not be called directly and
-should only be passed to the gin router
+UserGET Gin handler for the GET request to the User Endpoint. This function should not be called
+directly and should only be passed to the gin router
 */
 func UserGET(ctx *gin.Context) {
 	userEmail := ctx.GetString("userEmail")
@@ -50,8 +50,8 @@ func UserGET(ctx *gin.Context) {
 }
 
 /*
-UserDELETE Gin handler for DELETE request to the user endpoint. This should not be called directly and
-should only be passed to the gin router
+UserDELETE Gin handler for the DELETE request to the User Endpoint. This function should not be called
+directly and should only be passed to the gin router
 */
 func UserDELETE(ctx *gin.Context) {
 	userEmail := ctx.GetString("userEmail")
