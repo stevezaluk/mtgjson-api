@@ -13,8 +13,8 @@ import (
 )
 
 /*
-DeckGET Gin handler for GET request to the deck endpoint. This should not be called directly and
-should only be passed to the gin router
+DeckGET Gin handler for the GET request to the Deck Endpoint. This function should not be called
+directly and should only be passed to the gin router
 */
 func DeckGET(ctx *gin.Context) {
 	userEmail := ctx.GetString("userEmail")
@@ -55,8 +55,8 @@ func DeckGET(ctx *gin.Context) {
 }
 
 /*
-DeckPOST Gin handler for POST request to the deck endpoint. This should not be called directly and
-should only be passed to the gin router
+DeckPOST Gin handler for the POST request to the Deck Endpoint. This function should not be called
+directly and should only be passed to the gin router
 */
 func DeckPOST(ctx *gin.Context) {
 	var newDeck *deckModel.Deck
@@ -121,8 +121,8 @@ func DeckPOST(ctx *gin.Context) {
 }
 
 /*
-DeckDELETE Gin handler for DELETE request to the deck endpoint. This should not be called directly and
-should only be passed to the gin router
+DeckDELETE Gin handler for the DELETE request to the Deck Endpoint. This function should not be called
+directly and should only be passed to the gin router
 */
 func DeckDELETE(ctx *gin.Context) {
 	code := ctx.Query("deckCode")
@@ -163,8 +163,8 @@ func DeckDELETE(ctx *gin.Context) {
 }
 
 /*
-DeckContentGET Gin handler for GET request to the deck content endpoint. This should not be called directly and
-should only be passed to the gin router
+DeckContentGET Gin handler for the GET request to the Deck Content Endpoint. This function should not be called
+directly and should only be passed to the gin router
 */
 func DeckContentGET(ctx *gin.Context) {
 	code := ctx.Query("deckCode")
@@ -197,8 +197,8 @@ func DeckContentGET(ctx *gin.Context) {
 }
 
 /*
-DeckContentPOST Gin handler for POST request to the deck content endpoint. This should not be called directly and
-should only be passed to the gin router
+DeckContentPOST Gin handler for the POST request to the Deck Content Endpoint. This function should not be called
+directly and should only be passed to the gin router
 */
 func DeckContentPOST(ctx *gin.Context) {
 	code := ctx.Query("deckCode")
@@ -267,8 +267,8 @@ func DeckContentPOST(ctx *gin.Context) {
 }
 
 /*
-DeckContentDELETE Gin handler for DELETE request to the deck content endpoint. This should not be called directly and
-should only be passed to the gin router
+DeckContentDELETE Gin handler for the DELETE request to the Deck Content Endpoint. This function should not be called
+directly and should only be passed to the gin router
 */
 func DeckContentDELETE(ctx *gin.Context) {
 	code := ctx.Query("deckCode")

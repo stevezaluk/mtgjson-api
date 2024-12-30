@@ -13,8 +13,8 @@ import (
 )
 
 /*
-SetGET Gin handler for GET request to the set endpoint. This should not be called directly and
-should only be passed to the gin router
+SetGET Gin handler for the GET request to the Set Endpoint. This function should not be called
+directly and should only be passed to the gin router
 */
 func SetGET(ctx *gin.Context) {
 	userEmail := ctx.GetString("userEmail")
@@ -117,8 +117,8 @@ func SetPOST(ctx *gin.Context) {
 }
 
 /*
-SetDELETE Gin handler for sending DELETE requests to the /set endpoint. This function should not be called directly and should only
-be passed to the gin router
+SetDELETE Gin handler for the DELETE request to the Set Endpoint. This function should not be called
+directly and should only be passed to the gin router
 */
 func SetDELETE(ctx *gin.Context) {
 	userEmail := ctx.GetString("userEmail")
@@ -160,8 +160,8 @@ func SetDELETE(ctx *gin.Context) {
 }
 
 /*
-SetContentGET Gin handler for GET request to the set content endpoint. This function should not be called directly and
-should only be passed to the gin router
+SetContentGET Gin handler for the GET request to the Set Content Endpoint. This function should not be called
+directly and should only be passed to the gin router
 */
 func SetContentGET(ctx *gin.Context) {
 	userEmail := ctx.GetString("userEmail")
@@ -195,7 +195,7 @@ func SetContentGET(ctx *gin.Context) {
 }
 
 /*
-SetContentPOST Gin handler for sending post requests to the set content endpoint. This function should not be called
+SetContentPOST Gin handler for the POST request to the Set Content Endpoint. This function should not be called
 directly and should only be passed to the gin router
 */
 func SetContentPOST(ctx *gin.Context) {
@@ -251,7 +251,7 @@ func SetContentPOST(ctx *gin.Context) {
 }
 
 /*
-SetContentDELETE Gin handler for making DELETE requests to the set content endpoint. This function should not be called
+SetContentDELETE Gin handler for the DELETE request to the Set Content Endpoint. This function should not be called
 directly and should only be passed to the gin router
 */
 func SetContentDELETE(ctx *gin.Context) {

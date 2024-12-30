@@ -10,8 +10,8 @@ import (
 )
 
 /*
-LoginPOST Gin handler for POST request to the login endpoint. This should not be called directly and
-should only be passed to the gin router
+LoginPOST Gin handler for the POST request to the Login Endpoint. This function should not be called
+directly and should only be passed to the gin router
 */
 func LoginPOST(ctx *gin.Context) {
 	type LoginRequest struct {
