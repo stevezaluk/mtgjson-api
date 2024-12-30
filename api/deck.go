@@ -171,12 +171,6 @@ DeckContentGET Gin handler for the GET request to the Deck Content Endpoint. Thi
 directly and should only be passed to the gin router
 */
 func DeckContentGET(ctx *gin.Context) {
-	code := ctx.Query("deckCode")
-	if code == "" {
-		ctx.JSON(http.StatusBadRequest, gin.H{"message": "Deck code is required to fetch a deck's contents"})
-		return
-	}
-
 	userEmail := ctx.GetString("userEmail")
 	owner := ctx.DefaultQuery("owner", userEmail)
 	if owner != "system" && owner != userEmail { // caller is trying to read the contents of another users deck
@@ -184,6 +178,12 @@ func DeckContentGET(ctx *gin.Context) {
 			ctx.JSON(http.StatusForbidden, gin.H{"message": "Invalid permissions to read other users decks", "requiredScope": "read:user-deck"})
 			return
 		}
+	}
+
+	code := ctx.Query("deckCode")
+	if code == "" {
+		ctx.JSON(http.StatusBadRequest, gin.H{"message": "Deck code is required to fetch a deck's contents"})
+		return
 	}
 
 	_deck, err := deck.GetDeck(code, owner)
