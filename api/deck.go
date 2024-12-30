@@ -228,12 +228,6 @@ func DeckContentPOST(ctx *gin.Context) {
 		return
 	}
 
-	_deck, err := deck.GetDeck(code, owner)
-	if errors.Is(err, sdkErrors.ErrNoDeck) {
-		ctx.JSON(http.StatusNotFound, gin.H{"message": err.Error()})
-		return
-	}
-
 	var updates deckModel.DeckContentIds
 	if ctx.BindJSON(&updates) != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"message": "Failed to bind response to object. Object structure may be incorrect"})
@@ -258,7 +252,12 @@ func DeckContentPOST(ctx *gin.Context) {
 		return
 	}
 
-	// need functions for adding to the deck here
+	_deck, err := deck.GetDeck(code, owner)
+	if errors.Is(err, sdkErrors.ErrNoDeck) {
+		ctx.JSON(http.StatusNotFound, gin.H{"message": err.Error()})
+		return
+	}
+
 	deck.AddCards(_deck, &updates)
 
 	err = deck.ReplaceDeck(_deck)
