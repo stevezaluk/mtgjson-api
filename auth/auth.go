@@ -28,8 +28,8 @@ func GetIssuerUrl() *url.URL {
 }
 
 /*
-GetValidator Creates a new JWT token validator for use witin the ValidateToken middleware. The object that
-this function returns provides logic for validating JWT tokens and unmarshaling custom claims
+GetValidator Creates a new JWT token validator for use within the ValidateToken middleware. The object that
+this function returns provides logic for validating JWT tokens and unmarshalling custom claims
 defined in your Auth0 tenant
 */
 func GetValidator() (*validator.Validator, error) {
