@@ -240,6 +240,11 @@ func DeckContentPOST(ctx *gin.Context) {
 		return
 	}
 
+	if len(allCards) == 0 {
+		ctx.JSON(http.StatusBadRequest, gin.H{"message": "No cards were passed to update the deck with"})
+		return
+	}
+
 	// this function needs to be re-added
 	var valid, invalidCards, noExistCards = card.ValidateCards(allCards)
 	if valid != nil {
