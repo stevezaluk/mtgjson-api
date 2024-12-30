@@ -125,12 +125,6 @@ CardDELETE Gin handler for DELETE request to the Card endpoint. This should not 
 should only be passed to the gin router
 */
 func CardDELETE(ctx *gin.Context) {
-	cardId := ctx.Query("cardId")
-	if cardId == "" {
-		ctx.JSON(http.StatusBadRequest, gin.H{"message": "A cardId (mtgjsonV4Id) is required to delete a card"})
-		return
-	}
-
 	userEmail := ctx.GetString("userEmail")
 	owner := ctx.DefaultQuery("owner", userEmail)
 
@@ -146,6 +140,12 @@ func CardDELETE(ctx *gin.Context) {
 			ctx.JSON(http.StatusForbidden, gin.H{"message": "Invalid permissions to modify another users cards", "requiredScope": "write:user-card"})
 			return
 		}
+	}
+
+	cardId := ctx.Query("cardId")
+	if cardId == "" {
+		ctx.JSON(http.StatusBadRequest, gin.H{"message": "A cardId (mtgjsonV4Id) is required to delete a card"})
+		return
 	}
 
 	err := card.DeleteCard(cardId, owner)
