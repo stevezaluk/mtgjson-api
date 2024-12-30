@@ -49,6 +49,7 @@ func SetGET(ctx *gin.Context) {
 	err = set.GetSetContents(results)
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
+		return
 	}
 
 	ctx.JSON(http.StatusOK, results)
@@ -156,4 +157,39 @@ func SetDELETE(ctx *gin.Context) {
 	}
 
 	ctx.JSON(http.StatusOK, gin.H{"message": "Successfully deleted set", "setCode": _set.Code})
+}
+
+/*
+SetContentGET Gin handler for GET request to the set content endpoint. This function should not be called directly and
+should only be passed to the gin router
+*/
+func SetContentGET(ctx *gin.Context) {
+	userEmail := ctx.GetString("userEmail")
+	owner := ctx.DefaultQuery("owner", userEmail)
+	if owner != "system" && owner != userEmail {
+		if !auth.ValidateScope(ctx, "read:user-set") {
+			ctx.JSON(http.StatusForbidden, gin.H{"message": "Invalid permissions to read other users sets", "requiredScope": "read:user-set"})
+			return
+		}
+	}
+
+	code := ctx.Query("setCode")
+	if code == "" {
+		ctx.JSON(http.StatusBadRequest, gin.H{"message": "Set code is required to fetch a sets contents"})
+		return
+	}
+
+	_set, err := set.GetSet(code, owner)
+	if errors.Is(err, sdkErrors.ErrNoSet) {
+		ctx.JSON(http.StatusNotFound, gin.H{"message": "No set found under the passed set code", "setCode": code})
+		return
+	}
+
+	err = set.GetSetContents(_set)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, _set.Contents)
 }
