@@ -36,7 +36,7 @@ func GetValidator() (*validator.Validator, error) {
 	issuer := GetIssuerUrl()
 	provider := jwks.NewCachingProvider(issuer, 5*time.Minute)
 
-	validator, err := validator.New(
+	tokenValidator, err := validator.New(
 		provider.KeyFunc,
 		validator.RS256,
 		issuer.String(),
@@ -49,10 +49,10 @@ func GetValidator() (*validator.Validator, error) {
 	)
 
 	if err != nil {
-		return validator, err
+		return tokenValidator, err
 	}
 
-	return validator, nil
+	return tokenValidator, nil
 }
 
 /*
@@ -72,14 +72,14 @@ func ValidateTokenHandler() gin.HandlerFunc {
 
 		tokenStr := strings.TrimPrefix(authHeader, "Bearer ")
 
-		validator, err := GetValidator()
+		tokenValidator, err := GetValidator()
 		if err != nil {
 			ctx.JSON(http.StatusInternalServerError, gin.H{"message": "Failed to start token validator"}) // format this better
 			ctx.Abort()
 			return
 		}
 
-		token, err := validator.ValidateToken(
+		token, err := tokenValidator.ValidateToken(
 			context.Background(),
 			tokenStr,
 		)
