@@ -279,12 +279,6 @@ DeckContentDELETE Gin handler for the DELETE request to the Deck Content Endpoin
 directly and should only be passed to the gin router
 */
 func DeckContentDELETE(ctx *gin.Context) {
-	code := ctx.Query("deckCode")
-	if code == "" {
-		ctx.JSON(http.StatusBadRequest, gin.H{"message": "Deck code is required to perform a DELETE operation"})
-		return
-	}
-
 	userEmail := ctx.GetString("userEmail")
 	owner := ctx.DefaultQuery("owner", userEmail)
 
@@ -300,6 +294,12 @@ func DeckContentDELETE(ctx *gin.Context) {
 			ctx.JSON(http.StatusForbidden, gin.H{"message": "Invalid permissions to modify another users deck content", "requiredScope": "write:user-deck"})
 			return
 		}
+	}
+
+	code := ctx.Query("deckCode")
+	if code == "" {
+		ctx.JSON(http.StatusBadRequest, gin.H{"message": "Deck code is required to perform a DELETE operation"})
+		return
 	}
 
 	_deck, err := deck.GetDeck(code, owner)
