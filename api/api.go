@@ -50,6 +50,16 @@ func (api API) addDeckRoutes() {
 	api.Router.DELETE("/api/v1/deck/content", auth.ValidateTokenHandler(), auth.StoreUserEmailHandler(), auth.ValidateScopeHandler("write:deck"), DeckContentDELETE)
 }
 
+func (api API) addSetRoutes() {
+	api.Router.GET("/api/v1/set", auth.ValidateTokenHandler(), auth.StoreUserEmailHandler(), auth.ValidateScopeHandler("read:set"), SetGET)
+	api.Router.POST("/api/v1/set", auth.ValidateTokenHandler(), auth.StoreUserEmailHandler(), auth.ValidateScopeHandler("write:set"), SetPOST)
+	api.Router.DELETE("/api/v1/set", auth.ValidateTokenHandler(), auth.StoreUserEmailHandler(), auth.ValidateScopeHandler("write:set"), SetDELETE)
+
+	api.Router.GET("/api/v1/set/content", auth.ValidateTokenHandler(), auth.StoreUserEmailHandler(), auth.ValidateScopeHandler("read:set"), SetContentGET)
+	api.Router.POST("/api/v1/set/content", auth.ValidateTokenHandler(), auth.StoreUserEmailHandler(), auth.ValidateScopeHandler("write:set"), SetContentPOST)
+	api.Router.DELETE("/api/v1/set/content", auth.ValidateTokenHandler(), auth.StoreUserEmailHandler(), auth.ValidateScopeHandler("write:set"), SetContentDELETE)
+}
+
 /*
 AddUserRoutes Add GET and DELETE routes to the API for the user namespace
 */
@@ -84,6 +94,10 @@ func (api API) AddRoutes(routes []string) {
 
 		if route == "deck" {
 			api.addDeckRoutes()
+		}
+
+		if route == "set" {
+			api.addSetRoutes()
 		}
 
 		if route == "user" {
