@@ -68,6 +68,23 @@ CardPOST Gin handler for POST request to the Card endpoint. This should not be c
 should only be passed to the gin router
 */
 func CardPOST(ctx *gin.Context) {
+	userEmail := ctx.GetString("userEmail")
+	owner := ctx.DefaultQuery("owner", userEmail)
+
+	if owner == "system" {
+		if !auth.ValidateScope(ctx, "write:system-card") {
+			ctx.JSON(http.StatusForbidden, gin.H{"message": "Invalid permissions to modify of system or pre-constructed cards", "requiredScope": "write:system-card"})
+			return
+		}
+	}
+
+	if owner != userEmail {
+		if !auth.ValidateScope(ctx, "write:user-card") {
+			ctx.JSON(http.StatusForbidden, gin.H{"message": "Invalid permissions to modify another users card's", "requiredScope": "write:user-card"})
+			return
+		}
+	}
+
 	var newCard *cardModel.CardSet
 
 	err := ctx.Bind(&newCard)
@@ -89,23 +106,6 @@ func CardPOST(ctx *gin.Context) {
 	if newCard.MtgjsonApiMeta != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"message": "The mtgjsonApiMeta must be null. This will be filled in automatically during card creation"})
 		return
-	}
-
-	userEmail := ctx.GetString("userEmail")
-	owner := ctx.DefaultQuery("owner", userEmail)
-
-	if owner == "system" {
-		if !auth.ValidateScope(ctx, "write:system-card") {
-			ctx.JSON(http.StatusForbidden, gin.H{"message": "Invalid permissions to modify of system or pre-constructed cards", "requiredScope": "write:system-card"})
-			return
-		}
-	}
-
-	if owner != userEmail {
-		if !auth.ValidateScope(ctx, "write:user-card") {
-			ctx.JSON(http.StatusForbidden, gin.H{"message": "Invalid permissions to modify another users card's", "requiredScope": "write:user-card"})
-			return
-		}
 	}
 
 	err = card.NewCard(newCard, owner)
