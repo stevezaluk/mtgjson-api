@@ -83,37 +83,40 @@ func DeckPOST(ctx *gin.Context) {
 		return
 	}
 
-	if newDeck.Name == "" || newDeck.Code == "" {
-		ctx.JSON(http.StatusBadRequest, gin.H{"message": "Deck Code or Name must not be empty when creating a deck"})
-		return
-	}
-
 	if newDeck.MtgjsonApiMeta != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"message": "The mtgjsonApiMeta field must be null. This will be filled out automatically during deck creation"})
 		return
 	}
 
+	if newDeck.ContentIds != nil { // user submitted a deck with no content ids. Skip as NewDeck will create this structure regardless
+		allCards, allCardErr := deck.AllCardIds(newDeck.ContentIds)
+		if allCardErr != nil { // this error check is arbitrary as we validate that the deck is not missing a contentIds field
+			ctx.JSON(http.StatusBadRequest, gin.H{"message": "Error deck is missing the contentIds field"})
+			return
+		}
+
+		if len(allCards) != 0 { // skip this block if an empty ContentIds structure was passed, ensuring we don't waste database calls
+			// this function needs to be re-added
+			var valid, invalidCards, noExistCards = card.ValidateCards(allCards)
+			if valid != nil {
+				ctx.JSON(http.StatusInternalServerError, gin.H{"message": "Error while validating cards for deck creation", "err": valid.Error()})
+				return
+			}
+
+			if len(invalidCards) != 0 || len(noExistCards) != 0 {
+				ctx.JSON(http.StatusBadRequest, gin.H{"message": "Failed to create deck. Some cards do not exist in the database or are invalid", "invalid": invalidCards, "noExist": noExistCards})
+				return
+			}
+		}
+	}
+
 	// add nil check here for contentIds and skip if they are nil. NewDeck will create this automatically
-	allCards, allCardErr := deck.AllCardIds(newDeck.ContentIds)
-	if allCardErr != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"message": "Error deck is missing the contentIds field"})
-		return
-	}
-
-	// this function needs to be re-added
-	var valid, invalidCards, noExistCards = card.ValidateCards(allCards)
-	if valid != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{"message": "Error while validating cards for deck creation", "err": valid.Error()})
-		return
-	}
-
-	if len(invalidCards) != 0 || len(noExistCards) != 0 {
-		ctx.JSON(http.StatusBadRequest, gin.H{"message": "Failed to create deck. Some cards do not exist in the database or are invalid", "invalid": invalidCards, "noExist": noExistCards})
-		return
-	}
 
 	var err = deck.NewDeck(newDeck, owner)
-	if errors.Is(err, sdkErrors.ErrDeckAlreadyExists) {
+	if errors.Is(err, sdkErrors.ErrDeckMissingId) {
+		ctx.JSON(http.StatusBadRequest, gin.H{"message": "Deck is missing a name and/or a deck code. Both of these values must be filled"})
+		return
+	} else if errors.Is(err, sdkErrors.ErrDeckAlreadyExists) {
 		ctx.JSON(http.StatusConflict, gin.H{"message": "Deck already exists under this deck code", "deckCode": newDeck.Code})
 		return
 	}
