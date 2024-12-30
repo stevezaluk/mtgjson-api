@@ -24,7 +24,7 @@ func ValidateTokenHandler() gin.HandlerFunc {
 
 		tokenStr := strings.TrimPrefix(authHeader, "Bearer ")
 
-		tokenValidator, err := auth.GetValidator()
+		tokenValidator, err := auth.GetTokenValidator()
 		if err != nil {
 			ctx.JSON(http.StatusInternalServerError, gin.H{"message": "Failed to start token validator"}) // format this better
 			ctx.Abort()
