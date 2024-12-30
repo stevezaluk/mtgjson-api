@@ -302,12 +302,6 @@ func DeckContentDELETE(ctx *gin.Context) {
 		return
 	}
 
-	_deck, err := deck.GetDeck(code, owner)
-	if errors.Is(err, sdkErrors.ErrNoDeck) {
-		ctx.JSON(http.StatusNotFound, gin.H{"message": err.Error()})
-		return
-	}
-
 	var updates deckModel.DeckContentIds
 	if ctx.BindJSON(&updates) != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"message": "Failed to bind response to object. Object structure may be incorrect"})
@@ -329,6 +323,12 @@ func DeckContentDELETE(ctx *gin.Context) {
 
 	if len(invalidCards) != 0 || len(noExistCards) != 0 {
 		ctx.JSON(http.StatusBadRequest, gin.H{"message": "Failed to update deck. Some cards do not exist in the database or are invalid", "invalid": invalidCards, "noExist": noExistCards})
+		return
+	}
+
+	_deck, err := deck.GetDeck(code, owner)
+	if errors.Is(err, sdkErrors.ErrNoDeck) {
+		ctx.JSON(http.StatusNotFound, gin.H{"message": err.Error()})
 		return
 	}
 
