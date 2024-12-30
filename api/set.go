@@ -193,3 +193,55 @@ func SetContentGET(ctx *gin.Context) {
 
 	ctx.JSON(http.StatusOK, _set.Contents)
 }
+
+func SetContentPOST(ctx *gin.Context) {
+	userEmail := ctx.GetString("userEmail")
+	owner := ctx.DefaultQuery("owner", userEmail)
+
+	if owner == "system" {
+		if !auth.ValidateScope(ctx, "write:system-set") {
+			ctx.JSON(http.StatusForbidden, gin.H{"message": "Invalid permissions to modify content of system or pre-constructed set", "requiredScope": "write:system-set"})
+			return
+		}
+	}
+
+	if owner != userEmail {
+		if !auth.ValidateScope(ctx, "write:user-set") {
+			ctx.JSON(http.StatusForbidden, gin.H{"message": "Invalid permissions to modify content of user owned set", "requiredScope": "write:user-set"})
+			return
+		}
+	}
+
+	code := ctx.Query("setCode")
+	if code == "" {
+		ctx.JSON(http.StatusBadRequest, gin.H{"message": "Set code is required to perform a POST operation on the sets contents"})
+		return
+	}
+
+	_set, err := set.GetSet(code, owner)
+	if errors.Is(err, sdkErrors.ErrNoSet) {
+		ctx.JSON(http.StatusNotFound, gin.H{"message": "No set found under the passed set code", "setCode": code})
+		return
+	}
+
+	var updates []string
+	if ctx.Bind(&updates) != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"message": "Failed to bind response to object. Object structure may be incorrect"})
+		return
+	}
+
+	if updates == nil || len(updates) == 0 {
+		ctx.JSON(http.StatusBadRequest, gin.H{"message": "At least one card must be passed in the body of this request. List cannot be empty"})
+		return
+	}
+
+	set.AddCards(_set, updates)
+
+	err = set.ReplaceSet(_set)
+	if errors.Is(err, sdkErrors.ErrSetUpdateFailed) {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, gin.H{"message": "Successfully updated set", "setCode": code}) // re-add count here
+}
