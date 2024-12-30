@@ -114,3 +114,46 @@ func SetPOST(ctx *gin.Context) {
 
 	ctx.JSON(http.StatusOK, gin.H{"message": "Successfully created new set", "code": newSet.Code})
 }
+
+/*
+SetDELETE Gin handler for sending DELETE requests to the /set endpoint. This function should not be called directly and should only
+be passed to the gin router
+*/
+func SetDELETE(ctx *gin.Context) {
+	userEmail := ctx.GetString("userEmail")
+	owner := ctx.DefaultQuery("owner", userEmail)
+
+	if owner == "system" {
+		if !auth.ValidateScope(ctx, "write:system-set") {
+			ctx.JSON(http.StatusForbidden, gin.H{"message": "Invalid permissions to delete system or pre-constructed set", "requiredScope": "write:system-set"})
+			return
+		}
+	}
+
+	if owner != userEmail {
+		if !auth.ValidateScope(ctx, "write:user-set") {
+			ctx.JSON(http.StatusForbidden, gin.H{"message": "Invalid permissions to delete other users sets", "requiredScope": "write:user-set"})
+			return
+		}
+	}
+
+	code := ctx.Query("setCode")
+	if code == "" {
+		ctx.JSON(http.StatusBadRequest, gin.H{"message": "Set code is required to perform a DELETE operation on a set"})
+		return
+	}
+
+	_set, err := set.GetSet(code, owner)
+	if errors.Is(err, sdkErrors.ErrNoSet) {
+		ctx.JSON(http.StatusNotFound, gin.H{"message": "No set found for DELETE operation"})
+		return
+	}
+
+	result := set.DeleteSet(_set.Code, owner)
+	if errors.Is(result, sdkErrors.ErrSetDeleteFailed) {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"message": result.Error()})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, gin.H{"message": "Successfully deleted set", "setCode": _set.Code})
+}

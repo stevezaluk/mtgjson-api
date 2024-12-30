@@ -53,6 +53,7 @@ func (api API) addDeckRoutes() {
 func (api API) addSetRoutes() {
 	api.Router.GET("/api/v1/set", auth.ValidateTokenHandler(), auth.StoreUserEmailHandler(), auth.ValidateScopeHandler("read:set"), SetGET)
 	api.Router.POST("/api/v1/set", auth.ValidateTokenHandler(), auth.StoreUserEmailHandler(), auth.ValidateScopeHandler("write:set"), SetPOST)
+	api.Router.DELETE("/api/v1/set", auth.ValidateTokenHandler(), auth.StoreUserEmailHandler(), auth.ValidateScopeHandler("write:set"), SetDELETE)
 }
 
 /*
