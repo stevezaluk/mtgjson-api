@@ -59,7 +59,6 @@ func GetValidator() (*validator.Validator, error) {
 ValidateTokenHandler Gin handler for validating tokens received from your Auth0 tenant. An Authorization header is
 required to be passed in the request for this to properly function. If the token is valid, then it
 is stored in the gin context under 'token'. If the token is invalid, the request is aborted.
-Additionally, if the 'api.no_auth' flag is set, the validator returns to the next handler without any validation
 */
 func ValidateTokenHandler() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
