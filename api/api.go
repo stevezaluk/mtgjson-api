@@ -29,7 +29,7 @@ func (api API) Init() {
 }
 
 /*
-AddCardRoutes Add GET, POST, and DELETE routes to the API for the card namespace
+addCardRoutes Add GET, POST, and DELETE routes to the API for the card namespace
 */
 func (api API) addCardRoutes() {
 	api.Router.GET("/api/v1/card", auth.ValidateTokenHandler(), auth.StoreUserEmailHandler(), auth.ValidateScopeHandler("read:card"), CardGET)
@@ -38,7 +38,7 @@ func (api API) addCardRoutes() {
 }
 
 /*
-AddDeckRoutes Add GET, POST, and DELETE routes to the API for the deck and deck content namespace
+addDeckRoutes Add GET, POST, and DELETE routes to the API for the deck and deck content namespace
 */
 func (api API) addDeckRoutes() {
 	api.Router.GET("/api/v1/deck", auth.ValidateTokenHandler(), auth.StoreUserEmailHandler(), auth.ValidateScopeHandler("read:deck"), DeckGET)
@@ -50,6 +50,9 @@ func (api API) addDeckRoutes() {
 	api.Router.DELETE("/api/v1/deck/content", auth.ValidateTokenHandler(), auth.StoreUserEmailHandler(), auth.ValidateScopeHandler("write:deck"), DeckContentDELETE)
 }
 
+/*
+addSetRoutesAdd GET, POST, and DELETE routes to the API for the set and set content namespace
+*/
 func (api API) addSetRoutes() {
 	api.Router.GET("/api/v1/set", auth.ValidateTokenHandler(), auth.StoreUserEmailHandler(), auth.ValidateScopeHandler("read:set"), SetGET)
 	api.Router.POST("/api/v1/set", auth.ValidateTokenHandler(), auth.StoreUserEmailHandler(), auth.ValidateScopeHandler("write:set"), SetPOST)
@@ -61,7 +64,7 @@ func (api API) addSetRoutes() {
 }
 
 /*
-AddUserRoutes Add GET and DELETE routes to the API for the user namespace
+addUserRoutes Add GET and DELETE routes to the API for the user namespace
 */
 func (api API) addUserRoutes() {
 	api.Router.GET("/api/v1/user", auth.ValidateTokenHandler(), auth.StoreUserEmailHandler(), auth.ValidateScopeHandler("read:profile"), UserGET)
@@ -76,7 +79,7 @@ func (api API) addManagementRoutes() {
 }
 
 /*
-AddAuthRoutes Add GET and POST routes to the API for the login, register, and reset password endpoints
+addAuthRoutes Add GET and POST routes to the API for the login, register, and reset password endpoints
 */
 func (api API) addAuthRoutes() {
 	api.Router.POST("/api/v1/login", LoginPOST)
@@ -84,6 +87,10 @@ func (api API) addAuthRoutes() {
 	api.Router.GET("/api/v1/reset", auth.ValidateTokenHandler(), auth.StoreUserEmailHandler(), auth.ValidateScopeHandler("reset:password"), ResetGET)
 }
 
+/*
+AddRoutes Iterate through a list of namespaces passed in the routes parameter and add routes for the requested
+namespaces
+*/
 func (api API) AddRoutes(routes []string) {
 	api.addManagementRoutes()
 
