@@ -32,7 +32,7 @@ func DeckGET(ctx *gin.Context) {
 		limit := limitToInt64(ctx.DefaultQuery("limit", "100"))
 		results, err := deck.IndexDecks(limit) // update this function with owner
 		if errors.Is(err, sdkErrors.ErrNoDecks) {
-			ctx.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
+			ctx.JSON(http.StatusBadRequest, gin.H{"message": "Failed to find decks in the database to index", "err": err.Error()})
 			return
 		}
 
@@ -42,13 +42,13 @@ func DeckGET(ctx *gin.Context) {
 
 	results, err := deck.GetDeck(code, owner)
 	if errors.Is(err, sdkErrors.ErrNoDeck) {
-		ctx.JSON(http.StatusNotFound, gin.H{"message": err.Error()})
+		ctx.JSON(http.StatusNotFound, gin.H{"message": "Failed to find deck under the specified deck code", "err": err.Error(), "deckCode": code})
 		return
 	}
 
 	err = deck.GetDeckContents(results)
 	if err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
+		ctx.JSON(http.StatusBadRequest, gin.H{"message": "Failed to fetch the deck contents for the specified deck", "err": err.Error(), "deckCode": code})
 	}
 
 	ctx.JSON(http.StatusOK, results)
@@ -91,7 +91,7 @@ func DeckPOST(ctx *gin.Context) {
 	if newDeck.ContentIds != nil { // user submitted a deck with no content ids. Skip as NewDeck will create this structure regardless
 		allCards, allCardErr := deck.AllCardIds(newDeck.ContentIds)
 		if allCardErr != nil { // this error check is arbitrary as we validate that the deck is not missing a contentIds field
-			ctx.JSON(http.StatusBadRequest, gin.H{"message": "Error deck is missing the contentIds field"})
+			ctx.JSON(http.StatusBadRequest, gin.H{"message": "Error deck is missing the contentIds field", "err": allCardErr.Error()})
 			return
 		}
 
@@ -104,7 +104,7 @@ func DeckPOST(ctx *gin.Context) {
 			}
 
 			if len(invalidCards) != 0 || len(noExistCards) != 0 {
-				ctx.JSON(http.StatusBadRequest, gin.H{"message": "Failed to create deck. Some cards do not exist in the database or are invalid", "invalid": invalidCards, "noExist": noExistCards})
+				ctx.JSON(http.StatusBadRequest, gin.H{"message": "Failed to create deck. Some cards do not exist in the database or are invalid", "invalidCards": invalidCards, "noExistCards": noExistCards})
 				return
 			}
 		}
@@ -114,10 +114,10 @@ func DeckPOST(ctx *gin.Context) {
 
 	var err = deck.NewDeck(newDeck, owner)
 	if errors.Is(err, sdkErrors.ErrDeckMissingId) {
-		ctx.JSON(http.StatusBadRequest, gin.H{"message": "Deck is missing a name and/or a deck code. Both of these values must be filled"})
+		ctx.JSON(http.StatusBadRequest, gin.H{"message": "Deck is missing a name and/or a deck code. Both of these values must be filled", "err": err.Error()})
 		return
 	} else if errors.Is(err, sdkErrors.ErrDeckAlreadyExists) {
-		ctx.JSON(http.StatusConflict, gin.H{"message": "Deck already exists under this deck code", "deckCode": newDeck.Code})
+		ctx.JSON(http.StatusConflict, gin.H{"message": "Deck already exists under this deck code", "err": err.Error(), "deckCode": newDeck.Code})
 		return
 	}
 
@@ -153,13 +153,13 @@ func DeckDELETE(ctx *gin.Context) {
 
 	_deck, err := deck.GetDeck(code, owner)
 	if errors.Is(err, sdkErrors.ErrNoDeck) {
-		ctx.JSON(http.StatusNotFound, gin.H{"message": err.Error()})
+		ctx.JSON(http.StatusNotFound, gin.H{"message": "Failed to find deck under the specified deck code", "err": err.Error(), "deckCode": code})
 		return
 	}
 
 	result := deck.DeleteDeck(_deck.Code, owner)
 	if errors.Is(result, sdkErrors.ErrDeckDeleteFailed) {
-		ctx.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
+		ctx.JSON(http.StatusInternalServerError, gin.H{"message": "Delete deck operation has failed", "err": err.Error(), "deckCode": code})
 		return
 	}
 

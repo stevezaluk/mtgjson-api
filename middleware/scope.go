@@ -13,7 +13,7 @@ handler and the core logic handler for the defined route.
 func ValidateScopeHandler(requiredScope string) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		if !auth.ValidateScope(ctx, requiredScope) {
-			ctx.JSON(http.StatusForbidden, gin.H{"message": "Invalid permissions to access this resource", "missingScope": requiredScope})
+			ctx.JSON(http.StatusForbidden, gin.H{"message": "Invalid permissions to access this resource", "requiredScope": requiredScope})
 			ctx.Abort()
 			return
 		}
