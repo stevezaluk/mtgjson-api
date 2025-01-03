@@ -43,7 +43,7 @@ func CardGET(ctx *gin.Context) {
 		limit := limitToInt64(ctx.DefaultQuery("limit", "100"))
 		results, err := card.IndexCards(limit) // update this function with owner
 		if errors.Is(err, sdkErrors.ErrNoCards) {
-			ctx.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
+			ctx.JSON(http.StatusBadRequest, gin.H{"message": "Failed to find cards in the database to index", "err": err.Error()})
 			return
 		}
 
@@ -53,10 +53,10 @@ func CardGET(ctx *gin.Context) {
 
 	results, err := card.GetCard(cardId, owner)
 	if errors.Is(err, sdkErrors.ErrNoCard) {
-		ctx.JSON(http.StatusNotFound, gin.H{"message": err.Error(), "cardId": cardId})
+		ctx.JSON(http.StatusNotFound, gin.H{"message": "Failed to find card with specified cardId", "err": err.Error(), "cardId": cardId})
 		return
 	} else if errors.Is(err, sdkErrors.ErrInvalidUUID) {
-		ctx.JSON(http.StatusBadRequest, gin.H{"message": err.Error(), "cardId": cardId})
+		ctx.JSON(http.StatusBadRequest, gin.H{"message": "cardId is not a valid V5 UUID", "err": err.Error(), "cardId": cardId})
 		return
 	}
 
@@ -110,14 +110,14 @@ func CardPOST(ctx *gin.Context) {
 
 	err = card.NewCard(newCard, owner)
 	if errors.Is(err, sdkErrors.ErrCardAlreadyExist) {
-		ctx.JSON(http.StatusConflict, gin.H{"message": "Card already exists under this identifier", "mtgjsonV4Id": newCard.Identifiers.MtgjsonV4Id})
+		ctx.JSON(http.StatusConflict, gin.H{"message": "Card already exists under this identifier", "err": err.Error(), "cardId": newCard.Identifiers.MtgjsonV4Id})
 		return
 	} else if errors.Is(err, sdkErrors.ErrCardMissingId) {
-		ctx.JSON(http.StatusBadRequest, gin.H{"message": "Card name or mtgjsonV4Id must not be empty when creating a card"})
+		ctx.JSON(http.StatusBadRequest, gin.H{"message": "Card name or mtgjsonV4Id must not be empty when creating a card", "err": err.Error()})
 		return
 	}
 
-	ctx.JSON(http.StatusOK, gin.H{"message": "New card created successfully", "mtgjsonV4Id": newCard.Identifiers.MtgjsonV4Id})
+	ctx.JSON(http.StatusOK, gin.H{"message": "New card created successfully", "cardId": newCard.Identifiers.MtgjsonV4Id})
 }
 
 /*
@@ -150,12 +150,12 @@ func CardDELETE(ctx *gin.Context) {
 
 	err := card.DeleteCard(cardId, owner)
 	if errors.Is(err, sdkErrors.ErrNoCard) {
-		ctx.JSON(http.StatusNotFound, gin.H{"message": "Failed to find card with the specified id", "mtgjsonV4Id": cardId})
+		ctx.JSON(http.StatusNotFound, gin.H{"message": "Failed to find card with the specified id", "err": err.Error(), "cardId": cardId})
 		return
 	} else if errors.Is(err, sdkErrors.ErrCardDeleteFailed) {
-		ctx.JSON(http.StatusInternalServerError, gin.H{"message": "Failed to delete card. Internal server issue"})
+		ctx.JSON(http.StatusInternalServerError, gin.H{"message": "Failed to delete card. Internal server issue", "err": err.Error()})
 		return
 	}
 
-	ctx.JSON(http.StatusOK, gin.H{"message": "Card successfully deleted", "mtgjsonV4Id": cardId})
+	ctx.JSON(http.StatusOK, gin.H{"message": "Card successfully deleted", "cardId": cardId})
 }

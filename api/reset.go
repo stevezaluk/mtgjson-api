@@ -27,16 +27,16 @@ func ResetGET(ctx *gin.Context) {
 
 	_, err := user.GetUser(email)
 	if errors.Is(err, sdkErrors.ErrInvalidEmail) {
-		ctx.JSON(http.StatusBadRequest, gin.H{"message": "Invalid email address used in query"})
+		ctx.JSON(http.StatusBadRequest, gin.H{"message": "Invalid email address used in query", "err": err.Error()})
 		return
 	} else if errors.Is(err, sdkErrors.ErrNoUser) {
-		ctx.JSON(http.StatusNotFound, gin.H{"message": "Failed to find user with the specified email address"})
+		ctx.JSON(http.StatusNotFound, gin.H{"message": "Failed to find user with the specified email address", "err": err.Error()})
 		return
 	}
 
 	err = user.ResetUserPassword(email)
 	if err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
+		ctx.JSON(http.StatusBadRequest, gin.H{"message": "Failed to reset user password", "err": err.Error()})
 		return
 	}
 

@@ -280,7 +280,7 @@ func SetContentDELETE(ctx *gin.Context) {
 
 	_set, err := set.GetSet(code, owner)
 	if errors.Is(err, sdkErrors.ErrNoSet) {
-		ctx.JSON(http.StatusNotFound, gin.H{"message": "No set found under the passed set code"})
+		ctx.JSON(http.StatusNotFound, gin.H{"message": "Failed to find set under the specified set code", "err": err.Error(), "setCode": code})
 		return
 	}
 
@@ -310,7 +310,7 @@ func SetContentDELETE(ctx *gin.Context) {
 
 	err = set.ReplaceSet(_set)
 	if errors.Is(err, sdkErrors.ErrSetUpdateFailed) {
-		ctx.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
+		ctx.JSON(http.StatusInternalServerError, gin.H{"message": "Failed to update set", "err": err.Error(), "setCode": code})
 		return
 	}
 

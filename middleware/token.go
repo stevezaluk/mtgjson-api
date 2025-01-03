@@ -26,7 +26,7 @@ func ValidateTokenHandler() gin.HandlerFunc {
 
 		tokenValidator, err := auth.GetTokenValidator()
 		if err != nil {
-			ctx.JSON(http.StatusInternalServerError, gin.H{"message": "Failed to start token validator"}) // format this better
+			ctx.JSON(http.StatusInternalServerError, gin.H{"message": "Failed to start token validator", "err": err.Error()}) // format this better
 			ctx.Abort()
 			return
 		}

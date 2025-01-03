@@ -68,7 +68,7 @@ addUserRoutes Add GET and DELETE routes to the API for the user namespace
 */
 func (api API) addUserRoutes() {
 	api.Router.GET("/api/v1/user", middleware.ValidateTokenHandler(), middleware.StoreUserEmailHandler(), middleware.ValidateScopeHandler("read:profile"), UserGET)
-	api.Router.DELETE("/api/v1/user", middleware.ValidateTokenHandler(), middleware.StoreUserEmailHandler(), middleware.ValidateScopeHandler("write:user"), UserDELETE)
+	api.Router.DELETE("/api/v1/user", middleware.ValidateTokenHandler(), middleware.StoreUserEmailHandler(), middleware.ValidateScopeHandler("read:profile"), UserDELETE)
 }
 
 /*

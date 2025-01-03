@@ -19,8 +19,8 @@ func UserGET(ctx *gin.Context) {
 	email := ctx.DefaultQuery("email", userEmail)
 
 	if email != userEmail {
-		if !auth.ValidateScope(ctx, "read:user") {
-			ctx.JSON(http.StatusForbidden, gin.H{"message": "Invalid permissions to read other user's account data", "requiredScope": "read:user"})
+		if !auth.ValidateScope(ctx, "write:user") {
+			ctx.JSON(http.StatusForbidden, gin.H{"message": "Invalid permissions to read other user's account data", "requiredScope": "write:user"})
 			return
 		}
 	}
@@ -80,7 +80,7 @@ func UserDELETE(ctx *gin.Context) {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"message": "Failed to delete user from MongoDB. User account may still be active"})
 		return
 	} else if err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
+		ctx.JSON(http.StatusInternalServerError, gin.H{"message": "Failed to deactivate user", "err": err.Error()})
 		return
 	}
 

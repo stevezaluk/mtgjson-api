@@ -34,13 +34,13 @@ func RegisterPOST(ctx *gin.Context) {
 
 	_, err := user.RegisterUser(request.Username, request.Email, request.Password)
 	if errors.Is(err, sdkErrors.ErrInvalidPasswordLength) {
-		ctx.JSON(http.StatusBadRequest, gin.H{"message": "User password is not long enough. Password must be at least 12 characters, 1 special character, and 1 number"})
+		ctx.JSON(http.StatusBadRequest, gin.H{"message": "User password is not long enough. Password must be at least 12 characters, 1 special character, and 1 number", "err": err.Error()})
 		return
 	} else if errors.Is(err, sdkErrors.ErrInvalidEmail) {
-		ctx.JSON(http.StatusBadRequest, gin.H{"message": "User email is not valid or is not an email address"})
+		ctx.JSON(http.StatusBadRequest, gin.H{"message": "User email is not valid or is not an email address", "err": err.Error()})
 		return
 	} else if errors.Is(err, sdkErrors.ErrFailedToRegisterUser) {
-		ctx.JSON(http.StatusInternalServerError, gin.H{"message": "Failed to register the user with Auth0"})
+		ctx.JSON(http.StatusInternalServerError, gin.H{"message": "Failed to register the user with Auth0", "err": err.Error()})
 		return
 	}
 

@@ -33,7 +33,7 @@ func LoginPOST(ctx *gin.Context) {
 
 	_, err := user.GetUser(request.Email)
 	if errors.Is(err, sdkErrors.ErrNoUser) {
-		ctx.JSON(http.StatusNotFound, gin.H{"message": "Failed to find the user account with the requested email address"})
+		ctx.JSON(http.StatusNotFound, gin.H{"message": "Failed to find the user account with the requested email address", "err": err.Error()})
 		return
 	}
 
