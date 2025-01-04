@@ -47,7 +47,7 @@ func CardGET(ctx *gin.Context) {
 			return
 		}
 
-		ctx.JSON(http.StatusFound, results)
+		ctx.JSON(http.StatusOK, results)
 		return
 	}
 
