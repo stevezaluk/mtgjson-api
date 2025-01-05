@@ -89,22 +89,22 @@ func CardPOST(ctx *gin.Context) {
 
 	err := ctx.Bind(&newCard)
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{"message": "Failed to bind response to object. Object structure may be incorrect", "err": err.Error()})
+		ctx.JSON(http.StatusInternalServerError, gin.H{"message": err.Error(), "err": sdkErrors.ErrInvalidObjectStructure.Error()})
 		return
 	}
 
 	if newCard.Identifiers == nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"message": "The identifiers field must be filled. At minimum an mtgjsonV4Id is required"})
+		ctx.JSON(http.StatusBadRequest, gin.H{"message": "The identifiers field must be filled. At minimum an mtgjsonV4Id is required", "err": sdkErrors.ErrCardMissingId.Error()})
 		return
 	}
 
 	if newCard.Name == "" || newCard.Identifiers.MtgjsonV4Id == "" {
-		ctx.JSON(http.StatusBadRequest, gin.H{"message": "Either the name or mtgjsonV4Id field is empty. Both of these fields must be filled in"})
+		ctx.JSON(http.StatusBadRequest, gin.H{"message": "Either the name or mtgjsonV4Id field is empty. Both of these fields must be filled in", "err": sdkErrors.ErrCardMissingId.Error()})
 		return
 	}
 
 	if newCard.MtgjsonApiMeta != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"message": "The mtgjsonApiMeta must be null. This will be filled in automatically during card creation"})
+		ctx.JSON(http.StatusBadRequest, gin.H{"message": "The mtgjsonApiMeta must be null. This will be filled in automatically during card creation", "err": sdkErrors.ErrMetaApiMustBeNull.Error()}) // need seperate error for this
 		return
 	}
 
@@ -144,7 +144,7 @@ func CardDELETE(ctx *gin.Context) {
 
 	cardId := ctx.Query("cardId")
 	if cardId == "" {
-		ctx.JSON(http.StatusBadRequest, gin.H{"message": "A cardId (mtgjsonV4Id) is required to delete a card"})
+		ctx.JSON(http.StatusBadRequest, gin.H{"message": "A cardId (mtgjsonV4Id) is required to delete a card", "err": sdkErrors.ErrCardMissingId.Error()})
 		return
 	}
 

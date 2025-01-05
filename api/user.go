@@ -29,7 +29,7 @@ func UserGET(ctx *gin.Context) {
 		limit := limitToInt64(ctx.DefaultQuery("limit", "100"))
 		result, err := user.IndexUsers(limit)
 		if err != nil {
-			ctx.JSON(http.StatusNotFound, gin.H{"message": "Failed to find users in database"})
+			ctx.JSON(http.StatusNotFound, gin.H{"message": "Failed to find users in database", "err": err.Error()})
 			return
 		}
 
@@ -39,10 +39,10 @@ func UserGET(ctx *gin.Context) {
 
 	result, err := user.GetUser(email)
 	if errors.Is(err, sdkErrors.ErrNoUser) {
-		ctx.JSON(http.StatusNotFound, gin.H{"message": "Failed to find user with the specified email address"})
+		ctx.JSON(http.StatusNotFound, gin.H{"message": "Failed to find user with the specified email address", "err": err.Error()})
 		return
 	} else if errors.Is(err, sdkErrors.ErrInvalidEmail) {
-		ctx.JSON(http.StatusBadRequest, gin.H{"message": "Invalid email address used in query"})
+		ctx.JSON(http.StatusBadRequest, gin.H{"message": "Invalid email address used in query", "err": err.Error()})
 		return
 	}
 
@@ -65,19 +65,19 @@ func UserDELETE(ctx *gin.Context) {
 	}
 
 	if email == "" {
-		ctx.JSON(http.StatusBadRequest, gin.H{"message": "An email address must be used to delete an account"})
+		ctx.JSON(http.StatusBadRequest, gin.H{"message": "An email address must be used to delete an account", "err": sdkErrors.ErrUserMissingId.Error()})
 		return
 	}
 
 	err := user.DeactivateUser(email)
 	if errors.Is(err, sdkErrors.ErrNoUser) {
-		ctx.JSON(http.StatusNotFound, gin.H{"message": "Failed to find user with the specified email address"})
+		ctx.JSON(http.StatusNotFound, gin.H{"message": "Failed to find user with the specified email address", "err": err.Error()})
 		return
 	} else if errors.Is(err, sdkErrors.ErrInvalidEmail) {
-		ctx.JSON(http.StatusBadRequest, gin.H{"message": "Invalid email address used in query"})
+		ctx.JSON(http.StatusBadRequest, gin.H{"message": "Invalid email address used in query", "err": err.Error()})
 		return
 	} else if errors.Is(err, sdkErrors.ErrUserDeleteFailed) {
-		ctx.JSON(http.StatusInternalServerError, gin.H{"message": "Failed to delete user from MongoDB. User account may still be active"})
+		ctx.JSON(http.StatusInternalServerError, gin.H{"message": "Failed to delete user from MongoDB. User account may still be active", "err": err.Error()})
 		return
 	} else if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"message": "Failed to deactivate user", "err": err.Error()})

@@ -21,8 +21,9 @@ func LoginPOST(ctx *gin.Context) {
 
 	var request LoginRequest
 
-	if ctx.Bind(&request) != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{"message": "Failed to bind response to object. Object structure may be incorrect"})
+	err := ctx.Bind(&request)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"message": err.Error(), "err": sdkErrors.ErrInvalidObjectStructure.Error()})
 		return
 	}
 
@@ -31,7 +32,7 @@ func LoginPOST(ctx *gin.Context) {
 		return
 	}
 
-	_, err := user.GetUser(request.Email)
+	_, err = user.GetUser(request.Email)
 	if errors.Is(err, sdkErrors.ErrNoUser) {
 		ctx.JSON(http.StatusNotFound, gin.H{"message": "Failed to find the user account with the requested email address", "err": err.Error()})
 		return
