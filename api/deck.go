@@ -83,15 +83,15 @@ func DeckPOST(ctx *gin.Context) {
 		return
 	}
 
-	if newDeck.MtgjsonApiMeta != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"message": "The mtgjsonApiMeta field must be null. This will be filled out automatically during deck creation"})
+	if newDeck.MtgjsonApiMeta != nil { // need an error for this
+		ctx.JSON(http.StatusBadRequest, gin.H{"message": "The mtgjsonApiMeta field must be null. This will be filled out automatically during deck creation", "err": sdkErrors.ErrMetaApiMustBeNull.Error()})
 		return
 	}
 
 	if newDeck.ContentIds != nil { // user submitted a deck with no content ids. Skip as NewDeck will create this structure regardless
 		allCards, allCardErr := deck.AllCardIds(newDeck.ContentIds)
 		if allCardErr != nil { // this error check is arbitrary as we validate that the deck is not missing a contentIds field
-			ctx.JSON(http.StatusBadRequest, gin.H{"message": "Error deck is missing the contentIds field", "err": allCardErr.Error()})
+			ctx.JSON(http.StatusBadRequest, gin.H{"message": "Error deck is missing the contentIds field", "err": sdkErrors.ErrDeckMissingContentIds.Error()})
 			return
 		}
 
@@ -104,7 +104,7 @@ func DeckPOST(ctx *gin.Context) {
 			}
 
 			if len(invalidCards) != 0 || len(noExistCards) != 0 {
-				ctx.JSON(http.StatusBadRequest, gin.H{"message": "Failed to create deck. Some cards do not exist in the database or are invalid", "invalidCards": invalidCards, "noExistCards": noExistCards})
+				ctx.JSON(http.StatusBadRequest, gin.H{"message": "Failed to create deck. Some cards do not exist in the database or are invalid", "err": sdkErrors.ErrInvalidCards.Error(), "invalidCards": invalidCards, "noExistCards": noExistCards})
 				return
 			}
 		}
@@ -147,7 +147,7 @@ func DeckDELETE(ctx *gin.Context) {
 
 	code := ctx.Query("deckCode")
 	if code == "" {
-		ctx.JSON(http.StatusBadRequest, gin.H{"message": "Deck code is required to perform a DELETE operation"})
+		ctx.JSON(http.StatusBadRequest, gin.H{"message": "Deck code is required to perform a DELETE operation", "err": sdkErrors.ErrDeckMissingId.Error()})
 		return
 	}
 
@@ -182,13 +182,13 @@ func DeckContentGET(ctx *gin.Context) {
 
 	code := ctx.Query("deckCode")
 	if code == "" {
-		ctx.JSON(http.StatusBadRequest, gin.H{"message": "Deck code is required to fetch a deck's contents"})
+		ctx.JSON(http.StatusBadRequest, gin.H{"message": "Deck code is required to fetch a deck's contents", "err": sdkErrors.ErrDeckMissingId.Error()})
 		return
 	}
 
 	_deck, err := deck.GetDeck(code, owner)
 	if errors.Is(err, sdkErrors.ErrNoDeck) {
-		ctx.JSON(http.StatusNotFound, gin.H{"message": err.Error()})
+		ctx.JSON(http.StatusNotFound, gin.H{"message": "Failed to find deck with the specified deck code", "err": err.Error()})
 		return
 	}
 
@@ -224,42 +224,42 @@ func DeckContentPOST(ctx *gin.Context) {
 
 	code := ctx.Query("deckCode")
 	if code == "" {
-		ctx.JSON(http.StatusBadRequest, gin.H{"message": "Deck code is required to perform a POST operation"})
+		ctx.JSON(http.StatusBadRequest, gin.H{"message": "Deck code is required to perform a POST operation", "err": sdkErrors.ErrDeckMissingId.Error()})
 		return
 	}
 
 	var updates deckModel.DeckContentIds
-	if ctx.BindJSON(&updates) != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{"message": "Failed to bind response to object. Object structure may be incorrect"})
+	err := ctx.Bind(&updates)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"message": err.Error(), "err": sdkErrors.ErrInvalidObjectStructure.Error()})
 		return
 	}
 
 	allCards, allCardErr := deck.AllCardIds(&updates)
-	if allCardErr != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"message": "Error deck is missing the contentIds field"})
+	if allCardErr != nil { // this should be a sperate error
+		ctx.JSON(http.StatusBadRequest, gin.H{"message": "Error deck is missing the contentIds field", "err": sdkErrors.ErrDeckMissingContentIds.Error()})
 		return
 	}
 
-	if len(allCards) == 0 {
-		ctx.JSON(http.StatusBadRequest, gin.H{"message": "No cards were passed to update the deck with"})
+	if len(allCards) == 0 { // this should be a seperate error
+		ctx.JSON(http.StatusBadRequest, gin.H{"message": "No cards were passed to update the deck with", "err": sdkErrors.ErrDeckMissingId.Error()})
 		return
 	}
 
-	// this function needs to be re-added
 	var valid, invalidCards, noExistCards = card.ValidateCards(allCards)
 	if valid != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"message": "Error while validating cards for deck creation", "err": valid.Error()})
 		return
 	}
 
-	if len(invalidCards) != 0 || len(noExistCards) != 0 {
-		ctx.JSON(http.StatusBadRequest, gin.H{"message": "Failed to update deck. Some cards do not exist in the database or are invalid", "invalid": invalidCards, "noExist": noExistCards})
+	if len(invalidCards) != 0 || len(noExistCards) != 0 { // need an error for this
+		ctx.JSON(http.StatusBadRequest, gin.H{"message": "Failed to update deck. Some cards do not exist in the database or are invalid", "err": sdkErrors.ErrInvalidCards.Error(), "invalid": invalidCards, "noExist": noExistCards})
 		return
 	}
 
 	_deck, err := deck.GetDeck(code, owner)
 	if errors.Is(err, sdkErrors.ErrNoDeck) {
-		ctx.JSON(http.StatusNotFound, gin.H{"message": err.Error()})
+		ctx.JSON(http.StatusNotFound, gin.H{"message": "Failed to find deck under the specified deck code", "err": err.Error(), "deckCode": code})
 		return
 	}
 
@@ -267,11 +267,11 @@ func DeckContentPOST(ctx *gin.Context) {
 
 	err = deck.ReplaceDeck(_deck)
 	if errors.Is(err, sdkErrors.ErrDeckUpdateFailed) {
-		ctx.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
+		ctx.JSON(http.StatusInternalServerError, gin.H{"message": "Failed to update deck", "err": err.Error()})
 		return
 	}
 
-	ctx.JSON(http.StatusOK, gin.H{"message": "Successfully updated deck", "deckCode": code}) // re-add count here
+	ctx.JSON(http.StatusOK, gin.H{"message": "Successfully updated deck", "deckCode": code})
 }
 
 /*
@@ -298,24 +298,25 @@ func DeckContentDELETE(ctx *gin.Context) {
 
 	code := ctx.Query("deckCode")
 	if code == "" {
-		ctx.JSON(http.StatusBadRequest, gin.H{"message": "Deck code is required to perform a DELETE operation"})
+		ctx.JSON(http.StatusBadRequest, gin.H{"message": "Deck code is required to perform a DELETE operation", "err": sdkErrors.ErrDeckMissingId.Error()})
 		return
 	}
 
 	var updates deckModel.DeckContentIds
-	if ctx.BindJSON(&updates) != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{"message": "Failed to bind response to object. Object structure may be incorrect"})
+	err := ctx.Bind(&updates)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"message": err.Error(), "err": sdkErrors.ErrInvalidObjectStructure.Error()})
 		return
 	}
 
 	allCards, allCardErr := deck.AllCardIds(&updates)
 	if allCardErr != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"message": "Error deck is missing the contentIds field"})
+		ctx.JSON(http.StatusBadRequest, gin.H{"message": "Error deck is missing the contentIds field", "err": sdkErrors.ErrDeckMissingId.Error()})
 		return
 	}
 
 	if len(allCards) == 0 {
-		ctx.JSON(http.StatusBadRequest, gin.H{"message": "No cards were passed to update the deck with"})
+		ctx.JSON(http.StatusBadRequest, gin.H{"message": "No cards were passed to update the deck with", "err": sdkErrors.ErrDeckMissingId.Error()})
 		return
 	}
 
@@ -327,13 +328,13 @@ func DeckContentDELETE(ctx *gin.Context) {
 	}
 
 	if len(invalidCards) != 0 || len(noExistCards) != 0 {
-		ctx.JSON(http.StatusBadRequest, gin.H{"message": "Failed to update deck. Some cards do not exist in the database or are invalid", "invalid": invalidCards, "noExist": noExistCards})
+		ctx.JSON(http.StatusBadRequest, gin.H{"message": "Failed to update deck. Some cards do not exist in the database or are invalid", "err": sdkErrors.ErrInvalidCards.Error(), "invalid": invalidCards, "noExist": noExistCards})
 		return
 	}
 
 	_deck, err := deck.GetDeck(code, owner)
 	if errors.Is(err, sdkErrors.ErrNoDeck) {
-		ctx.JSON(http.StatusNotFound, gin.H{"message": err.Error()})
+		ctx.JSON(http.StatusNotFound, gin.H{"message": "Failed to find deck under the specified deck code", "err": err.Error()})
 		return
 	}
 
@@ -342,7 +343,7 @@ func DeckContentDELETE(ctx *gin.Context) {
 
 	err = deck.ReplaceDeck(_deck)
 	if errors.Is(err, sdkErrors.ErrDeckUpdateFailed) {
-		ctx.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
+		ctx.JSON(http.StatusInternalServerError, gin.H{"message": "Failed to update deck", "err": err.Error()})
 		return
 	}
 

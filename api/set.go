@@ -32,7 +32,7 @@ func SetGET(ctx *gin.Context) {
 		limit := limitToInt64(ctx.DefaultQuery("limit", "100"))
 		results, err := set.IndexSets(limit) // update this to include ownership
 		if errors.Is(err, sdkErrors.ErrNoSet) {
-			ctx.JSON(http.StatusBadRequest, gin.H{"message": "No sets available to index"})
+			ctx.JSON(http.StatusBadRequest, gin.H{"message": "No sets available to index", "err": err.Error()})
 			return
 		}
 
@@ -42,13 +42,13 @@ func SetGET(ctx *gin.Context) {
 
 	results, err := set.GetSet(setCode, owner)
 	if errors.Is(err, sdkErrors.ErrNoSet) {
-		ctx.JSON(http.StatusNotFound, gin.H{"message": "Failed to find set under the requested Set Code", "setCode": setCode})
+		ctx.JSON(http.StatusNotFound, gin.H{"message": "Failed to find set under the requested Set Code", "err": err.Error(), "setCode": setCode})
 		return
 	}
 
 	err = set.GetSetContents(results)
 	if err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
+		ctx.JSON(http.StatusBadRequest, gin.H{"message": "Failed to fetch contents for the requested set", "err": err.Error()})
 		return
 	}
 
@@ -79,18 +79,19 @@ func SetPOST(ctx *gin.Context) {
 
 	var newSet *setModel.Set
 
-	if ctx.Bind(&newSet) != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"message": "Failed to bind response object. Object structure may be incorrect"})
+	err := ctx.Bind(&newSet)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"message": err.Error(), "err": sdkErrors.ErrInvalidObjectStructure.Error()})
 		return
 	}
 
 	if newSet.Name == "" || newSet.Code == "" {
-		ctx.JSON(http.StatusBadRequest, gin.H{"message": "Set code or name must not be empty when creating a new set"})
+		ctx.JSON(http.StatusBadRequest, gin.H{"message": "Set code or name must not be empty when creating a new set", "err": sdkErrors.ErrSetMissingId.Error()})
 		return
 	}
 
-	if newSet.MtgjsonApiMeta != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"message": "The mtgjsonApiMeta field must be null. This will be filled out automatically during deck creation"})
+	if newSet.MtgjsonApiMeta != nil { // need a seperate error for this
+		ctx.JSON(http.StatusBadRequest, gin.H{"message": "The mtgjsonApiMeta field must be null. This will be filled out automatically during deck creation", "err": sdkErrors.ErrMetaApiMustBeNull.Error()})
 		return
 	}
 
@@ -101,15 +102,15 @@ func SetPOST(ctx *gin.Context) {
 			return
 		}
 
-		if len(invalidCards) != 0 || len(noExistCards) != 0 {
-			ctx.JSON(http.StatusBadRequest, gin.H{"message": "Failed to create set. Some cards do not exist or are invalid", "invalidCards": invalidCards, "noExistCards": noExistCards})
+		if len(invalidCards) != 0 || len(noExistCards) != 0 { // need a seperate error for this
+			ctx.JSON(http.StatusBadRequest, gin.H{"message": "Failed to create set. Some cards do not exist or are invalid", "err": sdkErrors.ErrSetNoCards.Error(), "invalidCards": invalidCards, "noExistCards": noExistCards})
 			return
 		}
 	}
 
-	var err = set.NewSet(newSet, owner)
+	err = set.NewSet(newSet, owner)
 	if errors.Is(err, sdkErrors.ErrSetAlreadyExists) {
-		ctx.JSON(http.StatusConflict, gin.H{"message": "Set already exists under this set code", "code": newSet.Code})
+		ctx.JSON(http.StatusConflict, gin.H{"message": "Set already exists under this set code", "err": err.Error(), "code": newSet.Code})
 		return
 	}
 
@@ -140,19 +141,19 @@ func SetDELETE(ctx *gin.Context) {
 
 	code := ctx.Query("setCode")
 	if code == "" {
-		ctx.JSON(http.StatusBadRequest, gin.H{"message": "Set code is required to perform a DELETE operation on a set"})
+		ctx.JSON(http.StatusBadRequest, gin.H{"message": "Set code is required to perform a DELETE operation on a set", "err": sdkErrors.ErrSetMissingId.Error()})
 		return
 	}
 
 	_set, err := set.GetSet(code, owner)
 	if errors.Is(err, sdkErrors.ErrNoSet) {
-		ctx.JSON(http.StatusNotFound, gin.H{"message": "No set found for DELETE operation"})
+		ctx.JSON(http.StatusNotFound, gin.H{"message": "No set found for DELETE operation", "err": err.Error(), "setCode": code})
 		return
 	}
 
 	result := set.DeleteSet(_set.Code, owner)
 	if errors.Is(result, sdkErrors.ErrSetDeleteFailed) {
-		ctx.JSON(http.StatusInternalServerError, gin.H{"message": result.Error()})
+		ctx.JSON(http.StatusInternalServerError, gin.H{"message": "Failed to delete the requested set", "err": result.Error()})
 		return
 	}
 
@@ -175,19 +176,19 @@ func SetContentGET(ctx *gin.Context) {
 
 	code := ctx.Query("setCode")
 	if code == "" {
-		ctx.JSON(http.StatusBadRequest, gin.H{"message": "Set code is required to fetch a sets contents"})
+		ctx.JSON(http.StatusBadRequest, gin.H{"message": "Set code is required to fetch a sets contents", "err": sdkErrors.ErrSetMissingId.Error()})
 		return
 	}
 
 	_set, err := set.GetSet(code, owner)
 	if errors.Is(err, sdkErrors.ErrNoSet) {
-		ctx.JSON(http.StatusNotFound, gin.H{"message": "No set found under the passed set code", "setCode": code})
+		ctx.JSON(http.StatusNotFound, gin.H{"message": "No set found under the passed set code", "err": err.Error(), "setCode": code})
 		return
 	}
 
 	err = set.GetSetContents(_set)
 	if err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
+		ctx.JSON(http.StatusBadRequest, gin.H{"message": "Failed to fetch set contents for the requested set", "err": err.Error()})
 		return
 	}
 
@@ -217,25 +218,26 @@ func SetContentPOST(ctx *gin.Context) {
 	}
 
 	code := ctx.Query("setCode")
-	if code == "" {
-		ctx.JSON(http.StatusBadRequest, gin.H{"message": "Set code is required to perform a POST operation on the sets contents"})
+	if code == "" { // need a sepereate error for this
+		ctx.JSON(http.StatusBadRequest, gin.H{"message": "Set code is required to perform a POST operation on the sets contents", "err": sdkErrors.ErrSetMissingId.Error()})
 		return
 	}
 
 	_set, err := set.GetSet(code, owner)
 	if errors.Is(err, sdkErrors.ErrNoSet) {
-		ctx.JSON(http.StatusNotFound, gin.H{"message": "No set found under the passed set code", "setCode": code})
+		ctx.JSON(http.StatusNotFound, gin.H{"message": "No set found under the passed set code", "err": err.Error(), "setCode": code})
 		return
 	}
 
 	var updates []string
-	if ctx.Bind(&updates) != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{"message": "Failed to bind response to object. Object structure may be incorrect"})
+	err = ctx.Bind(&updates)
+	if err != nil { // need an error for this
+		ctx.JSON(http.StatusInternalServerError, gin.H{"message": err.Error(), "err": sdkErrors.ErrInvalidObjectStructure.Error()})
 		return
 	}
 
-	if updates == nil || len(updates) == 0 {
-		ctx.JSON(http.StatusBadRequest, gin.H{"message": "At least one card must be passed in the body of this request. List cannot be empty"})
+	if updates == nil || len(updates) == 0 { // need a seperate error for this
+		ctx.JSON(http.StatusBadRequest, gin.H{"message": "At least one card must be passed in the body of this request. List cannot be empty", "err": sdkErrors.ErrSetNoCards.Error(), "setCode": code})
 		return
 	}
 
@@ -243,7 +245,7 @@ func SetContentPOST(ctx *gin.Context) {
 
 	err = set.ReplaceSet(_set)
 	if errors.Is(err, sdkErrors.ErrSetUpdateFailed) {
-		ctx.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
+		ctx.JSON(http.StatusInternalServerError, gin.H{"message": "Failed to update set", "err": err.Error()})
 		return
 	}
 
@@ -273,8 +275,8 @@ func SetContentDELETE(ctx *gin.Context) {
 	}
 
 	code := ctx.Query("setCode")
-	if code == "" {
-		ctx.JSON(http.StatusBadRequest, gin.H{"message": "Deck code is required to perform this operation"})
+	if code == "" { // need a seperate error for this
+		ctx.JSON(http.StatusBadRequest, gin.H{"message": "Set code is required to perform this operation", "err": sdkErrors.ErrSetMissingId.Error()})
 		return
 	}
 
@@ -285,13 +287,14 @@ func SetContentDELETE(ctx *gin.Context) {
 	}
 
 	var updates []string
-	if ctx.Bind(&updates) != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{"message": "Failed to bind response object. Object structure may be incorrect"})
+	err = ctx.Bind(&updates)
+	if err != nil { // need a seperate error for this
+		ctx.JSON(http.StatusInternalServerError, gin.H{"message": err.Error(), "err": sdkErrors.ErrInvalidObjectStructure.Error()})
 		return
 	}
 
-	if updates == nil || len(updates) == 0 {
-		ctx.JSON(http.StatusBadRequest, gin.H{"message": "At least one card must be passed in the body of this request. List cannot be empty"})
+	if updates == nil || len(updates) == 0 { // need a seperate error for this
+		ctx.JSON(http.StatusBadRequest, gin.H{"message": "At least one card must be passed in the body of this request. List cannot be empty", "err": sdkErrors.ErrSetNoCards.Error(), "setCode": code})
 		return
 	}
 
@@ -301,8 +304,8 @@ func SetContentDELETE(ctx *gin.Context) {
 		return
 	}
 
-	if len(invalidCards) != 0 || len(noExistCards) != 0 {
-		ctx.JSON(http.StatusBadRequest, gin.H{"message": "Failed to update set. Some cards do not exist or are not valid", "invalidCards": invalidCards, "noExistCards": noExistCards})
+	if len(invalidCards) != 0 || len(noExistCards) != 0 { // need a seperate error for this
+		ctx.JSON(http.StatusBadRequest, gin.H{"message": "Failed to update set. Some cards do not exist or are not valid", "err": sdkErrors.ErrInvalidCards.Error(), "invalidCards": invalidCards, "noExistCards": noExistCards})
 		return
 	}
 

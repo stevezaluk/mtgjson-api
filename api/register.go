@@ -22,8 +22,9 @@ func RegisterPOST(ctx *gin.Context) {
 
 	var request RegisterRequest
 
-	if ctx.Bind(&request) != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{"message": "Failed to bind response to object. Object structure may be incorrect"})
+	err := ctx.Bind(&request)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"message": err.Error(), "err": sdkErrors.ErrInvalidObjectStructure.Error()})
 		return
 	}
 
@@ -32,7 +33,7 @@ func RegisterPOST(ctx *gin.Context) {
 		return
 	}
 
-	_, err := user.RegisterUser(request.Username, request.Email, request.Password)
+	_, err = user.RegisterUser(request.Username, request.Email, request.Password)
 	if errors.Is(err, sdkErrors.ErrInvalidPasswordLength) {
 		ctx.JSON(http.StatusBadRequest, gin.H{"message": "User password is not long enough. Password must be at least 12 characters, 1 special character, and 1 number", "err": err.Error()})
 		return
