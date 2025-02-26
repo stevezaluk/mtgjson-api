@@ -1,0 +1,9 @@
+services:
+  mtgjson:
+    image: mtgjson-api:latest
+    container_name: mtgjson-api
+    volumes:
+      - "~/.config/mtgjson-api:/root/.config/mtgjson-api"
+    ports:
+      - "8080:8080"
+    restart: unless-stopped
