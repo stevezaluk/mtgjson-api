@@ -3,6 +3,7 @@ package middleware
 import (
 	"context"
 	"github.com/gin-gonic/gin"
+	"github.com/stevezaluk/mtgjson-sdk/user"
 	"mtgjson/auth"
 	"net/http"
 	"strings"
@@ -42,6 +43,13 @@ func ValidateTokenHandler() gin.HandlerFunc {
 			return
 		}
 
+		userEmail, err := user.GetEmailFromToken(tokenStr)
+		if err != nil {
+			ctx.JSON(http.StatusInternalServerError, gin.H{"message": "Failed to fetch email from access token. This is needed for establishing ownership in created objects", "err": err.Error()})
+			ctx.Abort()
+		}
+
+		ctx.Set("userEmail", userEmail)
 		ctx.Set("token", token)
 		ctx.Set("tokenStr", tokenStr)
 	}
