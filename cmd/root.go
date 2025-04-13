@@ -5,6 +5,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/mitchellh/go-homedir"
 	"github.com/spf13/viper"
+	"log/slog"
 	"os"
 
 	"github.com/spf13/cobra"
@@ -33,6 +34,10 @@ Developed and Tested on Debian-based Linux Distro's. Unconfirmed support on othe
 		if viper.GetBool("debug") {
 			fmt.Println("Debug mode enabled")
 			gin.SetMode(gin.DebugMode)
+		}
+
+		if viper.GetBool("verbose") {
+			slog.SetLogLoggerLevel(slog.LevelDebug)
 		}
 	},
 	Run: func(cmd *cobra.Command, args []string) {
