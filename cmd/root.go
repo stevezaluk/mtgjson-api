@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"github.com/gin-gonic/gin"
 	"github.com/mitchellh/go-homedir"
 	"github.com/spf13/viper"
 	"os"
@@ -28,6 +29,12 @@ Executing this binary with no CLI arguments will start the API with the default 
 Any options can be configured with either command line arguments, a config file, or environment variables.
 
 Developed and Tested on Debian-based Linux Distro's. Unconfirmed support on other operating systems`,
+	PreRun: func(cmd *cobra.Command, args []string) {
+		if viper.GetBool("debug") {
+			fmt.Println("Debug mode enabled")
+			gin.SetMode(gin.DebugMode)
+		}
+	},
 	Run: func(cmd *cobra.Command, args []string) {
 	},
 }
@@ -51,7 +58,14 @@ func init() {
 	cobra.OnInitialize(initConfig)
 	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.config/mtgjson-api/config.json)")
 
+	rootCmd.Flags().BoolP("debug", "d", false, "Put the gin engine in debug mode. Defaults to false (release mode)")
 	rootCmd.Flags().BoolP("verbose", "v", false, "Enable verbosity in logging")
+
+	err := viper.BindPFlags(rootCmd.Flags())
+	if err != nil {
+		fmt.Println("Error binding Cobra flags to viper: ", err.Error())
+		fmt.Println("Viper config values may not work properly")
+	}
 }
 
 /*
