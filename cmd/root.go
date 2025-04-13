@@ -24,12 +24,7 @@ MTGJSON API is unofficial Fan Content permitted under the Fan Content Policy.
 Not approved/endorsed by Wizards of the Coast. Portions of the materials used are property of Wizards of the Coast. 
 © Wizards of the Coast LLC.
 
-MTGJSON API not officially endorsed by MTGJSON
-
-Executing this binary with no CLI arguments will start the API with the default settings.
-Any options can be configured with either command line arguments, a config file, or environment variables.
-
-Developed and Tested on Debian-based Linux Distro's. Unconfirmed support on other operating systems`,
+MTGJSON API not officially endorsed by MTGJSON`,
 	PreRun: func(cmd *cobra.Command, args []string) {
 		if viper.GetBool("debug") {
 			gin.SetMode(gin.DebugMode)
@@ -40,6 +35,7 @@ Developed and Tested on Debian-based Linux Distro's. Unconfirmed support on othe
 		}
 	},
 	Run: func(cmd *cobra.Command, args []string) {
+
 	},
 }
 
