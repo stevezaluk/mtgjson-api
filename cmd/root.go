@@ -32,7 +32,6 @@ Any options can be configured with either command line arguments, a config file,
 Developed and Tested on Debian-based Linux Distro's. Unconfirmed support on other operating systems`,
 	PreRun: func(cmd *cobra.Command, args []string) {
 		if viper.GetBool("debug") {
-			fmt.Println("Debug mode enabled")
 			gin.SetMode(gin.DebugMode)
 		}
 
