@@ -9,6 +9,9 @@ import (
 	"strconv"
 )
 
+// HandlerFunc - Wraps all handler functions to ensure that they can get passed a reference to the Server structure
+type HandlerFunc func(server *server.Server) gin.HandlerFunc
+
 /*
 API - An abstraction of the API as a whole
 */
@@ -37,6 +40,17 @@ FromConfig - Initialize the API structure using values from Viper
 */
 func FromConfig() *API {
 	return New(server.FromConfig())
+}
+
+/*
+RegisterEndpoint - Registers an endpoint with the API. Method is the HTTP method that you want to
+use on the path parameter, and the scope is the minimum required scope that will be required to
+access the endpoint. If an empty string is provided to the scope, then one won't be required to
+access it
+*/
+func (api *API) RegisterEndpoint(method string, path string, scope string, handler HandlerFunc) {
+	// auth handlers still need to be added here
+	api.router.Handle(method, path, handler(api.server))
 }
 
 /*
