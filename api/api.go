@@ -6,6 +6,7 @@ import (
 	"github.com/spf13/viper"
 	"github.com/stevezaluk/mtgjson-sdk/server"
 	"log/slog"
+	"strconv"
 )
 
 /*
@@ -39,9 +40,10 @@ func FromConfig() *API {
 }
 
 /*
-Run - Connect to the MongoDB database and Start the API Server
+Run - Connect to the MongoDB database and Start the API Server. The port parameter should describe
+the port you want to expose the API on
 */
-func (api *API) Run() error {
+func (api *API) Run(port int) error {
 	slog.Info("Initiating connection to MongoDB", "hostname", viper.GetString("mongo.hostname"))
 	err := api.server.Database().Connect()
 	if err != nil {
@@ -49,8 +51,8 @@ func (api *API) Run() error {
 		return err
 	}
 
-	slog.Info("Starting API Server", "port", viper.GetInt("port"))
-	err = api.router.Run(":" + viper.GetString("port"))
+	slog.Info("Starting API Server", "port", port)
+	err = api.router.Run(":" + strconv.Itoa(port))
 	if err != nil {
 		slog.Error("Failed to start API Server", "err", err)
 		return err
