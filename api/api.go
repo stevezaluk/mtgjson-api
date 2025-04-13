@@ -15,3 +15,12 @@ type API struct {
 	// router - The primary gin router used for routing endpoints on the API
 	router *gin.Engine
 }
+
+/*
+New - A constructor for the API structure
+*/
+func New(server *server.Server) *API {
+	return &API{
+		server: server,
+	}
+}
