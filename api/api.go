@@ -24,3 +24,10 @@ func New(server *server.Server) *API {
 		server: server,
 	}
 }
+
+/*
+FromConfig - Initialize the API structure using values from viper
+*/
+func FromConfig() *API {
+	return New(server.FromConfig())
+}
