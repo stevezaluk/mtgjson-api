@@ -61,11 +61,42 @@ executed when viper is initialized. Should not be called directly
 */
 func init() {
 	cobra.OnInitialize(initConfig)
+
+	/*
+		Universal CLI Flags - Any flags that can be used with any command
+	*/
 	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.config/mtgjson-api/config.json)")
+	rootCmd.Flags().BoolP("debug", "d", false, "Put the gin engine in debug mode. (default is false [release mode])")
+	rootCmd.Flags().BoolP("verbose", "v", false, "Enable verbosity in logging (default is false)")
+	rootCmd.Flags().IntP("port", "p", 8080, "The port the API should be exposed on (default is 8080)")
 
-	rootCmd.Flags().BoolP("debug", "d", false, "Put the gin engine in debug mode. Defaults to false (release mode)")
-	rootCmd.Flags().BoolP("verbose", "v", false, "Enable verbosity in logging")
+	/*
+		MongoDB CLI Flags - Any flags used for identifying a MongoDB server
+	*/
+	rootCmd.Flags().String("mongo.hostname", "localhost", "The hostname of the MongoDB instance (default is localhost)")
+	rootCmd.Flags().Int("mongo.port", 27017, "The port of the MongoDB instance (default is 27017)")
+	rootCmd.Flags().String("mongo.username", "admin", "The username of the MongoDB user for authentication (default is admin)")
+	rootCmd.Flags().String("mongo.password", "admin", "The hostname of the MongoDB instance (default is admin)")
+	rootCmd.Flags().String("mongo.default_database", "mtgjson", "The MongoDB database to use by default (default is mtgjson)")
 
+	/*
+		Auth0 CLI Flags - Any flags used for identifying an Auth0 instance
+	*/
+	rootCmd.Flags().String("auth0.domain", "", "The domain of your Auth0 tenant")
+	rootCmd.Flags().String("auth0.audience", "", "The audience of your Auth0 API")
+	rootCmd.Flags().String("auth0.client_id", "", "The Client ID of your Auth0 application")
+	rootCmd.Flags().String("auth0.client_secret", "", "The Client Secret of your Auth0 application")
+	rootCmd.Flags().String("auth0.scope", "", "A space seperated string of Auth0 scopes that the API should recognize")
+
+	/*
+		Log CLI Flags - Any flags used for controlling slog logging features
+	*/
+	rootCmd.Flags().String("log.path", "/var/log/mtgjson-api", "The file path that log files should be saved to (default is /var/log/mtgjson-api)")
+
+	/*
+		Iterates through all the flags defined in rootCmd and binds them to viper values. The long name
+		of the command is used by default
+	*/
 	err := viper.BindPFlags(rootCmd.Flags())
 	if err != nil {
 		fmt.Println("Error binding Cobra flags to viper: ", err.Error())
