@@ -2,48 +2,52 @@ package api
 
 import (
 	"errors"
+	"github.com/stevezaluk/mtgjson-sdk/server"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
 	sdkErrors "github.com/stevezaluk/mtgjson-models/errors"
-	"github.com/stevezaluk/mtgjson-sdk/user"
 )
 
 /*
 RegisterPOST Gin handler for the POST request to the Register Endpoint. This function should not be called
-directly and should only be passed to the gin router
+directly and should only be passed to the gin router. Revalidate this
 */
-func RegisterPOST(ctx *gin.Context) {
-	type RegisterRequest struct {
-		Email    string `json:"email"`
-		Username string `json:"username"`
-		Password string `json:"password"`
+func RegisterPOST(server *server.Server) gin.HandlerFunc {
+	return func(ctx *gin.Context) {
+
+		type RegisterRequest struct {
+			Email    string `json:"email"`
+			Username string `json:"username"`
+			Password string `json:"password"`
+		}
+
+		var request RegisterRequest
+
+		err := ctx.Bind(&request)
+		if err != nil {
+			ctx.JSON(http.StatusInternalServerError, gin.H{"message": err.Error(), "err": sdkErrors.ErrInvalidObjectStructure.Error()})
+			return
+		}
+
+		if request.Email == "" || request.Username == "" || request.Password == "" {
+			ctx.JSON(http.StatusBadRequest, gin.H{"message": "Email, username, or password is blank. All fields must be filled"})
+			return
+		}
+
+		// this all needs to be reworked. User is not created with RegisterUser anymore
+		_, err = server.AuthenticationManager().RegisterUser(request.Username, request.Email, request.Password)
+		if errors.Is(err, sdkErrors.ErrInvalidPasswordLength) {
+			ctx.JSON(http.StatusBadRequest, gin.H{"message": "User password is not long enough. Password must be at least 12 characters, 1 special character, and 1 number", "err": err.Error()})
+			return
+		} else if errors.Is(err, sdkErrors.ErrInvalidEmail) {
+			ctx.JSON(http.StatusBadRequest, gin.H{"message": "User email is not valid or is not an email address", "err": err.Error()})
+			return
+		} else if errors.Is(err, sdkErrors.ErrFailedToRegisterUser) {
+			ctx.JSON(http.StatusInternalServerError, gin.H{"message": "Failed to register the user with Auth0", "err": err.Error()})
+			return
+		}
+
+		ctx.JSON(http.StatusOK, gin.H{"message": "User successfully registered"})
 	}
-
-	var request RegisterRequest
-
-	err := ctx.Bind(&request)
-	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{"message": err.Error(), "err": sdkErrors.ErrInvalidObjectStructure.Error()})
-		return
-	}
-
-	if request.Email == "" || request.Username == "" || request.Password == "" {
-		ctx.JSON(http.StatusBadRequest, gin.H{"message": "Email, username, or password is blank. All fields must be filled"})
-		return
-	}
-
-	_, err = user.RegisterUser(request.Username, request.Email, request.Password)
-	if errors.Is(err, sdkErrors.ErrInvalidPasswordLength) {
-		ctx.JSON(http.StatusBadRequest, gin.H{"message": "User password is not long enough. Password must be at least 12 characters, 1 special character, and 1 number", "err": err.Error()})
-		return
-	} else if errors.Is(err, sdkErrors.ErrInvalidEmail) {
-		ctx.JSON(http.StatusBadRequest, gin.H{"message": "User email is not valid or is not an email address", "err": err.Error()})
-		return
-	} else if errors.Is(err, sdkErrors.ErrFailedToRegisterUser) {
-		ctx.JSON(http.StatusInternalServerError, gin.H{"message": "Failed to register the user with Auth0", "err": err.Error()})
-		return
-	}
-
-	ctx.JSON(http.StatusOK, gin.H{"message": "User successfully registered"})
 }
