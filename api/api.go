@@ -39,9 +39,9 @@ func FromConfig() *API {
 }
 
 /*
-Start - Connect to the MongoDB database and Start the API Server
+Run - Connect to the MongoDB database and Start the API Server
 */
-func (api *API) Start() error {
+func (api *API) Run() error {
 	slog.Info("Initiating connection to MongoDB", "hostname", viper.GetString("mongo.hostname"))
 	err := api.server.Database().Connect()
 	if err != nil {
@@ -60,9 +60,9 @@ func (api *API) Start() error {
 }
 
 /*
-Stop - Gracefully stop the API Server and then disconnect from MongoDB
+Shutdown - Gracefully stop the API Server and then disconnect from MongoDB
 */
-func (api *API) Stop() error {
+func (api *API) Shutdown() error {
 	slog.Info("Shutting down API")
 	// stop receiving connections here
 	// gin router doesn't provide this natively
