@@ -21,7 +21,7 @@ func UserGET(server *server.Server) gin.HandlerFunc {
 		userEmail := ctx.GetString("userEmail")
 		email := ctx.DefaultQuery("email", userEmail)
 
-		if email != userEmail {
+		if email != userEmail { // externalize logic for fetching own profile to a separate endpoint
 			if !auth.ValidateScope(ctx, "write:user") {
 				ctx.JSON(http.StatusForbidden, gin.H{"message": "Invalid permissions to read other user's account data", "requiredScope": "write:user"})
 				return
