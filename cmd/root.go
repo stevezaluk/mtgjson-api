@@ -6,6 +6,7 @@ import (
 	"github.com/mitchellh/go-homedir"
 	"github.com/spf13/viper"
 	"log/slog"
+	"mtgjson/api"
 	"os"
 
 	"github.com/spf13/cobra"
@@ -35,7 +36,40 @@ MTGJSON API not officially endorsed by MTGJSON`,
 		}
 	},
 	Run: func(cmd *cobra.Command, args []string) {
+		serv := api.FromConfig()
 
+		// This is gross and needs to be reworked....
+		serv.RegisterEndpoint("POST", "/api/v1/login", "", false, api.LoginPOST)
+		serv.RegisterEndpoint("POST", "/api/v1/register", "", false, api.RegisterPOST)
+		serv.RegisterEndpoint("GET", "/api/v1/reset", "read:profile", true, api.CardGET)
+
+		serv.RegisterEndpoint("GET", "/api/v1/user", "read:user", true, api.UserGET)
+		serv.RegisterEndpoint("DELETE", "/api/v1/user", "write:user", true, api.UserDELETE)
+
+		serv.RegisterEndpoint("GET", "/api/v1/card", "read:card.wotc", true, api.CardGET)
+		serv.RegisterEndpoint("POST", "/api/v1/card", "write:card.user", true, api.CardPOST)
+		serv.RegisterEndpoint("DELETE", "/api/v1/card", "write:card.user", true, api.CardDELETE)
+
+		serv.RegisterEndpoint("GET", "/api/v1/deck", "read:deck.wotc", true, api.DeckGET)
+		serv.RegisterEndpoint("POST", "/api/v1/deck", "write:deck.user", true, api.DeckPOST)
+		serv.RegisterEndpoint("DELETE", "/api/v1/deck", "write:deck.user", true, api.DeckDELETE)
+
+		serv.RegisterEndpoint("GET", "/api/v1/deck/content", "read:deck.wotc", true, api.DeckContentGET)
+		serv.RegisterEndpoint("POST", "/api/v1/deck/content", "write:deck.user", true, api.DeckContentPOST)
+		serv.RegisterEndpoint("DELETE", "/api/v1/deck/content", "write:deck.user", true, api.DeckContentDELETE)
+
+		serv.RegisterEndpoint("GET", "/api/v1/set", "read:set.wotc", true, api.SetGET)
+		serv.RegisterEndpoint("POST", "/api/v1/set", "write:set.user", true, api.SetPOST)
+		serv.RegisterEndpoint("DELETE", "/api/v1/set", "write:set.user", true, api.SetDELETE)
+
+		serv.RegisterEndpoint("GET", "/api/v1/set/content", "read:set.wotc", true, api.SetContentGET)
+		serv.RegisterEndpoint("POST", "/api/v1/set/content", "write:set.user", true, api.SetContentPOST)
+		serv.RegisterEndpoint("DELETE", "/api/v1/set/content", "write:set.user", true, api.SetContentDELETE)
+
+		err := serv.Run(viper.GetInt("port"))
+		if err != nil {
+			os.Exit(1) // not printing here as logic for logging is within the api.API struct
+		}
 	},
 }
 

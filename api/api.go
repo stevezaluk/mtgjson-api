@@ -6,6 +6,7 @@ import (
 	"github.com/spf13/viper"
 	"github.com/stevezaluk/mtgjson-sdk/server"
 	"log/slog"
+	"mtgjson/middleware"
 	"strconv"
 )
 
@@ -32,6 +33,7 @@ func New(server *server.Server) *API {
 
 	return &API{
 		server: server,
+		router: router,
 	}
 }
 
@@ -48,9 +50,20 @@ use on the path parameter, and the scope is the minimum required scope that will
 access the endpoint. If an empty string is provided to the scope, then one won't be required to
 access it
 */
-func (api *API) RegisterEndpoint(method string, path string, scope string, handler HandlerFunc) {
-	// auth handlers still need to be added here
-	api.router.Handle(method, path, handler(api.server))
+func (api *API) RegisterEndpoint(method string, path string, scope string, hasAuth bool, handler HandlerFunc) {
+	handlers := []gin.HandlerFunc{
+		handler(api.server),
+	}
+
+	if hasAuth {
+		handlers = append(handlers, middleware.ValidateTokenHandler(api.server))
+	}
+
+	if scope != "" {
+		handlers = append(handlers, middleware.ValidateScopeHandler(scope))
+	}
+
+	api.router.Handle(method, path, handlers...)
 }
 
 /*
