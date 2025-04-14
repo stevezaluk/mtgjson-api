@@ -34,7 +34,7 @@ func CardGET(server *server.Server) gin.HandlerFunc {
 		owner := ctx.DefaultQuery("owner", userEmail)
 
 		if owner != "system" && owner != userEmail {
-			if !auth.ValidateScope(ctx, "read:user-card") {
+			if !auth.ValidateScope(ctx, "read:card.admin") {
 				ctx.JSON(http.StatusForbidden, gin.H{"message": "Invalid permissions to read other users cards", "requiredScope": "read:user-card"})
 				return
 			}
@@ -77,14 +77,14 @@ func CardPOST(server *server.Server) gin.HandlerFunc {
 		owner := ctx.DefaultQuery("owner", userEmail)
 
 		if owner == "system" {
-			if !auth.ValidateScope(ctx, "write:system-card") {
+			if !auth.ValidateScope(ctx, "write:card.wotc") {
 				ctx.JSON(http.StatusForbidden, gin.H{"message": "Invalid permissions to modify of system or pre-constructed cards", "requiredScope": "write:system-card"})
 				return
 			}
 		}
 
 		if owner != userEmail {
-			if !auth.ValidateScope(ctx, "write:user-card") {
+			if !auth.ValidateScope(ctx, "write:card.admin") {
 				ctx.JSON(http.StatusForbidden, gin.H{"message": "Invalid permissions to modify another users card's", "requiredScope": "write:user-card"})
 				return
 			}
@@ -137,14 +137,14 @@ func CardDELETE(server *server.Server) gin.HandlerFunc {
 		owner := ctx.DefaultQuery("owner", userEmail)
 
 		if owner == "system" {
-			if !auth.ValidateScope(ctx, "write:system-card") {
+			if !auth.ValidateScope(ctx, "write:deck.wotc") {
 				ctx.JSON(http.StatusForbidden, gin.H{"message": "Invalid permissions to modify of system or pre-constructed cards", "requiredScope": "write:system-card"})
 				return
 			}
 		}
 
 		if owner != userEmail {
-			if !auth.ValidateScope(ctx, "write:user-deck") {
+			if !auth.ValidateScope(ctx, "write:deck.admin") {
 				ctx.JSON(http.StatusForbidden, gin.H{"message": "Invalid permissions to modify another users cards", "requiredScope": "write:user-card"})
 				return
 			}

@@ -23,7 +23,7 @@ func SetGET(server *server.Server) gin.HandlerFunc {
 		owner := ctx.DefaultQuery("owner", userEmail)
 
 		if owner != "system" && owner != userEmail {
-			if !auth.ValidateScope(ctx, "read:user-set") {
+			if !auth.ValidateScope(ctx, "read:set.admin") {
 				ctx.JSON(http.StatusForbidden, gin.H{"message": "Invalid permissions to read other users sets", "requiredScope": "read:user-set"})
 				return
 			}
@@ -68,14 +68,14 @@ func SetPOST(server *server.Server) gin.HandlerFunc {
 		owner := ctx.DefaultQuery("owner", userEmail)
 
 		if owner == "system" {
-			if !auth.ValidateScope(ctx, "write:system-set") {
+			if !auth.ValidateScope(ctx, "write:set.wotc") {
 				ctx.JSON(http.StatusForbidden, gin.H{"message": "Invalid permissions to modify system or pre-constructed sets", "requiredScope": "write:system-set"})
 				return
 			}
 		}
 
 		if owner != userEmail {
-			if !auth.ValidateScope(ctx, "write:user-set") {
+			if !auth.ValidateScope(ctx, "write:set.admin") {
 				ctx.JSON(http.StatusForbidden, gin.H{"message": "Invalid permissions to modify another users sets", "requiredScope": "write:user-set"})
 				return
 			}
@@ -132,14 +132,14 @@ func SetDELETE(server *server.Server) gin.HandlerFunc {
 		owner := ctx.DefaultQuery("owner", userEmail)
 
 		if owner == "system" {
-			if !auth.ValidateScope(ctx, "write:system-set") {
+			if !auth.ValidateScope(ctx, "write:set.wotc") {
 				ctx.JSON(http.StatusForbidden, gin.H{"message": "Invalid permissions to delete system or pre-constructed set", "requiredScope": "write:system-set"})
 				return
 			}
 		}
 
 		if owner != userEmail {
-			if !auth.ValidateScope(ctx, "write:user-set") {
+			if !auth.ValidateScope(ctx, "write:set.admin") {
 				ctx.JSON(http.StatusForbidden, gin.H{"message": "Invalid permissions to delete other users sets", "requiredScope": "write:user-set"})
 				return
 			}
@@ -176,7 +176,7 @@ func SetContentGET(server *server.Server) gin.HandlerFunc {
 		userEmail := ctx.GetString("userEmail")
 		owner := ctx.DefaultQuery("owner", userEmail)
 		if owner != "system" && owner != userEmail {
-			if !auth.ValidateScope(ctx, "read:user-set") {
+			if !auth.ValidateScope(ctx, "read:set.admin") {
 				ctx.JSON(http.StatusForbidden, gin.H{"message": "Invalid permissions to read other users sets", "requiredScope": "read:user-set"})
 				return
 			}
@@ -214,14 +214,14 @@ func SetContentPOST(server *server.Server) gin.HandlerFunc {
 		owner := ctx.DefaultQuery("owner", userEmail)
 
 		if owner == "system" {
-			if !auth.ValidateScope(ctx, "write:system-set") {
+			if !auth.ValidateScope(ctx, "write:set.wotc") {
 				ctx.JSON(http.StatusForbidden, gin.H{"message": "Invalid permissions to modify content of system or pre-constructed set", "requiredScope": "write:system-set"})
 				return
 			}
 		}
 
 		if owner != userEmail {
-			if !auth.ValidateScope(ctx, "write:user-set") {
+			if !auth.ValidateScope(ctx, "write:set.admin") {
 				ctx.JSON(http.StatusForbidden, gin.H{"message": "Invalid permissions to modify content of user owned set", "requiredScope": "write:user-set"})
 				return
 			}
@@ -273,14 +273,14 @@ func SetContentDELETE(server *server.Server) gin.HandlerFunc {
 		owner := ctx.DefaultQuery("owner", userEmail)
 
 		if owner == "system" {
-			if !auth.ValidateScope(ctx, "write:system-set") {
+			if !auth.ValidateScope(ctx, "write:set.wotc") {
 				ctx.JSON(http.StatusForbidden, gin.H{"message": "Invalid permissions to modify content of system or pre-constructed sets", "requiredScope": "write:system-set"})
 				return
 			}
 		}
 
 		if owner != userEmail {
-			if !auth.ValidateScope(ctx, "write:user-set") {
+			if !auth.ValidateScope(ctx, "write:set.admin") {
 				ctx.JSON(http.StatusForbidden, gin.H{"message": "Invalid permissions to modify content of user owned sets", "requiredScope": "write:user-set"})
 				return
 			}

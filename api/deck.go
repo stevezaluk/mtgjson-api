@@ -24,7 +24,7 @@ func DeckGET(server *server.Server) gin.HandlerFunc {
 		owner := ctx.DefaultQuery("owner", userEmail)
 
 		if owner != "system" && owner != userEmail { // caller is trying to read another users deck
-			if !auth.ValidateScope(ctx, "read:user-deck") {
+			if !auth.ValidateScope(ctx, "read:deck.admin") {
 				ctx.JSON(http.StatusForbidden, gin.H{"message": "Invalid permissions to read other users decks", "requiredScope": "read:user-deck"})
 				return
 			}
@@ -69,14 +69,14 @@ func DeckPOST(server *server.Server) gin.HandlerFunc {
 		owner := ctx.DefaultQuery("owner", userEmail)
 
 		if owner == "system" {
-			if !auth.ValidateScope(ctx, "write:system-deck") {
+			if !auth.ValidateScope(ctx, "write:deck.wotc") {
 				ctx.JSON(http.StatusForbidden, gin.H{"message": "Invalid permissions to modify of system or pre-constructed decks", "requiredScope": "write:system-deck"})
 				return
 			}
 		}
 
 		if owner != userEmail {
-			if !auth.ValidateScope(ctx, "write:user-deck") {
+			if !auth.ValidateScope(ctx, "write:deck.admin") {
 				ctx.JSON(http.StatusForbidden, gin.H{"message": "Invalid permissions to modify another users deck content", "requiredScope": "write:user-deck"})
 				return
 			}
@@ -141,14 +141,14 @@ func DeckDELETE(server *server.Server) gin.HandlerFunc {
 		userEmail := ctx.GetString("userEmail")
 		owner := ctx.DefaultQuery("owner", userEmail)
 		if owner == "system" { // caller is trying to delete a system created (pre-constructed) deck
-			if !auth.ValidateScope(ctx, "write:system-deck") {
+			if !auth.ValidateScope(ctx, "write:deck.wotc") {
 				ctx.JSON(http.StatusForbidden, gin.H{"message": "Invalid permissions to delete pre-constructed decks", "requiredScope": "write:system-deck"})
 				return
 			}
 		}
 
 		if owner != userEmail { // caller is trying to delete a different users deck
-			if !auth.ValidateScope(ctx, "write:user-deck") {
+			if !auth.ValidateScope(ctx, "write:deck.admin") {
 				ctx.JSON(http.StatusForbidden, gin.H{"message": "Invalid permissions to delete other users decks", "requiredScope": "write:user-deck"})
 				return
 			}
@@ -186,7 +186,7 @@ func DeckContentGET(server *server.Server) gin.HandlerFunc {
 		userEmail := ctx.GetString("userEmail")
 		owner := ctx.DefaultQuery("owner", userEmail)
 		if owner != "system" && owner != userEmail { // caller is trying to read the contents of another users deck
-			if !auth.ValidateScope(ctx, "read:user-deck") {
+			if !auth.ValidateScope(ctx, "read:deck.admin") {
 				ctx.JSON(http.StatusForbidden, gin.H{"message": "Invalid permissions to read other users decks", "requiredScope": "read:user-deck"})
 				return
 			}
@@ -224,14 +224,14 @@ func DeckContentPOST(server *server.Server) gin.HandlerFunc {
 		owner := ctx.DefaultQuery("owner", userEmail)
 
 		if owner == "system" {
-			if !auth.ValidateScope(ctx, "write:system-deck") {
+			if !auth.ValidateScope(ctx, "write:deck.wotc") {
 				ctx.JSON(http.StatusForbidden, gin.H{"message": "Invalid permissions to modify content of system or pre-constructed decks", "requiredScope": "write:system-deck"})
 				return
 			}
 		}
 
 		if owner != userEmail {
-			if !auth.ValidateScope(ctx, "write:user-deck") {
+			if !auth.ValidateScope(ctx, "write:deck.admin") {
 				ctx.JSON(http.StatusForbidden, gin.H{"message": "Invalid permissions to modify another users deck content", "requiredScope": "write:user-deck"})
 				return
 			}
@@ -300,14 +300,14 @@ func DeckContentDELETE(server *server.Server) gin.HandlerFunc {
 		owner := ctx.DefaultQuery("owner", userEmail)
 
 		if owner == "system" {
-			if !auth.ValidateScope(ctx, "write:system-deck") {
+			if !auth.ValidateScope(ctx, "write:deck.wotc") {
 				ctx.JSON(http.StatusForbidden, gin.H{"message": "Invalid permissions to modify content of system or pre-constructed decks", "requiredScope": "write:system-deck"})
 				return
 			}
 		}
 
 		if owner != userEmail {
-			if !auth.ValidateScope(ctx, "write:user-deck") {
+			if !auth.ValidateScope(ctx, "write:deck.admin") {
 				ctx.JSON(http.StatusForbidden, gin.H{"message": "Invalid permissions to modify another users deck content", "requiredScope": "write:user-deck"})
 				return
 			}

@@ -21,6 +21,13 @@ func ResetGET(server *server.Server) gin.HandlerFunc {
 		userEmail := ctx.GetString("userEmail")
 		email := ctx.DefaultQuery("email", userEmail)
 
+		if email == userEmail {
+			if !auth.ValidateScope(ctx, "read:profile") {
+				ctx.JSON(http.StatusForbidden, gin.H{"message": "Invalid permissions to reset your password", "requiredScope": "read:profile"})
+				return
+			}
+		}
+
 		if email != userEmail {
 			if !auth.ValidateScope(ctx, "write:user") {
 				ctx.JSON(http.StatusForbidden, gin.H{"message": "Invalid permissions to reset other users passwords", "requiredScope": "write:user"})
