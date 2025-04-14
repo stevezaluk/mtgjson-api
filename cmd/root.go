@@ -36,7 +36,11 @@ MTGJSON API not officially endorsed by MTGJSON`,
 		}
 	},
 	Run: func(cmd *cobra.Command, args []string) {
-		serv := api.FromConfig()
+		serv, err := api.FromConfig()
+		if err != nil {
+			fmt.Println("Failed to initialize API struct: ", err.Error())
+			os.Exit(1)
+		}
 
 		// This is gross and needs to be reworked....
 		serv.RegisterEndpoint("POST", "/api/v1/login", "", false, api.LoginPOST)
@@ -66,7 +70,7 @@ MTGJSON API not officially endorsed by MTGJSON`,
 		serv.RegisterEndpoint("POST", "/api/v1/set/content", "write:set.user", true, api.SetContentPOST)
 		serv.RegisterEndpoint("DELETE", "/api/v1/set/content", "write:set.user", true, api.SetContentDELETE)
 
-		err := serv.Run(viper.GetInt("port"))
+		err = serv.Run(viper.GetInt("port"))
 		if err != nil {
 			os.Exit(1) // not printing here as logic for logging is within the api.API struct
 		}

@@ -40,8 +40,12 @@ func New(server *server.Server) *API {
 /*
 FromConfig - Initialize the API structure using values from Viper
 */
-func FromConfig() *API {
-	return New(server.FromConfig())
+func FromConfig() (*API, error) {
+	serv, err := server.FromConfig()
+	if err != nil {
+		return nil, err
+	}
+	return New(serv), nil
 }
 
 /*
