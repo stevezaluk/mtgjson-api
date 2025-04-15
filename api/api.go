@@ -55,9 +55,7 @@ access the endpoint. If an empty string is provided to the scope, then one won't
 access it
 */
 func (api *API) RegisterEndpoint(method string, path string, scope string, hasAuth bool, handler HandlerFunc) {
-	handlers := []gin.HandlerFunc{
-		handler(api.server),
-	}
+	var handlers []gin.HandlerFunc
 
 	if hasAuth {
 		handlers = append(handlers, middleware.ValidateTokenHandler(api.server))
@@ -66,6 +64,8 @@ func (api *API) RegisterEndpoint(method string, path string, scope string, hasAu
 	if scope != "" {
 		handlers = append(handlers, middleware.ValidateScopeHandler(scope))
 	}
+
+	handlers = append(handlers, handler(api.server))
 
 	api.router.Handle(method, path, handlers...)
 }
