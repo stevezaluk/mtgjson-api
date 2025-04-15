@@ -2,11 +2,12 @@ package api
 
 import (
 	"errors"
-	"github.com/stevezaluk/mtgjson-sdk/server"
-	"net/http"
-
 	"github.com/gin-gonic/gin"
 	sdkErrors "github.com/stevezaluk/mtgjson-models/errors"
+	userModel "github.com/stevezaluk/mtgjson-models/user"
+	"github.com/stevezaluk/mtgjson-sdk/server"
+	"github.com/stevezaluk/mtgjson-sdk/user"
+	"net/http"
 )
 
 /*
@@ -35,8 +36,18 @@ func RegisterPOST(server *server.Server) gin.HandlerFunc {
 			return
 		}
 
-		// this all needs to be reworked. User is not created with RegisterUser anymore
-		_, err = server.AuthenticationManager().RegisterUser(request.Username, request.Email, request.Password)
+		signUpResp, err := server.AuthenticationManager().RegisterUser(request.Username, request.Email, request.Password)
+		if err != nil {
+			ctx.JSON(http.StatusInternalServerError, gin.H{"message": "Failed to create user in Auth0", "err": err.Error()})
+			return
+		}
+
+		err = user.NewUser(server.Database(), &userModel.User{
+			Username: request.Username,
+			Email:    request.Email,
+			Auth0Id:  signUpResp.ID,
+		})
+
 		if errors.Is(err, sdkErrors.ErrInvalidPasswordLength) {
 			ctx.JSON(http.StatusBadRequest, gin.H{"message": "User password is not long enough. Password must be at least 12 characters, 1 special character, and 1 number", "err": err.Error()})
 			return
