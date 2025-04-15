@@ -251,12 +251,12 @@ func DeckContentPOST(server *server.Server) gin.HandlerFunc {
 		}
 
 		allCards, allCardErr := deck.AllCardIds(&updates)
-		if allCardErr != nil { // this should be a sperate error
+		if allCardErr != nil { // this should be a operate error
 			ctx.JSON(http.StatusBadRequest, gin.H{"message": "Error deck is missing the contentIds field", "err": sdkErrors.ErrDeckMissingContentIds.Error()})
 			return
 		}
 
-		if len(allCards) == 0 { // this should be a seperate error
+		if len(allCards) == 0 { // this should be a separate error
 			ctx.JSON(http.StatusBadRequest, gin.H{"message": "No cards were passed to update the deck with", "err": sdkErrors.ErrDeckMissingId.Error()})
 			return
 		}

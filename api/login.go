@@ -12,7 +12,7 @@ import (
 
 /*
 LoginPOST Gin handler for the POST request to the Login Endpoint. This function should not be called
-directly and should only be passed to the gin router. Revalidate this
+directly and should only be passed to the gin router.
 */
 func LoginPOST(server *server.Server) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
