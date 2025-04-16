@@ -63,6 +63,11 @@ func UserDELETE(server *server.Server) gin.HandlerFunc {
 		userEmail := ctx.GetString("userEmail")
 		email := ctx.DefaultQuery("email", userEmail)
 
+		if email == "" {
+			ctx.JSON(http.StatusBadRequest, gin.H{"message": "An email address must be used to delete an account", "err": sdkErrors.ErrUserMissingId.Error()})
+			return
+		}
+
 		if email != userEmail {
 			if !auth.ValidateScope(ctx, "write:user") {
 				ctx.JSON(http.StatusForbidden, gin.H{"message": "Invalid permissions to delete other users", "requiredScope": "write:user"})
@@ -70,23 +75,28 @@ func UserDELETE(server *server.Server) gin.HandlerFunc {
 			}
 		}
 
-		if email == "" {
-			ctx.JSON(http.StatusBadRequest, gin.H{"message": "An email address must be used to delete an account", "err": sdkErrors.ErrUserMissingId.Error()})
-			return
-		}
-
-		err := server.AuthenticationManager().DeactivateUser(email)
+		requestedUser, err := user.GetUser(server.Database(), email)
 		if errors.Is(err, sdkErrors.ErrNoUser) {
 			ctx.JSON(http.StatusNotFound, gin.H{"message": "Failed to find user with the specified email address", "err": err.Error()})
 			return
 		} else if errors.Is(err, sdkErrors.ErrInvalidEmail) {
 			ctx.JSON(http.StatusBadRequest, gin.H{"message": "Invalid email address used in query", "err": err.Error()})
 			return
-		} else if errors.Is(err, sdkErrors.ErrUserDeleteFailed) {
+		}
+
+		err = user.DeleteUser(server.Database(), requestedUser.Email)
+		if errors.Is(err, sdkErrors.ErrUserDeleteFailed) {
 			ctx.JSON(http.StatusInternalServerError, gin.H{"message": "Failed to delete user from MongoDB. User account may still be active", "err": err.Error()})
 			return
 		} else if err != nil {
 			ctx.JSON(http.StatusInternalServerError, gin.H{"message": "Failed to deactivate user", "err": err.Error()})
+			return
+		}
+
+		// this is returning 500 for any response. This needs to change
+		err = server.AuthenticationManager().DeactivateUser("auth0|" + requestedUser.Auth0Id)
+		if err != nil {
+			ctx.JSON(http.StatusInternalServerError, gin.H{"message": "Failed to remove user from Auth0", "err": err.Error()})
 			return
 		}
 
