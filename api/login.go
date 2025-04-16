@@ -41,9 +41,10 @@ func LoginPOST(server *server.Server) gin.HandlerFunc {
 			return
 		}
 
+		// this is returning 500 for all status codes. This has to get re-worked
 		accessToken, err := server.AuthenticationManager().AuthenticateUser(request.Email, request.Password)
 		if err != nil {
-			ctx.JSON(http.StatusInternalServerError, gin.H{"message": "Failed to generate token", "err": err.Error()})
+			ctx.JSON(http.StatusUnauthorized, gin.H{"message": "Failed to generate token", "err": err.Error()})
 			return
 		}
 
