@@ -79,7 +79,7 @@ To start, install Go Version 1.23.2 using the guide present on Golang's website:
 * MongoDB
   ```sh
   docker pull mongo@latest
-  docker run --name some-mongo -d mongo:tag -p 27017:27017
+  docker run --name some-mongo -d mongo:latest -p 27017:27017
   ```
 
 Auth0 is used as an authentication provider for the API and is optional to use. You can create a free account with 1000 tokens per month alloted to you at auth0.com. For more specifics on how to further configure this for use with MTGJSON-API, please see the guide below
@@ -92,10 +92,11 @@ You can define the mandatory configuration values through three different method
 
 The following configuration values are mandatory for starting the API server:
 
-* Mongo DB IP Address (string) ```mongo.ip``` - The IP Address of your running MongoDB instance
+* Mongo DB Hostname (string) ```mongo.hostname``` - The IP Address or Hostname of your running MongoDB instance
 * Mongo DB Port (integer) ```mongo.port``` - The port your MongoDB instance is listening for connections on
-* Mongo DB Username (string)  ```mongo.user``` - The username to use for authentication with MongoDB
-* Mongo DB Password (string) ```mongo.pass``` - The password to use for authentication with MongoDB
+* Mongo DB Username (string)  ```mongo.username``` - The username to use for authentication with MongoDB
+* Mongo DB Password (string) ```mongo.password``` - The password to use for authentication with MongoDB
+* Mongo DB Database (string) ```mongo.default_database``` - The default database that contains collections for mtgjson-api to operate on
 
 #### Authentication Flags
 If you wish to enable authentication within the API the following values must also be set:
@@ -108,7 +109,7 @@ If you wish to enable authentication within the API the following values must al
 
 #### Log Flags
 
-Finally you can define the path in which log files are stored using the following flag:
+Finally, you can define the path in which log files are stored using the following flag:
 
 * Log Path (string) ```log.path``` - The unix path to store log files in
 
@@ -136,26 +137,37 @@ To properly configure authentication with Auth0, a few things need to be complet
 
 A specific set of scopes must be defined for the API you have created for the scope validation to function properly. Below is a list of scoped permissions that must be created:
 
-* Read health permissions ```read:health``` - Provides permissions for read the health status of the API
+##### Endpoint Permissions
 * Read metric permissions ```read:metrics``` - Provides permissions for read prometheus metrics from the API
+
+##### User Permissions
 * Read user permissions ```read:user``` - Provides permissions to read any user's metadata from the API
-* Write user permissions ```write:user``` - Provides permissions to create a user's metadata from the API
+* Write user permissions ```write:user``` - Provides permissions to modify a user's metadata from the API
 * Read profile permissions ```read:profile``` - Provides permissions to read the callers user metadata but nobody else's
-* Read set permissions ```read:set``` - 	Provides permissions to read pre-constructed sets and sets created by the caller
-* Read user set permissions ```read:user-set``` - Provides permissions to read any user created set
-* Write set permissions ```write:set``` - Provides permissions to create sets under the callers account
-* Write system set permissions ```write:system-set``` - Provides permissions to create and modify sets under the system user (pre-constructed) sets
-* Write user set permissions ```write:user-set``` - Provides permissions to create and modify sets under any user account
-* Read card permissions ```read:card``` - Provides permissions to read pre-constructed cards and cards created by the caller
-* Read user card permissions ```read:user-card``` - Provides permissions to read any user created card
-* Write card permissions ```write:card``` - Provides permissions to create cards under the callers account
-* Write system card permissions ```write:system-card``` - Provides permissions to create cards under the system user (pre-constructed) cards
-* Write user card permissions ```write:user-card``` - Provides permissions to create cards under any user's account
-* Read deck permissions ```read:deck``` - Provides permissions to read pre-constructed decks and decks created by the caller
-* Read uers deck ```read:user-deck``` - Provides permissions to read any user created decks
-* Write deck permissions ```write:deck``` - Provides permissions to create decks under the callers account
-* Write system deck permissions ```write:system-deck``` - Provides permissions to create decks under the system user (pre-constructed sets) 
-* Write user deck permissions ```write:user-deck``` - Provides permissions to create decks under any user's account
+
+##### Set Permissions
+* Read WoTC set permissions `read:set.wotc` - Provides permissions to read sets released by Wizards of the Coast
+* Read User set permissions ``read:set.user`` - Provides permissions to read sets created by the user calling the API
+* Read Any set permissions ``read:set.admin`` - Provides permissions to read any set stored in the database
+* Write WoTC set permissions `write:set.wotc` - Provides permissions to modify sets released by Wizards of the Coast
+* Write User set permissions ``write:set.user`` - Provides permissions to modify sets created by the user calling the API
+* Write Any set permissions ``write:set.admin`` - Provides permissions to modify any set stored in the database
+
+##### Deck Permissions
+* Read WoTC deck permissions `read:deck.wotc` - Provides permissions to read decks released by Wizards of the Coast
+* Read User deck permissions ``read:deck.user`` - Provides permissions to read decks created by the user calling the API
+* Read Any deck permissions ``read:deck.admin`` - Provides permissions to read any deck stored in the database
+* Write WoTC deck permissions `write:deck.wotc` - Provides permissions to modify decks released by Wizards of the Coast
+* Write User deck permissions ``write:deck.user`` - Provides permissions to modify decks created by the user calling the API
+* Write Any deck permissions ``write:deck.admin`` - Provides permissions to modify any deck stored in the database
+
+##### Card Permissions
+* Read WoTC card permissions `read:card.wotc` - Provides permissions to read cards released by Wizards of the Coast
+* Read User card permissions ``read:card.user`` - Provides permissions to read cards created by the user calling the API
+* Read Any card permissions ``read:card.admin`` - Provides permissions to read any card stored in the database
+* Write WoTC card permissions `write:card.wotc` - Provides permissions to modify cards released by Wizards of the Coast
+* Write User card permissions ``write:card.user`` - Provides permissions to modify cards created by the user calling the API
+* Write Any card permissions ``write:card.admin`` - Provides permissions to modify cards stored in the database
 
 To add these permissions to the Auth0 API, follow the steps below:
 
@@ -187,7 +199,7 @@ After the above steps have been completed, make note of your Client ID, Client S
    ```
 5. Run the API
     ```sh
-    ./mtgjson run
+    ./mtgjson [args]
     ```
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
