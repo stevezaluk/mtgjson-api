@@ -4,10 +4,13 @@ import (
 	"errors"
 	deckModel "github.com/stevezaluk/mtgjson-models/deck"
 	sdkErrors "github.com/stevezaluk/mtgjson-models/errors"
+	"github.com/stevezaluk/mtgjson-sdk/card"
 	"github.com/stevezaluk/mtgjson-sdk/deck"
 	"github.com/stevezaluk/mtgjson-sdk/server"
+	"maps"
 	"mtgjson/auth"
 	"net/http"
+	"slices"
 
 	"github.com/gin-gonic/gin"
 )
@@ -85,6 +88,31 @@ func DeckPOST(server *server.Server) gin.HandlerFunc {
 
 		if newDeck.MtgjsonApiMeta != nil { // need an error for this
 			ctx.JSON(http.StatusBadRequest, gin.H{"message": "The mtgjsonApiMeta field must be null. This will be filled out automatically during deck creation", "err": sdkErrors.ErrMetaApiMustBeNull.Error()})
+			return
+		}
+
+		var cardValidate []string
+
+		if newDeck.MainBoard != nil {
+			cardValidate = append(cardValidate, slices.Collect(maps.Keys(newDeck.MainBoard))...)
+		}
+
+		if newDeck.SideBoard != nil {
+			cardValidate = append(cardValidate, slices.Collect(maps.Keys(newDeck.SideBoard))...)
+		}
+
+		if newDeck.Commander != nil {
+			cardValidate = append(cardValidate, slices.Collect(maps.Keys(newDeck.Commander))...)
+		}
+
+		isValid, invalidCards, noExistCards := card.ValidateCards(server.Database(), cardValidate)
+		if isValid != nil {
+			ctx.JSON(http.StatusInternalServerError, gin.H{"message": "Failed to validate the cards of the deck", "err": isValid.Error()})
+			return
+		}
+
+		if len(invalidCards) != 0 || len(noExistCards) != 0 {
+			ctx.JSON(http.StatusBadRequest, gin.H{"message": "Invalid cards were detected in the deck model", "err": sdkErrors.ErrInvalidCards, "invalidCards": invalidCards, "noExistCards": noExistCards})
 			return
 		}
 
@@ -215,10 +243,6 @@ func DeckContentPOST(server *server.Server) gin.HandlerFunc {
 			return
 		}
 
-		/*
-			Replace with logic for updating deck
-		*/
-
 		ctx.JSON(http.StatusOK, gin.H{"message": "Successfully updated deck", "deckCode": code})
 	}
 }
@@ -255,6 +279,7 @@ func DeckContentDELETE(server *server.Server) gin.HandlerFunc {
 		/*
 			Replace with logic for interacting with deck
 		*/
+
 		ctx.JSON(http.StatusOK, gin.H{"message": "Successfully removed cards from deck", "deckCode": code}) // re-add count here
 	}
 }
