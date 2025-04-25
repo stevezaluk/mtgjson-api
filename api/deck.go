@@ -2,17 +2,14 @@ package api
 
 import (
 	"errors"
+	"github.com/gin-gonic/gin"
 	deckModel "github.com/stevezaluk/mtgjson-models/deck"
 	sdkErrors "github.com/stevezaluk/mtgjson-models/errors"
 	"github.com/stevezaluk/mtgjson-sdk/card"
 	"github.com/stevezaluk/mtgjson-sdk/deck"
 	"github.com/stevezaluk/mtgjson-sdk/server"
-	"maps"
 	"mtgjson/auth"
 	"net/http"
-	"slices"
-
-	"github.com/gin-gonic/gin"
 )
 
 /*
@@ -91,29 +88,17 @@ func DeckPOST(server *server.Server) gin.HandlerFunc {
 			return
 		}
 
-		var cardValidate []string
+		if newDeck.Contents != nil {
+			isValid, invalidCards, noExistCards := card.ValidateCards(server.Database(), deck.AllCardIds(newDeck.Contents))
+			if isValid != nil {
+				ctx.JSON(http.StatusInternalServerError, gin.H{"message": "Failed to create deck. Error while validating cards", "err": isValid.Error()})
+				return
+			}
 
-		if newDeck.MainBoard != nil {
-			cardValidate = append(cardValidate, slices.Collect(maps.Keys(newDeck.MainBoard))...)
-		}
-
-		if newDeck.SideBoard != nil {
-			cardValidate = append(cardValidate, slices.Collect(maps.Keys(newDeck.SideBoard))...)
-		}
-
-		if newDeck.Commander != nil {
-			cardValidate = append(cardValidate, slices.Collect(maps.Keys(newDeck.Commander))...)
-		}
-
-		isValid, invalidCards, noExistCards := card.ValidateCards(server.Database(), cardValidate)
-		if isValid != nil {
-			ctx.JSON(http.StatusInternalServerError, gin.H{"message": "Failed to validate the cards of the deck", "err": isValid.Error()})
-			return
-		}
-
-		if len(invalidCards) != 0 || len(noExistCards) != 0 {
-			ctx.JSON(http.StatusBadRequest, gin.H{"message": "Invalid cards were detected in the deck model", "err": sdkErrors.ErrInvalidCards, "invalidCards": invalidCards, "noExistCards": noExistCards})
-			return
+			if len(invalidCards) != 0 || len(noExistCards) != 0 {
+				ctx.JSON(http.StatusBadRequest, gin.H{"message": "Failed to create deck. Some cards are invalid or do not exist", "err": sdkErrors.ErrInvalidCards, "invalidCards": invalidCards, "noExistCards": noExistCards})
+				return
+			}
 		}
 
 		// handle deck contents here
