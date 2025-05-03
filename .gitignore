@@ -26,3 +26,5 @@ go.work.sum
 
 # IDEA files
 .idea
+# Added by goreleaser init:
+dist/
