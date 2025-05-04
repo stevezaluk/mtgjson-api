@@ -1,5 +1,4 @@
 name: Development
-run-name: Pushed to dev01 ${{env.GITHUB_SHA}}
 on:
   workflow_dispatch:
 
@@ -39,9 +38,9 @@ jobs:
       - name: Login to Registry
         uses: docker/login-action@v3
         with:
-          registry: ${{secrets.UNSAFE_REGISTRY}}
-          username: ${{secrets.REGISTRY_USERNAME}}
-          password: ${{secrets.REGISTRY_PASSWORD}}
+          registry: ${{secrets.REGISTRY}}
+          username: ${{secrets.REGISTRY_USER}}
+          password: ${{secrets.REGISTRY_TOKEN}}
 
       - name: Build and Push
         uses: docker/build-push-action@v6
@@ -59,15 +58,15 @@ jobs:
       - name: Login to Registry
         uses: docker/login-action@v3
         with:
-          registry: ${{secrets.UNSAFE_REGISTRY}}
-          username: ${{secrets.REGISTRY_USERNAME}}
-          password: ${{secrets.REGISTRY_PASSWORD}}
+          registry: ${{secrets.REGISTRY}}
+          username: ${{secrets.REGISTRY_USER}}
+          password: ${{secrets.REGISTRY_TOKEN}}
 
       - name: Stop existing containers
-        run: sudo docker compose -p dev01-deploy down
+        run: docker compose -p dev01-deploy down
 
       - name: Pull dev-latest
-        run: sudo docker compose -f docker/docker-compose.yaml pull
+        run: docker compose -f docker/docker-compose.yaml pull
 
       - name: Deploy
-        run: sudo docker compose -p dev01-deploy -f docker/docker-compose.yaml up -d
+        run: docker compose -p dev01-deploy -f docker/docker-compose.yaml up -d
