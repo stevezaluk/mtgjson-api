@@ -46,7 +46,7 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           push: true
-          tags: ${{secrets.REGISTRY_TAG}}/mtgjson-api:dev-latest, ${{secrets.REGISTRY_TAG}}/mtgjson-api:${{env.GITHUB_SHA}}
+          tags: ${{secrets.REGISTRY_TAG}}/mtgjson-api:dev-latest, ${{secrets.REGISTRY_TAG}}/mtgjson-api:dev-${{env.GITHUB_SHA}}
 
   deploy:
     runs-on: ubuntu-latest
@@ -66,10 +66,10 @@ jobs:
           password: ${{secrets.REGISTRY_TOKEN}}
 
       - name: Stop existing containers
-        run: docker compose -p dev01-deploy down
+        run: docker compose -p deploy01 down
 
       - name: Pull dev-latest
         run: docker compose -f development.docker-compose.yaml pull
 
       - name: Deploy
-        run: docker compose -p dev01-deploy -f development.docker-compose.yaml up -d
+        run: docker compose -p deploy01 -f development.docker-compose.yaml up -d
