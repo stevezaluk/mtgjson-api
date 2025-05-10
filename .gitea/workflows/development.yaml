@@ -45,6 +45,7 @@ jobs:
       - name: Build and Push
         uses: docker/build-push-action@v6
         with:
+          context: "{{defaultContext}}:docker"
           push: true
           tags: ${{secrets.REGISTRY_TAG}}/mtgjson-api:dev-latest, ${{secrets.REGISTRY_TAG}}/mtgjson-api:${{env.GITHUB_SHA}}
 
