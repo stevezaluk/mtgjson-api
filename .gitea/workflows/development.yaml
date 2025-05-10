@@ -69,7 +69,7 @@ jobs:
         run: docker compose -p dev01-deploy down
 
       - name: Pull dev-latest
-        run: docker compose -f docker/development.docker-compose.yaml pull
+        run: docker compose -f development.docker-compose.yaml pull
 
       - name: Deploy
-        run: docker compose -p dev01-deploy -f docker/development.docker-compose.yaml up -d
+        run: docker compose -p dev01-deploy -f development.docker-compose.yaml up -d
