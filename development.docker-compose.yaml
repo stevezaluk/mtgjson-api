@@ -3,7 +3,7 @@ services:
     image: gitea.prod02.asgard-server.net/odin/mtgjson-api:dev-latest
     container_name: dev-mtgjson-api
     volumes:
-      - "~/.config/mtgjson-api:/root/.config/mtgjson-api"
+      - "/home/szaluk/.config/mtgjson-api:/root/.config/mtgjson-api"
     ports:
       - "8080:8080"
     restart: unless-stopped
