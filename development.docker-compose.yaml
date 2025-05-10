@@ -1,6 +1,6 @@
 services:
   mtgjson:
-    image: gitea.prod02.asgard-server.net/odin/mtgjson-api:latest
+    image: gitea.prod02.asgard-server.net/odin/mtgjson-api:dev-latest
     container_name: mtgjson-api
     volumes:
       - "~/.config/mtgjson-api:/root/.config/mtgjson-api"
